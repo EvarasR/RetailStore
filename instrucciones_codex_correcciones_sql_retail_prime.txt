@@ -1,0 +1,684 @@
+INSTRUCCIONES PARA TRABAJAR CON CODEX Y CORREGIR RETAIL PRIME
+Fecha de preparación: 2026-07-28
+Proyecto: Tienda web retail tipo Amazon, especializada en informática y redes
+Motor: PostgreSQL 15
+Arquitectura: DB-first, esquema public
+Archivos SQL autorizados:
+- estructura.sql
+- funciones.sql
+- triggers.sql
+- datos.sql
+
+============================================================
+1. RESPUESTA OPERATIVA
+============================================================
+
+Sí conviene usar Codex para esta fase porque debe leer varios archivos relacionados,
+modificar el repositorio, mantener consistencia entre estructura, funciones, triggers
+y datos, y permitir revisar los cambios mediante diff.
+
+Codex no sustituye la revisión técnica ni las pruebas en PostgreSQL. Su función será
+preparar cambios coherentes. El usuario ejecutará los scripts posteriormente.
+
+============================================================
+2. PREPARACIÓN DEL PROYECTO ANTES DE ABRIRLO EN CODEX
+============================================================
+
+1. Crear una copia limpia del proyecto.
+2. No incluir:
+   - entorno/
+   - __pycache__/
+   - .env
+   - credenciales reales
+   - copias antiguas del ZIP
+3. Conservar:
+   - estructura.sql
+   - funciones.sql
+   - triggers.sql
+   - datos.sql
+   - contexto actualizado
+   - este archivo de instrucciones
+   - código Django solo como referencia de compatibilidad
+4. Mantener .env.example, nunca .env.
+5. Inicializar Git y crear un punto de retorno:
+
+   git init
+   git add .
+   git commit -m "Estado base antes de correcciones SQL"
+   git switch -c fase3-sql-lotes-crud
+
+6. Abrir en Codex la carpeta raíz RetailStore, no el ZIP.
+7. No conceder permiso para ejecutar comandos destructivos ni conectarse a la base real.
+8. Codex puede inspeccionar todo el repositorio, pero en esta fase solo puede modificar
+   los cuatro archivos SQL autorizados.
+9. Revisar siempre:
+   git diff --stat
+   git diff -- estructura.sql funciones.sql triggers.sql datos.sql
+
+============================================================
+3. PROMPT INICIAL PARA PEGAR EN CODEX
+============================================================
+
+Lee completamente, en este orden:
+
+1. contexto_retail_prime_actualizado_codex_fase3.txt
+2. instrucciones_codex_correcciones_sql_retail_prime.txt
+3. estructura.sql
+4. funciones.sql
+5. triggers.sql
+6. datos.sql
+7. El proyecto Django únicamente para comprobar compatibilidad de nombres y firmas.
+
+No modifiques nada todavía. Primero entrégame:
+- mapa de dependencias entre los cuatro SQL;
+- tablas y funciones que cambiarías;
+- riesgos de compatibilidad;
+- plan dividido en fases;
+- criterios de aceptación verificables.
+
+Restricciones:
+- PostgreSQL 15.
+- Trabajar exclusivamente en public.
+- Mantener DB-first.
+- No crear un schema retail.
+- No modificar archivos Python, HTML, CSS o JavaScript.
+- No ejecutar los SQL en ninguna base.
+- No leer, imprimir ni modificar .env.
+- No inventar datos ajenos al nicho de informática y redes.
+- No crear DELETE físico para pedidos, pagos, facturas, inventario histórico,
+  auditoría, tracking o movimientos.
+- No cambiar una firma usada por Django sin mantener una sobrecarga compatible.
+- Toda operación crítica debe ser transaccional, idempotente cuando corresponda y
+  segura ante concurrencia.
+- Antes de editar, confirma que entendiste las restricciones.
+
+============================================================
+4. FORMA CORRECTA DE DIVIDIR EL TRABAJO
+============================================================
+
+No pedir todo en una sola edición gigantesca. Trabajar por fases:
+
+FASE A
+- Modelo de lotes/tandadas.
+- Cálculo de PVP por lote.
+- Reserva y consumo FIFO.
+- Reposición automática.
+
+FASE B
+- Precio final real.
+- Promociones y Prime.
+- Impuestos, envío y factura.
+- Protección de pago/cancelación.
+
+FASE C
+- Tracking persistente y progresivo.
+- Vencimiento de reservas.
+- Órdenes de abastecimiento y recepción de lotes.
+
+FASE D
+- Cobertura CRUD de entidades maestras necesarias.
+- Funciones de lectura y administración.
+- Datos técnicos del nicho.
+
+Después de cada fase:
+1. Codex debe mostrar un resumen exacto.
+2. Codex debe mostrar las firmas agregadas o modificadas.
+3. Revisar el diff.
+4. Pedir correcciones antes de aceptar la fase.
+5. Crear un commit separado.
+
+============================================================
+5. ALCANCE TÉCNICO OBLIGATORIO
+============================================================
+
+------------------------------------------------------------
+5.1 MODELO DE LOTES O TANDADAS
+------------------------------------------------------------
+
+Problema actual:
+El inventario solo conserva stock agregado. No puede distinguir:
+- 30 teclados comprados a $2;
+- 170 teclados comprados a $2;
+- otra compra posterior a $3;
+- qué unidades se vendieron;
+- qué costo y PVP correspondieron a cada unidad.
+
+Crear una estructura normalizada que permita trazabilidad completa.
+
+Tablas mínimas preferidas:
+
+A. regla_precio
+Campos mínimos:
+- cod_regla_precio BIGINT identity PK
+- cod_producto BIGINT nullable FK
+- cod_categoria BIGINT nullable FK
+- margen_porcentaje NUMERIC
+- costo_operativo_porcentaje NUMERIC
+- costo_fijo_unitario NUMERIC
+- porcentaje_impuesto NUMERIC nullable
+- prioridad INTEGER
+- activo BOOLEAN
+- fecha_inicio TIMESTAMPTZ nullable
+- fecha_fin TIMESTAMPTZ nullable
+- fecha_creacion
+- fecha_actualizacion
+
+Reglas:
+- Debe existir objetivo producto, categoría o regla global.
+- Prioridad: producto > categoría > global.
+- No permitir márgenes negativos.
+- Evitar reglas activas ambiguas con la misma prioridad.
+
+B. lote_inventario
+Campos mínimos:
+- cod_lote BIGINT identity PK
+- numero_lote VARCHAR unique
+- cod_producto BIGINT FK
+- cod_almacen BIGINT FK
+- cod_proveedor BIGINT nullable FK
+- cod_orden_abastecimiento_detalle BIGINT nullable FK
+- cantidad_recibida INTEGER
+- cantidad_disponible INTEGER
+- cantidad_reservada INTEGER
+- costo_unitario NUMERIC(12,4)
+- margen_porcentaje_aplicado NUMERIC
+- costo_operativo_aplicado NUMERIC
+- porcentaje_impuesto_aplicado NUMERIC
+- pvp_unitario NUMERIC(12,2)
+- fecha_recepcion TIMESTAMPTZ
+- fecha_vencimiento nullable
+- estado: ACTIVO, AGOTADO, BLOQUEADO, ANULADO
+- fecha_creacion
+- fecha_actualizacion
+
+Checks:
+- cantidades no negativas;
+- reservada <= disponible o definir con claridad si disponible representa físico total;
+- costo y PVP positivos;
+- producto y almacén obligatorios;
+- un lote recibido no debe cambiar de costo histórico.
+
+C. pedido_detalle_lote
+Campos mínimos:
+- cod_pedido_detalle_lote BIGINT identity PK
+- cod_pedido_detalle BIGINT FK
+- cod_lote BIGINT FK
+- cantidad INTEGER
+- costo_unitario_historico NUMERIC
+- pvp_unitario_historico NUMERIC
+- descuento_unitario NUMERIC
+- precio_final_unitario NUMERIC
+- subtotal_linea_lote NUMERIC
+- fecha_asignacion
+- unique o índice adecuado por detalle/lote
+
+D. Reservas por lote
+Preferencia:
+- Adaptar reserva_inventario para que tenga cod_lote y cod_pedido_detalle,
+  manteniendo compatibilidad con las columnas existentes.
+- Cada reserva debe apuntar al lote real utilizado.
+- Validar que producto y almacén coincidan con el lote.
+- Crear índices para reservas activas y lotes con disponibilidad.
+
+Aceptación:
+Una compra de 40 unidades debe poder generar:
+- 30 unidades desde lote con costo $2;
+- 10 unidades desde lote con costo $3;
+- total exacto calculado por cada lote;
+- promedio solo como resumen, nunca como pérdida de trazabilidad.
+
+------------------------------------------------------------
+5.2 CÁLCULO DE PVP
+------------------------------------------------------------
+
+Crear funciones mínimas:
+
+- fn_obtener_regla_precio_producto(p_cod_producto)
+- fn_calcular_pvp_lote(
+    p_cod_producto,
+    p_costo_unitario,
+    p_fecha_referencia DEFAULT now()
+  )
+- fn_crear_lote_inventario(...)
+- fn_recalcular_precio_actual_producto(p_cod_producto)
+- fn_cotizar_producto_por_lotes(
+    p_cod_usuario,
+    p_cod_producto,
+    p_cantidad
+  )
+
+La cotización debe devolver JSONB o TABLE con:
+- cantidad solicitada;
+- cantidad cubierta con stock propio;
+- cantidad pendiente de proveedor;
+- lotes;
+- costo unitario por lote;
+- PVP por lote;
+- promoción;
+- beneficio Prime;
+- precio final;
+- subtotal total;
+- precio promedio informativo;
+- tiempo estimado si requiere proveedor.
+
+Fórmula configurable:
+- No fijar margen ni IVA directamente en el código.
+- Usar regla de precio y parametro_sistema.
+- Redondear valores monetarios a 2 decimales al final, no en cálculos intermedios.
+- Guardar en el lote los porcentajes realmente aplicados para auditoría.
+
+producto.precio_actual:
+- Debe mantenerse como precio de exhibición o precio "desde".
+- Debe recalcularse con base en el siguiente lote FIFO disponible.
+- Nunca debe ser la única fuente para cobrar un pedido de varias tandadas.
+
+------------------------------------------------------------
+5.3 FIFO, RESERVA Y CONCURRENCIA
+------------------------------------------------------------
+
+Reemplazar o adaptar:
+- fn_reservar_stock
+- fn_consumir_reservas_pedido
+- fn_liberar_reservas_pedido
+- fn_expirar_reservas_vencidas
+
+Funciones preferidas:
+- fn_reservar_stock_por_lotes(...)
+- fn_consumir_reservas_lote_pedido(...)
+- fn_liberar_reservas_lote_pedido(...)
+- fn_recalcular_inventario_desde_lotes(...)
+
+Reglas:
+- Seleccionar lotes por fecha_recepcion y cod_lote.
+- Usar SELECT ... FOR UPDATE sobre lotes e inventario.
+- Evitar sobreventa bajo dos checkouts concurrentes.
+- Una reserva expirada debe devolver cantidad al lote.
+- Una captura debe convertir la reserva en asignación histórica
+  pedido_detalle_lote.
+- Una cancelación no debe borrar trazabilidad.
+- La suma de lotes debe coincidir con inventario agregado.
+
+------------------------------------------------------------
+5.4 REPOSICIÓN AUTOMÁTICA
+------------------------------------------------------------
+
+Problema actual:
+Solo se abastece el faltante del pedido. Si existe stock exacto para vender, el
+producto puede quedar en cero y no se genera reposición.
+
+Crear:
+- fn_stock_proyectado_producto_almacen(...)
+- fn_cantidad_pendiente_abastecimiento(...)
+- fn_generar_reposicion_automatica(p_cod_producto, p_cod_almacen)
+- fn_recalcular_reposicion_producto(...)
+- opcional fn_procesar_reposiciones_pendientes()
+
+Reglas:
+- Usar inventario.stock_minimo y stock_maximo.
+- Stock proyectado =
+  disponible real + cantidades en órdenes abiertas - reservas activas.
+- Si stock proyectado <= stock_minimo, abastecer hasta stock_maximo.
+- No duplicar órdenes abiertas por el mismo producto/proveedor/objetivo.
+- Seleccionar proveedores activos por:
+  prioridad, disponibilidad, costo, tiempo de entrega y calificación.
+- Permitir dividir el abastecimiento entre varios proveedores.
+- La reposición debe ejecutarse después de una venta/consumo y al recibir ajustes.
+- Si ningún proveedor puede cubrir, crear alerta crítica; no inventar disponibilidad.
+- "Nunca dejar de vender" debe interpretarse como reposición preventiva y uso de
+  proveedores, no como promesa imposible si todos los proveedores están agotados.
+
+Al recibir una orden:
+- actualizar stock del proveedor;
+- crear uno o varios lotes con el costo real de la orden;
+- recalcular inventario;
+- recalcular precio de exhibición;
+- reservar para el pedido que esperaba proveedor;
+- avanzar el estado cuando quede totalmente cubierto.
+
+------------------------------------------------------------
+5.5 PRECIO PROMOCIONAL, PRIME Y CUPONES
+------------------------------------------------------------
+
+Problema actual:
+El catálogo puede mostrar fn_precio_producto_con_promocion, pero el carrito conserva
+precio_actual. Puede mostrarse un precio y cobrarse otro.
+
+Crear una única ruta de cálculo:
+- fn_calcular_precio_final_item(...)
+- fn_calcular_descuento_promocion(...)
+- fn_calcular_descuento_prime(...)
+- fn_calcular_descuento_cupon(...)
+- fn_registrar_uso_beneficio(...)
+
+Reglas:
+- El checkout recalcula, no confía ciegamente en snapshots del carrito.
+- Guardar precio base, promoción, Prime, cupón y precio final.
+- Definir orden de aplicación.
+- Respetar promoción.acumulable.
+- Evitar que el descuento supere el subtotal.
+- Prime no elimina límites retail, stock, pago ni antifraude.
+- Registrar uso_beneficio cuando realmente se aplica un beneficio.
+- No dar el mismo beneficio a todos los planes si se pretende diferenciarlos.
+
+------------------------------------------------------------
+5.6 PEDIDO, ENVÍO, ZONA, IMPUESTO Y FACTURA
+------------------------------------------------------------
+
+Modificar pedido para conservar:
+- cod_metodo_envio;
+- cod_zona_entrega;
+- subtotal;
+- descuento;
+- impuesto;
+- tasa_impuesto;
+- costo_envio;
+- total;
+- fecha_estimada_entrega o datos equivalentes.
+
+Crear:
+- fn_calcular_costo_envio(...)
+- fn_obtener_tasa_impuesto(...)
+- fn_recalcular_total_pedido(...) como fuente única
+
+Reglas:
+- El método elegido por el cliente debe ser el mismo que usa envio.
+- Aplicar zona_entrega.recargo.
+- Aplicar envío Prime solo si el beneficio y el método lo permiten.
+- No fijar impuesto 12% en código.
+- Obtener la tasa desde parametro_sistema.
+- Debe cumplirse:
+  total = subtotal - descuento + impuesto + costo_envio
+- La factura debe copiar exactamente los valores finales del pedido.
+- La factura no debe contradecir el total cobrado.
+
+------------------------------------------------------------
+5.7 PAGO, CANCELACIÓN E IDEMPOTENCIA
+------------------------------------------------------------
+
+Fortalecer:
+- fn_autorizar_pago_simulado
+- fn_capturar_pago_simulado
+- fn_cancelar_pedido
+- fn_generar_reembolso_simulado
+
+Reglas:
+- Captura solo si el pedido está en estado permitido y no está cancelado.
+- Bloquear transacción, pedido, cuenta y reservas en orden consistente.
+- Cancelar pedido debe anular autorizaciones no capturadas.
+- Una transacción capturada no puede capturarse dos veces.
+- No permitir reactivar un pedido cancelado mediante captura tardía.
+- No permitir saldo o límite arbitrario controlado por el cliente.
+- No guardar CVV ni PAN completo.
+- Mantener idempotencia.
+
+------------------------------------------------------------
+5.8 TRACKING PERSISTENTE Y PROGRESIVO
+------------------------------------------------------------
+
+Problema actual:
+La línea de tiempo simulada se arma en Django según minutos, pero no persiste los
+eventos ni sincroniza pedido/envio.
+
+Crear tabla preferida:
+tracking_evento_programado
+- cod_programacion
+- cod_envio
+- cod_tipo_evento
+- descripcion
+- ubicacion
+- fecha_programada
+- procesado
+- fecha_procesado
+- orden
+- visible_cliente
+
+Crear:
+- fn_programar_tracking_pedido(...)
+- fn_procesar_tracking_pendiente(p_fecha_hasta DEFAULT now())
+- fn_actualizar_envio_estado(...)
+- fn_validar_transicion_pedido(...)
+- fn_validar_transicion_envio(...)
+
+Reglas:
+- Programar eventos después de pago capturado.
+- Procesar solo eventos vencidos y no procesados.
+- Insertar evento real en tracking_evento.
+- Actualizar envío y pedido en la misma transacción.
+- La función debe ser idempotente.
+- ENTREGADO debe guardar fecha_entrega.
+- Evitar saltos o retrocesos de estado.
+- No depender de que el cliente abra la pantalla.
+
+------------------------------------------------------------
+5.9 RESERVAS Y CARRITOS ABANDONADOS
+------------------------------------------------------------
+
+- fn_expirar_reservas_vencidas debe liberar lotes e inventario.
+- Crear fn_registrar_carritos_abandonados(...)
+- Crear fn_cancelar_pedidos_impagos_vencidos(...)
+- Evitar reservas eternas.
+- No borrar carritos históricos; cambiar estado.
+- Preparar estas funciones para ejecución periódica posterior desde Django,
+  pg_cron o comando de administración, pero no agregar dependencias externas ahora.
+
+------------------------------------------------------------
+5.10 CRUD DE ENTIDADES MAESTRAS
+------------------------------------------------------------
+
+No crear CRUD genérico para todas las 88 tablas.
+
+Sí crear CRUD lógico y funciones de lectura para las entidades administrables:
+
+Seguridad:
+- rol
+- permiso
+- rol_permiso
+- perfil_usuario
+- parametro_sistema
+
+Catálogo:
+- categoria
+- marca
+- producto
+- producto_imagen
+- producto_atributo
+- producto_atributo_valor
+- producto_relacionado
+- producto_resena
+- regla_limite_compra
+
+Inventario/configuración:
+- almacen
+- alerta_stock, con resolver/cerrar en vez de borrar
+
+Proveedores:
+- proveedor
+- proveedor_contacto
+- producto_proveedor
+
+Envíos:
+- transportista
+- metodo_envio
+- zona_entrega
+
+Prime:
+- plan_membresia
+- beneficio_membresia
+- cancelación de membresía
+- registro de uso_beneficio
+
+Marketing:
+- promocion
+- promocion_producto
+- cupon
+
+Contenido:
+- contenido_digital
+
+Convención por entidad maestra:
+- fn_crear_<entidad>
+- fn_obtener_<entidad>
+- fn_listar_<entidad>
+- fn_actualizar_<entidad>
+- fn_desactivar_<entidad>
+
+Para relaciones:
+- fn_asociar_<relacion>
+- fn_actualizar_<relacion>
+- fn_desasociar_<relacion>
+- fn_listar_<relacion>
+
+No usar DELETE físico si existe activo/estado.
+Las funciones deben validar existencia, duplicados, permisos de integridad y retornar
+el identificador o un resultado útil.
+
+------------------------------------------------------------
+5.11 TABLAS QUE NO DEBEN TENER CRUD GENÉRICO
+------------------------------------------------------------
+
+No crear update/delete libre para:
+- auditoria
+- intento_login
+- movimiento_inventario
+- reserva_inventario
+- pedido
+- pedido_detalle
+- pedido_estado_historial
+- factura
+- transaccion_pago
+- autorizacion_pago
+- reembolso_pago
+- tracking_evento
+- historial_precio_producto
+- historial_proveedor
+- pago_membresia
+- uso_beneficio
+- logs y snapshots BI
+
+Estas tablas deben manejarse por funciones de negocio, estados y consultas.
+
+------------------------------------------------------------
+5.12 DATOS.SQL
+------------------------------------------------------------
+
+Reemplazar datos generalistas por datos de informática y redes.
+
+Categorías mínimas:
+- Redes y conectividad
+- Seguridad de red
+- Cableado estructurado
+- Servidores y cómputo empresarial
+- Almacenamiento
+- Energía y UPS
+- Videovigilancia IP
+- Periféricos
+- Racks y organización
+- Herramientas de red
+
+Marcas:
+Cisco, Ubiquiti, MikroTik, TP-Link, Fortinet, Hikvision, Dahua, APC, Dell,
+Lenovo, HP, Kingston, Logitech, Panduit, Synology, QNAP y otras coherentes.
+
+Productos:
+- al menos 20 productos;
+- atributos técnicos reales;
+- imágenes de prueba no sensibles;
+- límites retail coherentes;
+- al menos 5 proveedores activos por producto publicable;
+- lotes con costos distintos para demostrar tandadas;
+- stock propio y stock de proveedor;
+- pedidos demo;
+- clientes normal y Prime;
+- promociones, cupones y tracking demo.
+
+Caso obligatorio de prueba:
+Producto teclado:
+- lote A: costo $2, 30 disponibles;
+- lote B: costo $3, al menos 10 disponibles;
+- cotización de 40 unidades debe usar 30 + 10;
+- el total debe coincidir con el desglose.
+
+No sembrar ropa, alimentos, belleza, juguetes, mascotas ni categorías ajenas.
+
+============================================================
+6. COMPATIBILIDAD Y CALIDAD
+============================================================
+
+- Mantener las firmas utilizadas actualmente por Django o crear sobrecargas.
+- No usar tipos ambiguos en llamadas.
+- Preferir BIGINT para IDs, INTEGER para cantidades y NUMERIC para dinero.
+- No usar MONEY ni FLOAT para valores monetarios.
+- Agregar índices para:
+  lotes FIFO disponibles,
+  reservas activas,
+  órdenes abiertas,
+  tracking programado,
+  promociones activas,
+  relaciones producto-proveedor.
+- Usar constraints y foreign keys.
+- Toda función crítica debe lanzar mensajes claros.
+- Evitar SQL dinámico innecesario.
+- Evitar funciones duplicadas accidentalmente.
+- Revisar que no existan dos implementaciones contradictorias del mismo nombre/firma.
+- Mantener ejecución:
+  estructura.sql
+  funciones.sql
+  triggers.sql
+  datos.sql
+
+============================================================
+7. ENTREGA QUE CODEX DEBE PRODUCIR
+============================================================
+
+Codex solo debe modificar:
+- estructura.sql
+- funciones.sql
+- triggers.sql
+- datos.sql
+
+Al finalizar debe reportar:
+1. tablas agregadas;
+2. columnas modificadas;
+3. funciones nuevas;
+4. funciones reemplazadas;
+5. triggers nuevos o reemplazados;
+6. firmas conservadas por compatibilidad;
+7. reglas de concurrencia;
+8. riesgos pendientes para Django;
+9. comandos de ejecución, sin ejecutarlos;
+10. consultas SELECT de verificación, sin modificar datos.
+
+No aceptar respuestas que solo describan cambios: Codex debe editar realmente los
+cuatro archivos y mostrar el diff.
+
+============================================================
+8. VALIDACIÓN MANUAL POSTERIOR
+============================================================
+
+Ejecutar únicamente en una base de desarrollo nueva o respaldada.
+
+Orden:
+psql -U postgres -d retail_prime_db_pruebas -f estructura.sql
+psql -U postgres -d retail_prime_db_pruebas -f funciones.sql
+psql -U postgres -d retail_prime_db_pruebas -f triggers.sql
+psql -U postgres -d retail_prime_db_pruebas -f datos.sql
+
+Advertencia:
+estructura.sql contiene DROP TABLE ... CASCADE. No ejecutarlo sobre una base con
+información que se necesite conservar sin respaldo.
+
+Pruebas mínimas:
+- reconstrucción desde cero sin errores;
+- producto publicable con 5 proveedores;
+- cotización FIFO 30 + 10;
+- dos reservas concurrentes sin sobreventa;
+- reposición aun cuando el stock cubre exactamente la venta;
+- promoción mostrada igual a precio cobrado;
+- Prime aplicado y registrado;
+- envío elegido igual al envío generado;
+- factura consistente;
+- cancelación antes de captura;
+- captura idempotente;
+- expiración de reserva;
+- tracking progresivo persistente;
+- CRUD lógico de entidades maestras.

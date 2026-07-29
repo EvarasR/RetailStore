@@ -1,0 +1,155 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Retail Prime | Tecnología, redes y seguridad</title>
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+</head>
+<body data-page="cliente">
+  <header class="rp-topbar">
+    <a class="rp-brand" href="/">
+      <span class="rp-brand-mark">RP</span>
+      <span>Retail Prime</span>
+    </a>
+
+    <form id="catalog-search" class="rp-search" autocomplete="off">
+      <select id="category-select" aria-label="Categoría">
+        <option value="">Todos los catálogos</option>
+      </select>
+      <input id="search-input" type="search" placeholder="Buscar switches, routers, cámaras IP, UPS...">
+      <button type="submit">Buscar</button>
+    </form>
+
+    <nav class="rp-actions">
+      <div id="rp-user-state" class="rp-user-state"><strong>Hola</strong><span>cargando...</span></div>
+      <button class="rp-icon-btn" data-view="catalogo" type="button">Catálogo</button>
+      <button class="rp-icon-btn" data-view="pedidos" type="button">Pedidos</button>
+      <button class="rp-icon-btn" id="btn-cart" type="button">Carrito <span id="cart-count" class="rp-badge">0</span></button>
+      {% if user.is_authenticated %}
+        <a class="rp-icon-btn" href="{% url 'core:perfil' %}">Perfil</a>
+        {% if user.is_staff %}<a class="rp-icon-btn" href="{% url 'administracion:panel' %}">Panel</a>{% endif %}
+        <a class="rp-icon-btn" href="{% url 'core:logout' %}">Salir</a>
+      {% else %}
+        <a class="rp-icon-btn" href="{% url 'core:login' %}">Ingresar</a>
+      {% endif %}
+      <button class="rp-icon-btn" id="theme-toggle" type="button">☾</button>
+    </nav>
+  </header>
+
+  <main class="rp-shell">
+    <section class="rp-hero" data-view-panel="inicio">
+      <div>
+        <p class="rp-kicker">Infraestructura tecnológica para equipos que no improvisan</p>
+        <h1>Retail Prime para redes, seguridad y computación empresarial.</h1>
+        <p>Explora como visitante, compra como cliente registrado y desbloquea beneficios Prime: envío elegible gratis, prioridad, ofertas y tracking progresivo.</p>
+        <div class="rp-hero-actions">
+          <button class="rp-primary" data-view="catalogo">Explorar catálogo</button>
+          <button class="rp-secondary" data-view="membresia">Ver Prime</button>
+        </div>
+      </div>
+      <div class="rp-hero-card">
+        <strong>Resumen rápido</strong>
+        <div id="home-summary" class="rp-mini-list"></div>
+      </div>
+    </section>
+
+
+    <section class="rp-section" data-view-panel="inicio">
+      <div class="rp-section-title">
+        <div>
+          <p class="rp-kicker">Experiencia por tipo de cliente</p>
+          <h2>Tres formas de usar Retail Prime</h2>
+        </div>
+      </div>
+      <div class="rp-state-grid">
+        <article class="rp-card"><span class="rp-chip">Visitante</span><h3>Explora catálogo</h3><p class="rp-muted">Puede buscar productos, ver detalles, stock público y beneficios Prime bloqueados. Para comprar debe iniciar sesión.</p></article>
+        <article class="rp-card"><span class="rp-chip">Cliente</span><h3>Compra completa</h3><p class="rp-muted">Agrega carrito, guarda direcciones, registra tarjetas simuladas, paga, recibe factura y consulta tracking.</p></article>
+        <article class="rp-card"><span class="rp-chip">Prime</span><h3>Beneficios activos</h3><p class="rp-muted">Ve beneficios desbloqueados en producto y checkout: envío elegible gratis, prioridad y descuentos exclusivos.</p></article>
+      </div>
+    </section>
+
+    <section class="rp-section" data-view-panel="inicio">
+      <div class="rp-section-title">
+        <div>
+          <p class="rp-kicker">Catálogos</p>
+          <h2>Categorías principales</h2>
+        </div>
+        <button class="rp-link-btn" data-view="catalogo">Ver todo</button>
+      </div>
+      <div id="category-grid" class="rp-category-grid"></div>
+    </section>
+
+    <section class="rp-section" data-view-panel="inicio">
+      <div class="rp-section-title">
+        <div>
+          <p class="rp-kicker">Recomendado</p>
+          <h2>Productos destacados</h2>
+        </div>
+      </div>
+      <div id="featured-products" class="rp-product-grid"></div>
+    </section>
+
+    <section class="rp-section rp-hidden" data-view-panel="catalogo">
+      <div class="rp-section-title">
+        <div>
+          <p class="rp-kicker">Búsqueda inteligente</p>
+          <h2>Catálogo</h2>
+        </div>
+        <div id="catalog-meta" class="rp-muted"></div>
+      </div>
+      <div id="catalog-grid" class="rp-product-grid"></div>
+      <div class="rp-pagination">
+        <button id="prev-page" class="rp-secondary" type="button">Anterior</button>
+        <span id="page-label"></span>
+        <button id="next-page" class="rp-secondary" type="button">Siguiente</button>
+      </div>
+    </section>
+
+    <section class="rp-section rp-hidden" data-view-panel="pedidos">
+      <div class="rp-section-title">
+        <div>
+          <p class="rp-kicker">Cliente</p>
+          <h2>Mis pedidos</h2>
+        </div>
+      </div>
+      <div id="orders-list" class="rp-list"></div>
+    </section>
+
+    <section class="rp-section rp-hidden" data-view-panel="membresia">
+      <div class="rp-section-title">
+        <div>
+          <p class="rp-kicker">Beneficios</p>
+          <h2>Retail Prime</h2>
+        </div>
+      </div>
+      <div id="membership-box" class="rp-card"></div>
+    </section>
+  </main>
+
+  <aside id="cart-drawer" class="rp-drawer" aria-hidden="true">
+    <div class="rp-drawer-head">
+      <h2>Carrito</h2>
+      <button class="rp-icon-btn" id="close-cart" type="button">Cerrar</button>
+    </div>
+    <div id="cart-items" class="rp-list"></div>
+    <div class="rp-drawer-footer">
+      <strong>Total: $<span id="cart-total">0.00</span></strong>
+      <p class="rp-muted">Revisa tus productos. La dirección, envío y pago se completan en una pasarela separada.</p>
+      <button id="btn-checkout" class="rp-primary" type="button">Proceder al pago</button>
+      <p id="cart-message" class="rp-message"></p>
+    </div>
+  </aside>
+
+  <div id="product-modal" class="rp-modal" aria-hidden="true">
+    <div class="rp-modal-card">
+      <button id="close-product-modal" class="rp-close" type="button">×</button>
+      <div id="product-detail-content"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="rp-toast"></div>
+  <script src="{% static 'retail/js/retail.js' %}"></script>
+</body>
+</html>

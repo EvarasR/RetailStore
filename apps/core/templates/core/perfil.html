@@ -1,0 +1,129 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi cuenta | Retail Prime</title>
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+</head>
+<body data-page="perfil">
+<header class="rp-topbar">
+  <a class="rp-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
+  <nav class="rp-actions">
+    <a class="rp-icon-btn" href="/">Tienda</a>
+    {% if user.is_staff %}<a class="rp-icon-btn" href="{% url 'administracion:panel' %}">Panel</a>{% endif %}
+    <a class="rp-icon-btn" href="{% url 'core:logout' %}">Salir</a>
+    <button class="rp-icon-btn" id="theme-toggle" type="button">☾</button>
+  </nav>
+</header>
+<main class="rp-shell">
+  <section class="rp-account-hero rp-card">
+    <div>
+      <p class="rp-kicker">Centro de cuenta</p>
+      <h1>Mi cuenta Retail Prime</h1>
+      <p class="rp-muted">Gestiona perfil, direcciones, métodos de pago, facturación y suscripción Prime desde un solo lugar.</p>
+    </div>
+    <div id="account-summary" class="rp-mini-list"></div>
+  </section>
+
+  <section class="rp-account-tabs">
+    <button class="rp-secondary" data-profile-tab="perfil">Perfil</button>
+    <button class="rp-secondary" data-profile-tab="direcciones">Direcciones</button>
+    <button class="rp-secondary" data-profile-tab="pagos">Métodos de pago</button>
+    <button class="rp-secondary" data-profile-tab="facturacion">Facturación</button>
+    <button class="rp-secondary" data-profile-tab="prime">Prime</button>
+  </section>
+
+  <section class="rp-profile-grid" data-profile-panel="perfil">
+    <div class="rp-card">
+      <p class="rp-kicker">Cuenta</p>
+      <h2>Datos personales</h2>
+      <form id="profile-form" class="rp-form">
+        {% csrf_token %}
+        <label>Nombres</label><input name="nombres" id="profile-nombres">
+        <label>Apellidos</label><input name="apellidos" id="profile-apellidos">
+        <label>Teléfono</label><input name="telefono" id="profile-telefono">
+        <label>Documento</label><input name="documento_identidad" id="profile-documento">
+        <button class="rp-primary" type="submit">Guardar cambios</button>
+      </form>
+    </div>
+    <div class="rp-card">
+      <p class="rp-kicker">Seguridad</p>
+      <h2>Estado de la cuenta</h2>
+      <div id="profile-status" class="rp-mini-list"></div>
+    </div>
+  </section>
+
+  <section class="rp-profile-grid rp-hidden" data-profile-panel="direcciones">
+    <div class="rp-card">
+      <p class="rp-kicker">Entrega</p>
+      <h2>Mis direcciones</h2>
+      <div id="address-list" class="rp-list"></div>
+    </div>
+    <div class="rp-card">
+      <p class="rp-kicker">Nueva dirección</p>
+      <h2>Agregar dirección</h2>
+      <form id="address-form" class="rp-form rp-compact-form">
+        {% csrf_token %}
+        <input name="alias" placeholder="Alias: Casa, oficina...">
+        <input name="receptor" placeholder="Persona que recibe">
+        <input name="linea1" placeholder="Dirección principal" required>
+        <input name="linea2" placeholder="Referencia">
+        <div class="rp-form-row">
+          <select name="cod_provincia" id="address-provincia" required><option value="">Provincia</option></select>
+          <select name="cod_canton" id="address-canton" required><option value="">Cantón / ciudad</option></select>
+        </div>
+        <input name="pais" placeholder="País" value="Ecuador" readonly>
+        <input name="codigo_postal" placeholder="Código postal opcional">
+        <input name="telefono_contacto" placeholder="Teléfono contacto">
+        <label class="rp-check"><input name="es_predeterminada" type="checkbox"> Usar como dirección predeterminada</label>
+        <button class="rp-secondary" type="submit">Agregar dirección</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="rp-profile-grid rp-hidden" data-profile-panel="pagos">
+    <div class="rp-card">
+      <p class="rp-kicker">Billetera simulada</p>
+      <h2>Métodos de pago</h2>
+      <div id="payment-list" class="rp-list"></div>
+    </div>
+    <div class="rp-card">
+      <p class="rp-kicker">Pasarela</p>
+      <h2>Agregar tarjeta simulada</h2>
+      <form id="profile-payment-form" class="rp-form" autocomplete="off">
+        {% csrf_token %}
+        <label>Titular</label><input name="titular" placeholder="Nombre como aparece en la tarjeta">
+        <label>Número de tarjeta</label><input name="numero_tarjeta" inputmode="numeric" maxlength="19" placeholder="4111111111111111">
+        <div class="rp-form-row">
+          <input name="exp_mes" inputmode="numeric" maxlength="2" placeholder="MM">
+          <input name="exp_anio" inputmode="numeric" maxlength="4" placeholder="AAAA">
+          <input name="cvv" inputmode="numeric" maxlength="4" placeholder="CVV">
+        </div>
+        <div class="rp-form-row">
+          <input name="saldo_disponible" inputmode="decimal" value="1000" placeholder="Saldo simulado">
+          <input name="limite_diario" inputmode="decimal" value="1000" placeholder="Límite diario">
+        </div>
+        <button class="rp-primary" type="submit">Guardar tarjeta</button>
+        <p class="rp-muted">No se guarda CVV ni número completo. La BD almacena marca, BIN, últimos 4 y token simulado.</p>
+      </form>
+    </div>
+  </section>
+
+  <section class="rp-card rp-hidden" data-profile-panel="facturacion">
+    <p class="rp-kicker">Comprobantes</p>
+    <h2>Facturación y pedidos pagados</h2>
+    <div id="invoice-list" class="rp-list"></div>
+  </section>
+
+  <section class="rp-card rp-hidden" data-profile-panel="prime">
+    <p class="rp-kicker">Suscripción</p>
+    <h2>Retail Prime</h2>
+    <div id="profile-membership-box"></div>
+  </section>
+</main>
+<div id="toast" class="rp-toast"></div>
+<script src="{% static 'retail/js/retail.js' %}"></script>
+</body>
+</html>

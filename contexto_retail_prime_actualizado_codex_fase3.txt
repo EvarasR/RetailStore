@@ -1,0 +1,2266 @@
+CONTEXTO OFICIAL DEL PROYECTO RETAIL PRIME
+Para continuar en otro chat y enfocarse directamente en Django
+Fecha de generación: 2026-06-06
+
+============================================================
+1. RESUMEN GENERAL DEL PROYECTO
+============================================================
+
+Nombre principal del proyecto:
+Sistema de tienda retail con gestión de miembros premium y beneficios tipo Prime.
+
+Nombre técnico sugerido:
+Retail Prime - Plataforma e-commerce retail para productos de informática y redes.
+
+Objetivo:
+Construir una aplicación web tipo Amazon, pero adaptada a un proyecto académico/técnico, usando Python, Django y PostgreSQL 15. El sistema debe vender al consumidor final, gestionar productos, proveedores, inventario, carrito, checkout, pagos simulados, tracking de pedidos, membresías premium tipo Prime, beneficios, notificaciones, reportes y reglas de negocio automatizadas.
+
+El nicho final elegido ya NO es generalista. Se cambió a:
+Productos de informática, redes, seguridad de red, cableado estructurado, servidores, periféricos, almacenamiento, videovigilancia IP, UPS, racks, herramientas de red y equipos empresariales.
+
+Ejemplos de productos del nicho:
+- Switches PoE.
+- Routers empresariales.
+- Firewalls.
+- Access Points WiFi 6.
+- Cable UTP Cat6.
+- Patch panels.
+- Racks.
+- SFP/fibra óptica.
+- NAS.
+- UPS.
+- Servidores.
+- Laptops empresariales.
+- Cámaras IP.
+- NVR.
+- Testers de red.
+- Crimpadoras.
+- Organizadores de cableado.
+
+Marcas del nicho:
+Cisco, Ubiquiti, MikroTik, TP-Link, Fortinet, Hikvision, Dahua, APC, Dell, Lenovo, HP, Kingston, Logitech, Panduit, Synology, QNAP, entre otras.
+
+============================================================
+2. ENFOQUE TECNOLÓGICO DEFINIDO
+============================================================
+
+Backend:
+Python + Django.
+
+Base de datos:
+PostgreSQL 15.
+
+Frontend inicial:
+Django Templates.
+
+APIs:
+Sí se usarán APIs internas, pero inicialmente consumidas desde los templates usando JavaScript, fetch/AJAX o una técnica equivalente. La idea es que la app funcione primero con Django Templates y luego, cuando el sistema ya esté bien armado, se pueda migrar el frontend a React.
+
+Frontend futuro:
+React, pero NO al inicio.
+
+Correos/SMTP:
+Para desarrollo se puede usar:
+- Django console email backend.
+- Django filebased email backend.
+- Mailpit como SMTP local simulado.
+
+Docker:
+No usar Docker desde el inicio como eje principal. Docker se usará más adelante para dockerizar la app cuando ya esté finalizada o bastante madura.
+
+Servidor futuro:
+Nginx + Gunicorn + PostgreSQL + SSL/TLS.
+
+Arquitectura elegida:
+Monolito modular con Django, usando pocas apps, base de datos fuerte y lógica SQL centralizada.
+
+============================================================
+3. DECISIÓN ARQUITECTÓNICA MÁS IMPORTANTE
+============================================================
+
+El proyecto seguirá un enfoque DB-first.
+
+La lógica principal del sistema vivirá en PostgreSQL 15 mediante:
+- Funciones SQL/PLpgSQL.
+- Triggers.
+- Constraints.
+- Foreign keys.
+- Índices.
+- Validaciones de integridad.
+- Automatización de estados.
+- Auditoría.
+
+Django NO debe ser quien haga toda la lógica crítica de negocio de manera dispersa. Django debe:
+- Mostrar templates.
+- Recibir formularios.
+- Validar datos de entrada a nivel de interfaz.
+- Manejar sesiones y autenticación.
+- Llamar funciones SQL.
+- Consumir respuestas JSON.
+- Renderizar paneles.
+- Integrarse posteriormente con React si se decide migrar el frontend.
+
+La base de datos debe ser el núcleo fuerte del sistema.
+
+Frase guía:
+Si la base de datos queda bien, Django fluye. Si la base queda mal, Django solo maquilla el desastre.
+
+============================================================
+4. ESQUEMA DE BASE DE DATOS
+============================================================
+
+El usuario decidió trabajar directamente en el esquema public de PostgreSQL.
+
+Importante:
+- NO crear schema retail.
+- NO usar SET search_path = retail, public.
+- Todo debe trabajar en public, que es el esquema por defecto de PostgreSQL.
+
+Los archivos SQL deben trabajar directo con tablas como:
+usuario, producto, proveedor, pedido, etc.
+
+No usar prefijo retail.tabla.
+
+============================================================
+5. NORMALIZACIÓN Y CONVENCIÓN DE IDs
+============================================================
+
+La base de datos debe estar normalizada, preferentemente en 3FN.
+
+Criterios:
+- 1FN: campos atómicos, sin listas dentro de una columna.
+- 2FN: atributos dependientes de toda la clave.
+- 3FN: no depender de atributos no clave.
+
+Convención de IDs:
+Usar claves primarias con nombres tipo:
+- cod_usuario
+- cod_producto
+- cod_proveedor
+- cod_pedido
+- cod_pago
+- cod_envio
+- cod_membresia
+- cod_categoria
+- cod_marca
+
+Se recomienda snake_case, no nombres pegados.
+
+Ejemplo correcto:
+cod_usuario
+
+Ejemplo no recomendado:
+codusuario
+
+Las tablas deben tener constraints, foreign keys, índices únicos y checks.
+
+============================================================
+6. APPS DJANGO DEFINIDAS
+============================================================
+
+El usuario no quiere una app Django por cada módulo pequeño, porque eso sobresatura el proyecto.
+
+La estructura recomendada es de 5 apps principales:
+
+1. core
+Responsabilidad:
+- Usuarios.
+- Roles.
+- Permisos.
+- Autenticación.
+- Perfil de usuario.
+- Direcciones.
+- Parámetros generales.
+- Auditoría base.
+- Utilidades compartidas.
+
+2. clientes
+Responsabilidad:
+- Inicio público.
+- Catálogo visible.
+- Detalle de producto.
+- Favoritos.
+- Wishlist.
+- Carrito.
+- Checkout.
+- Pedidos del cliente.
+- Tracking visible.
+- Membresía premium.
+- Compras recurrentes.
+- Devoluciones solicitadas por cliente.
+
+3. administracion
+Responsabilidad:
+- Panel administrativo.
+- Gestión de productos.
+- Categorías.
+- Marcas.
+- Inventario.
+- Precios.
+- Promociones.
+- Cupones.
+- Usuarios.
+- Pedidos.
+- Reportes.
+- KPIs.
+- Configuración general.
+
+4. proveedores
+Responsabilidad:
+- Registro de proveedores.
+- Productos ofrecidos por proveedor.
+- Stock proveedor.
+- Costos.
+- Tiempo de entrega.
+- Órdenes de abastecimiento.
+- Historial de proveedor.
+- Evaluación/cumplimiento del proveedor.
+
+5. operaciones
+Responsabilidad:
+- Pagos simulados.
+- Tracking.
+- Envíos.
+- Estados del pedido.
+- Notificaciones.
+- Cola de emails.
+- Facturación simulada.
+- Devoluciones.
+- Automatizaciones internas.
+- Soporte.
+
+============================================================
+7. ARCHIVOS SQL DEFINIDOS
+============================================================
+
+Se decidió manejar solamente 4 archivos SQL principales:
+
+1. estructura.sql
+Contiene:
+- Drops al inicio.
+- Extensiones necesarias.
+- Creación de tablas.
+- Primary keys.
+- Foreign keys.
+- Constraints.
+- Checks.
+- Índices.
+- Estructura normalizada.
+
+2. funciones.sql
+Contiene:
+- Funciones utilitarias.
+- Funciones CRUD.
+- Funciones de lógica de negocio.
+- Funciones de pagos simulados.
+- Funciones de inventario.
+- Funciones de proveedores.
+- Funciones de pedidos.
+- Funciones de tracking.
+- Funciones de membresías.
+- Funciones de promociones/cupones.
+- Funciones de notificaciones.
+- Funciones de reportes.
+
+3. triggers.sql
+Contiene:
+- Funciones trigger.
+- Triggers de auditoría.
+- Triggers de historial de precio.
+- Triggers de stock.
+- Triggers de pedidos.
+- Triggers de tracking.
+- Triggers de pagos.
+- Triggers de membresía.
+- Triggers de notificación.
+
+4. datos.sql
+Contiene:
+- Datos estáticos.
+- Estados.
+- Roles.
+- Permisos.
+- Categorías del nicho informática/redes.
+- Marcas.
+- Proveedores técnicos.
+- Productos técnicos.
+- Stock.
+- Usuarios de prueba.
+- Métodos de pago simulados.
+- Carritos.
+- Pedidos demo.
+- Datos de tracking.
+- Datos de reportes.
+- Datos de prueba abundantes.
+
+Orden correcto de ejecución:
+
+psql -U postgres -d retail_prime_db -f estructura.sql
+psql -U postgres -d retail_prime_db -f funciones.sql
+psql -U postgres -d retail_prime_db -f triggers.sql
+psql -U postgres -d retail_prime_db -f datos.sql
+
+Si se usa pgAdmin, ejecutar en ese mismo orden.
+
+============================================================
+8. TABLAS PRINCIPALES DE LA BASE
+============================================================
+
+Seguridad y usuarios:
+- rol
+- permiso
+- rol_permiso
+- usuario
+- usuario_rol
+- perfil_usuario
+- direccion_usuario
+- intento_login
+- auditoria
+- parametro_sistema
+
+Catálogos técnicos:
+- estado_producto
+- estado_pedido
+- estado_pago
+- estado_membresia
+- tipo_movimiento_inventario
+- tipo_evento_tracking
+
+Catálogo de productos:
+- categoria
+- marca
+- producto
+- producto_imagen
+- producto_atributo
+- producto_atributo_valor
+- producto_relacionado
+- producto_favorito
+- producto_resena
+- regla_limite_compra
+- historial_precio_producto
+- pregunta_producto
+- respuesta_producto
+- wishlist
+- wishlist_detalle
+
+Inventario:
+- almacen
+- inventario
+- movimiento_inventario
+- reserva_inventario
+- alerta_stock
+
+Proveedores:
+- proveedor
+- proveedor_contacto
+- producto_proveedor
+- proveedor_stock
+- orden_abastecimiento
+- orden_abastecimiento_detalle
+- historial_proveedor
+
+Carrito y pedidos:
+- carrito
+- carrito_detalle
+- pedido
+- pedido_detalle
+- pedido_estado_historial
+- factura
+- devolucion
+- devolucion_detalle
+
+Pagos simulados:
+- bin_tarjeta
+- metodo_pago
+- cuenta_simulada
+- transaccion_pago
+- autorizacion_pago
+- reembolso_pago
+
+Envíos y tracking:
+- transportista
+- metodo_envio
+- zona_entrega
+- envio
+- tracking_evento
+
+Membresías premium:
+- plan_membresia
+- beneficio_membresia
+- membresia_usuario
+- pago_membresia
+- compra_recurrente
+- compra_recurrente_detalle
+- uso_beneficio
+
+Promociones y cupones:
+- cupon
+- cupon_uso
+- promocion
+- promocion_producto
+
+Notificaciones y correos:
+- notificacion
+- email_cola
+- plantilla_email
+
+Soporte:
+- ticket_soporte
+- ticket_soporte_mensaje
+
+Biblioteca digital / contenido premium opcional:
+- contenido_digital
+- contenido_usuario
+
+Analítica y BI:
+- log_busqueda
+- log_producto_visto
+- log_carrito_abandonado
+- evento_recomendacion
+- resumen_venta_diaria
+- snapshot_kpi
+- segmento_cliente
+
+============================================================
+9. REGLAS DE NEGOCIO DEFINIDAS
+============================================================
+
+9.1 Regla retail
+La tienda vende al consumidor final, no al mayorista.
+
+Por eso debe haber límites de compra por producto o categoría.
+
+Ejemplos:
+- Firewalls: máximo 2 por pedido.
+- Routers: máximo 3 por pedido.
+- Switches: máximo 5 por pedido.
+- Access Points: máximo 10 por pedido.
+- Cables: límite mayor, porque es normal comprar varias unidades.
+- Herramientas: límite moderado.
+
+Si un cliente pide una cantidad exagerada, el sistema debe:
+- Rechazar la compra.
+- O marcarla como requiere revisión.
+- O sugerir contactar a soporte.
+
+9.2 Regla de producto publicable
+Un producto puede crearse en estado BORRADOR, pero solo puede pasar a PUBLICADO si cumple:
+- Tiene categoría.
+- Tiene marca.
+- Tiene SKU único.
+- Tiene precio mayor a cero.
+- Tiene imagen principal.
+- Tiene límite retail configurado.
+- Tiene mínimo 5 proveedores activos.
+- Tiene stock propio o stock disponible en proveedores.
+
+9.3 Regla de mínimo 5 proveedores
+Cada producto debe tener mínimo 5 proveedores activos para poder estar publicado.
+
+Un proveedor puede proveer varios productos.
+Un producto puede estar asociado a varios proveedores.
+
+Relación clave:
+producto 1 --- N producto_proveedor N --- 1 proveedor
+
+9.4 Regla de stock propio + proveedores
+Si el cliente pide una cantidad y el stock propio no alcanza:
+
+Ejemplo:
+Cantidad solicitada: 10
+Stock propio: 4
+Faltante: 6
+
+El sistema debe:
+1. Reservar stock propio disponible.
+2. Buscar proveedores activos del producto.
+3. Ordenarlos por prioridad, costo y tiempo de entrega.
+4. Cubrir el faltante con uno o más proveedores.
+5. Generar orden de abastecimiento si corresponde.
+6. Marcar el pedido como WAITING_SUPPLIER o estado equivalente.
+
+Si no se puede cubrir el faltante:
+- Rechazar compra.
+- O permitir solo la cantidad disponible.
+
+9.5 Regla de pago simulado
+La pasarela de pago será simulada, pero debe comportarse como una real.
+
+Debe validar:
+- Marca de tarjeta.
+- BIN.
+- Algoritmo Luhn.
+- Fecha de expiración.
+- CVV.
+- Saldo disponible.
+- Límite diario.
+- Estado de tarjeta.
+- Tarjeta bloqueada.
+- Monto del pedido.
+- Idempotencia.
+
+No guardar CVV.
+No guardar número completo de tarjeta.
+Guardar solamente:
+- Marca.
+- BIN parcial.
+- Últimos 4 dígitos.
+- Token simulado.
+- Nombre del titular.
+- Fecha de vencimiento.
+
+Estados de pago:
+- INICIADO
+- VALIDANDO
+- AUTORIZADO
+- RECHAZADO
+- CAPTURADO
+- FALLIDO
+- REEMBOLSADO
+- ANULADO
+
+9.6 Regla de tracking automático
+Cada cambio importante del pedido debe generar evento de tracking.
+
+Eventos posibles:
+- Pedido creado.
+- Pago aprobado.
+- Preparando pedido.
+- Esperando proveedor.
+- Listo para enviar.
+- Recogido por transportista.
+- En tránsito.
+- Llegó a centro local.
+- En reparto.
+- Entregado.
+- Devolución solicitada.
+- Devuelto.
+
+9.7 Regla de membresía premium
+El cliente premium tendrá beneficios tipo Prime:
+- Envío gratis.
+- Entrega prioritaria.
+- Descuentos exclusivos.
+- Acceso anticipado.
+- Compras recurrentes.
+- Mayor plazo de devolución.
+- Promociones tipo “Suscríbete y ahorra”.
+
+Pero premium NO debe saltarse reglas críticas:
+- No elimina límites retail.
+- No permite comprar sin stock.
+- No evita validación de pago.
+- No permite saltar controles antifraude.
+
+============================================================
+10. FUNCIONES SQL ESPERADAS / EXISTENTES
+============================================================
+
+Las funciones SQL deben cubrir CRUD y lógica de negocio.
+
+Funciones utilitarias:
+- fn_generar_numero_pedido()
+- fn_generar_numero_factura()
+- fn_generar_numero_tracking()
+- fn_luhn_valido(numero_tarjeta)
+- fn_detectar_marca_tarjeta(numero_tarjeta)
+- fn_normalizar_texto(texto)
+
+Usuarios y seguridad:
+- fn_crear_usuario(...)
+- fn_actualizar_usuario(...)
+- fn_asignar_rol_usuario(...)
+- fn_usuario_tiene_permiso(...)
+- fn_registrar_intento_login(...)
+- fn_marcar_email_verificado(...)
+
+Catálogo:
+- fn_crear_producto(...)
+- fn_actualizar_producto(...)
+- fn_publicar_producto(...)
+- fn_desactivar_producto(...)
+- fn_validar_producto_publicable(cod_producto)
+- fn_registrar_vista_producto(...)
+- fn_registrar_busqueda(...)
+- fn_agregar_producto_favorito(...)
+- fn_quitar_producto_favorito(...)
+- fn_crear_wishlist(...)
+- fn_agregar_wishlist_detalle(...)
+- fn_crear_pregunta_producto(...)
+- fn_responder_pregunta_producto(...)
+
+Inventario:
+- fn_calcular_stock_disponible(cod_producto)
+- fn_registrar_movimiento_inventario(...)
+- fn_reservar_stock(...)
+- fn_liberar_reserva_stock(...)
+- fn_consumir_reserva_stock(...)
+- fn_generar_alerta_stock(...)
+- fn_recalcular_alertas_stock(...)
+
+Proveedores:
+- fn_crear_proveedor(...)
+- fn_asociar_producto_proveedor(...)
+- fn_actualizar_stock_proveedor(...)
+- fn_contar_proveedores_activos_producto(cod_producto)
+- fn_consultar_proveedores_para_faltante(...)
+- fn_generar_orden_abastecimiento(...)
+
+Carrito:
+- fn_obtener_o_crear_carrito(cod_usuario)
+- fn_agregar_producto_carrito(...)
+- fn_actualizar_cantidad_carrito(...)
+- fn_eliminar_producto_carrito(...)
+- fn_calcular_total_carrito(cod_carrito)
+- fn_validar_limite_retail(...)
+- fn_marcar_carrito_abandonado(...)
+
+Checkout/pedidos:
+- fn_crear_pedido_desde_carrito(...)
+- fn_actualizar_total_pedido(cod_pedido)
+- fn_actualizar_estado_pedido(...)
+- fn_cancelar_pedido(...)
+- fn_generar_factura(...)
+- fn_solicitar_devolucion(...)
+- fn_aprobar_devolucion(...)
+
+Pagos simulados:
+- fn_registrar_metodo_pago_simulado(...)
+- fn_validar_tarjeta_simulada(...)
+- fn_autorizar_pago_simulado(...)
+- fn_capturar_pago_simulado(...)
+- fn_reembolsar_pago_simulado(...)
+
+Nota importante:
+Hubo un error con fn_registrar_metodo_pago_simulado porque PostgreSQL no encontraba una firma compatible con:
+fn_registrar_metodo_pago_simulado(bigint, unknown, unknown, integer, integer, unknown, integer, integer)
+
+Se corrigió agregando/ajustando sobrecarga para aceptar INTEGER en mes/año/saldos o casteos explícitos en datos.sql.
+
+Tracking/envíos:
+- fn_crear_envio_pedido(...)
+- fn_registrar_tracking_evento(...)
+- fn_actualizar_envio_estado(...)
+
+Membresía:
+- fn_activar_membresia_usuario(...)
+- fn_cancelar_membresia(...)
+- fn_usuario_es_premium(cod_usuario)
+- fn_aplicar_beneficios_premium(...)
+- fn_registrar_uso_beneficio(...)
+
+Promociones/cupones:
+- fn_crear_cupon(...)
+- fn_validar_cupon(...)
+- fn_aplicar_cupon_pedido(...)
+- fn_crear_promocion(...)
+- fn_asociar_producto_promocion(...)
+
+Notificaciones/correos:
+- fn_crear_notificacion(...)
+- fn_marcar_notificacion_leida(...)
+- fn_encolar_email(...)
+- fn_marcar_email_enviado(...)
+- fn_marcar_email_error(...)
+
+Soporte:
+- fn_crear_ticket_soporte(...)
+- fn_responder_ticket_soporte(...)
+- fn_cerrar_ticket_soporte(...)
+
+BI/reportes:
+- fn_actualizar_resumen_venta_diaria(...)
+- fn_generar_snapshot_kpi(...)
+- fn_segmentar_cliente(...)
+- fn_recomendar_productos_usuario(...)
+
+Compras recurrentes:
+- fn_crear_compra_recurrente(...)
+- fn_ejecutar_compras_recurrentes_pendientes(...)
+
+============================================================
+11. TRIGGERS ESPERADOS / EXISTENTES
+============================================================
+
+Triggers principales:
+
+Auditoría:
+- Auditar inserts/updates/deletes en tablas críticas.
+- Guardar datos anteriores y nuevos en JSONB.
+
+Productos:
+- Registrar historial de precio cuando cambia precio_actual.
+- Validar condiciones antes de publicar producto.
+- Actualizar fecha_actualizacion.
+
+Inventario:
+- Prevenir stock negativo.
+- Crear movimiento de inventario.
+- Generar alerta si stock cae bajo mínimo.
+- Actualizar fecha_actualizacion.
+
+Pedidos:
+- Recalcular subtotal/total cuando cambia pedido_detalle.
+- Registrar historial de estado cuando cambia cod_estado_pedido.
+- Generar evento de tracking cuando cambia estado.
+- Encolar email al crear pedido o cambiar estado relevante.
+
+Pagos:
+- Registrar evento de pago.
+- Cambiar estado del pedido si pago se captura.
+- Encolar email de pago aprobado o rechazado.
+
+Tracking:
+- Crear notificación visible al cliente cuando hay evento importante.
+
+Membresía:
+- Actualizar estado si vence.
+- Registrar pago de membresía.
+- Encolar email de activación o vencimiento.
+
+Soporte:
+- Notificar cuando se crea/responde/cierra ticket.
+
+============================================================
+12. DATOS DE PRUEBA DEFINIDOS
+============================================================
+
+El archivo datos.sql debe incluir datos para el nicho de informática y redes.
+
+Debe incluir:
+- Roles: CUSTOMER, PREMIUM_CUSTOMER, ADMIN, WAREHOUSE_MANAGER, SUPPLIER_MANAGER, SUPPORT.
+- Permisos base.
+- Estados de producto.
+- Estados de pedido.
+- Estados de pago.
+- Estados de membresía.
+- Tipos de movimiento de inventario.
+- Tipos de tracking.
+- Categorías técnicas.
+- Marcas técnicas.
+- Productos del nicho.
+- Proveedores mayoristas técnicos.
+- Asociación producto-proveedor con mínimo 5 proveedores por producto.
+- Stock propio en almacenes.
+- Stock proveedor.
+- Usuarios de prueba.
+- Direcciones de usuario.
+- Métodos de pago simulados.
+- Cuentas simuladas con saldo.
+- Carritos demo.
+- Pedidos demo.
+- Tracking demo.
+- Reseñas.
+- Favoritos.
+- Búsquedas.
+- Logs BI.
+- Membresías premium.
+- Beneficios.
+- Promociones/cupones si aplica.
+
+============================================================
+13. ERRORES YA DETECTADOS Y CORREGIDOS
+============================================================
+
+1. Problema con schema retail:
+Inicialmente algunos archivos usaban schema retail o SET search_path = retail, public.
+Decisión final: quitar eso. Todo va en public.
+
+2. Drops al inicio:
+El usuario pidió que estructura.sql tenga DROP TABLE IF EXISTS ... CASCADE al inicio.
+Eso debe mantenerse.
+
+3. Error en datos.sql con fn_registrar_metodo_pago_simulado:
+Error:
+ERROR: no existe la función fn_registrar_metodo_pago_simulado(bigint, unknown, unknown, integer, integer, unknown, integer, integer)
+
+Causa:
+La función estaba definida con tipos más específicos, por ejemplo SMALLINT o NUMERIC, y datos.sql llamaba con INTEGER/unknown.
+
+Solución aplicada:
+- Agregar firma compatible en funciones.sql.
+- O castear explícitamente en datos.sql.
+
+4. Cambio de nicho:
+El usuario pidió cambiar los datos de productos a informática y redes.
+Se modificó datos.sql para ese nicho.
+
+============================================================
+14. CÓMO DEBE CONECTARSE DJANGO CON LA BASE
+============================================================
+
+Django debe usar modelos para representar tablas, pero la lógica crítica debe llamar funciones SQL.
+
+Ejemplo conceptual desde Django:
+
+with connection.cursor() as cursor:
+    cursor.execute(
+        "SELECT fn_agregar_producto_carrito(%s, %s, %s)",
+        [cod_usuario, cod_producto, cantidad]
+    )
+    resultado = cursor.fetchone()
+
+Django debe tener servicios/repositorios para encapsular llamadas SQL, por ejemplo:
+
+apps/clientes/services/carrito_service.py
+apps/operaciones/services/pago_service.py
+apps/proveedores/services/abastecimiento_service.py
+apps/administracion/services/producto_service.py
+
+No poner llamadas SQL desordenadas dentro de todas las vistas.
+
+Estructura sugerida:
+
+apps/
+  core/
+    models.py
+    services/
+    views.py
+    urls.py
+  clientes/
+    models.py
+    services/
+      carrito_service.py
+      checkout_service.py
+    views.py
+    urls.py
+    templates/clientes/
+  administracion/
+    services/
+      producto_admin_service.py
+      reportes_service.py
+    views.py
+    urls.py
+    templates/administracion/
+  proveedores/
+    services/
+      proveedor_service.py
+    views.py
+    urls.py
+    templates/proveedores/
+  operaciones/
+    services/
+      pago_service.py
+      tracking_service.py
+      notificacion_service.py
+    views.py
+    urls.py
+
+============================================================
+15. APIs INTERNAS CON TEMPLATES
+============================================================
+
+La primera versión usará Django Templates, pero con endpoints internos tipo JSON.
+
+Ejemplos de rutas:
+
+/api/carrito/agregar/
+/api/carrito/actualizar-cantidad/
+/api/checkout/validar-stock/
+/api/checkout/simular-pago/
+/api/tracking/estado-pedido/
+/api/productos/recomendados/
+/api/proveedores/consultar-stock/
+/api/cupones/validar/
+/api/notificaciones/marcar-leida/
+
+Estas APIs se consumirán desde templates con fetch/AJAX.
+Más adelante React podrá consumir rutas similares.
+
+============================================================
+16. PANTALLAS DJANGO NECESARIAS
+============================================================
+
+Cliente:
+- Inicio.
+- Catálogo.
+- Detalle de producto.
+- Carrito.
+- Checkout.
+- Resultado de pago.
+- Mis pedidos.
+- Tracking de pedido.
+- Mis favoritos.
+- Mi membresía premium.
+- Mis compras recurrentes.
+- Mis devoluciones.
+- Soporte.
+
+Administración:
+- Dashboard.
+- Gestión de productos.
+- Gestión de categorías.
+- Gestión de marcas.
+- Gestión de inventario.
+- Gestión de proveedores.
+- Gestión de pedidos.
+- Gestión de pagos simulados.
+- Gestión de tracking.
+- Gestión de membresías.
+- Gestión de cupones/promociones.
+- Reportes/KPIs.
+- Auditoría.
+
+Proveedores:
+- Panel proveedor.
+- Productos asociados.
+- Stock proveedor.
+- Órdenes de abastecimiento.
+- Historial de entregas.
+
+Operaciones/soporte:
+- Tickets.
+- Notificaciones.
+- Correos en cola.
+- Seguimiento de envíos.
+
+============================================================
+17. PRIORIDAD PARA EL SIGUIENTE CHAT
+============================================================
+
+El siguiente chat debe enfocarse directamente en Django.
+
+Prioridad recomendada:
+
+1. Crear proyecto Django.
+2. Crear apps: core, clientes, administracion, proveedores, operaciones.
+3. Configurar PostgreSQL 15.
+4. Conectar Django a la BD existente.
+5. Crear modelos Django mapeados a tablas existentes.
+6. Marcar modelos como managed = False si la estructura la controla SQL.
+7. Crear servicios Python para llamar funciones SQL.
+8. Crear vistas con templates.
+9. Crear rutas internas JSON.
+10. Empezar con flujo cliente:
+    - Catálogo.
+    - Detalle producto.
+    - Carrito.
+    - Checkout.
+    - Pago simulado.
+    - Pedido.
+    - Tracking.
+
+Decisión importante para Django:
+Como la BD ya existe y se controla desde SQL, probablemente conviene usar:
+
+class Meta:
+    managed = False
+    db_table = "nombre_tabla"
+
+Esto evita que Django intente crear o modificar tablas con migraciones cuando la estructura ya la maneja PostgreSQL.
+
+Aun así, se puede usar migrations para tablas propias de Django si se decide usar auth_user estándar, sesiones, etc. Pero en este proyecto ya existe tabla usuario propia, así que habrá que decidir si:
+
+Opción A:
+Usar Custom User Model de Django conectado a tabla usuario.
+
+Opción B:
+Usar auth_user de Django y mapear usuario del sistema aparte.
+
+Recomendación:
+Usar Custom User Model desde el inicio si se va a integrar bien con login de Django.
+
+============================================================
+18. ESTILO DE TRABAJO ESPERADO
+============================================================
+
+El usuario quiere:
+- Archivos descargables.
+- Código listo para copiar/pegar o ejecutar.
+- Evitar exceso de archivos innecesarios.
+- Mantener orden práctico.
+- No sobresaturar el proyecto.
+- Explicación directa.
+- Enfoque full stack Django + PostgreSQL.
+- Seguridad desde el inicio.
+- Base de datos muy automatizada.
+- Funciones SQL y triggers como centro de la lógica.
+
+Cuando se entreguen archivos, deben ser concretos y solo los que se modifican.
+
+============================================================
+19. RESUMEN EJECUTIVO PARA PEGAR EN OTRO CHAT
+============================================================
+
+Estoy desarrollando un sistema e-commerce tipo Amazon llamado Retail Prime, orientado al nicho de informática y redes. Uso Python, Django y PostgreSQL 15. La primera versión será con Django Templates y APIs internas JSON consumidas desde templates; React queda para después. Docker se usará al final, cuando la app esté madura.
+
+La arquitectura será monolito modular con 5 apps Django: core, clientes, administracion, proveedores y operaciones. No quiero demasiadas apps.
+
+La base de datos ya está pensada en PostgreSQL 15, normalizada en 3FN, trabajando directamente en el esquema public. No quiero crear schemas personalizados. Los IDs usan convención cod_usuario, cod_producto, cod_proveedor, etc. La lógica crítica debe vivir en funciones SQL y triggers: CRUD, reglas de negocio, checkout, stock, proveedores, pagos simulados, tracking, membresías, notificaciones y reportes.
+
+Tengo 4 archivos SQL principales: estructura.sql, funciones.sql, triggers.sql y datos.sql. El orden de ejecución es estructura, funciones, triggers y datos. estructura.sql debe tener drops al inicio. datos.sql ya fue cambiado al nicho informática/redes.
+
+Ahora quiero enfocarme en Django: crear el proyecto, conectar con PostgreSQL, mapear modelos a las tablas existentes, probablemente con managed=False, crear servicios Python que llamen funciones SQL, crear templates, vistas, URLs y APIs internas para catálogo, carrito, checkout, pago simulado, pedidos y tracking.
+
+============================================================
+FIN DEL CONTEXTO
+============================================================
+
+============================================================
+20. ACTUALIZACIÓN DEL AVANCE EN DJANGO
+============================================================
+
+Fecha de actualización: 2026-06-07
+
+Este bloque resume lo avanzado después del contexto inicial. Sirve para abrir un nuevo chat y continuar sin perder el hilo.
+
+Estado general actual:
+- El proyecto Django ya existe.
+- El proyecto principal se llama TiendaRetail.
+- La estructura trabaja con la carpeta apps/.
+- Las apps principales ya existen:
+  - apps/core
+  - apps/clientes
+  - apps/administracion
+  - apps/proveedores
+  - apps/operaciones
+- Se corrigió el nombre de la app administracion. Antes se había mencionado por error como administracon.
+- PostgreSQL ya está conectado con Django.
+- El admin/login funciona con la tabla usuario propia de PostgreSQL.
+- Ya se validó que se puede iniciar sesión.
+- Ya se validó que las funciones SQL pueden ejecutarse desde Django usando servicios Python.
+- Ya se generaron archivos iniciales de views, urls, templates, CSS y JS, pero todavía falta corregir redirección por rol y mejorar fuertemente el diseño visual.
+
+============================================================
+21. INSTALACIONES Y DEPENDENCIAS DEFINIDAS
+============================================================
+
+Se decidió usar Django 5.2 LTS o superior dentro de la rama 5.2 porque el proyecto usa modelos con claves primarias compuestas mediante models.CompositePrimaryKey.
+
+Paquetes principales recomendados/instalados:
+- Django >= 5.2, < 5.3
+- psycopg[binary]
+- python-decouple
+- Pillow
+- djangorestframework
+- django-filter
+- django-debug-toolbar
+- django-extensions
+- whitenoise
+- argon2-cffi
+
+Notas:
+- PostgreSQL 15 es la base de datos.
+- Se detectó que python manage.py dbshell fallaba porque Windows no encontraba psql.exe en el PATH.
+- Esto no impedía que Django conectara a PostgreSQL mediante psycopg.
+- Se recomendó agregar C:\Program Files\PostgreSQL\15\bin al PATH si se quiere usar dbshell.
+- Se confirmó que el proyecto se está ejecutando en Windows con entorno virtual llamado entorno.
+- No se debe subir .env ni entorno virtual al repositorio.
+
+============================================================
+22. CONFIGURACIÓN DE APPS DJANGO
+============================================================
+
+Se corrigieron los apps.py para que cada app tenga su propia clase Config y no todas se llamen AdministracionConfig.
+
+Configuración correcta esperada:
+
+apps/core/apps.py:
+class CoreConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.core"
+
+apps/clientes/apps.py:
+class ClientesConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.clientes"
+
+apps/administracion/apps.py:
+class AdministracionConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.administracion"
+
+apps/proveedores/apps.py:
+class ProveedoresConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.proveedores"
+
+apps/operaciones/apps.py:
+class OperacionesConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.operaciones"
+
+En INSTALLED_APPS se recomendó usar:
+- apps.core.apps.CoreConfig
+- apps.clientes.apps.ClientesConfig
+- apps.administracion.apps.AdministracionConfig
+- apps.proveedores.apps.ProveedoresConfig
+- apps.operaciones.apps.OperacionesConfig
+
+============================================================
+23. MAPEO DE BASE EXISTENTE A MODELOS DJANGO
+============================================================
+
+Se ejecutó inspectdb y se generó el archivo:
+apps/core/models_generados.py
+
+Luego se entregó un ZIP llamado:
+modelos_retail_prime_divididos.zip
+
+Ese ZIP dividió los modelos generados en:
+- apps/core/models.py
+- apps/clientes/models.py
+- apps/administracion/models.py
+- apps/proveedores/models.py
+- apps/operaciones/models.py
+
+Decisiones aplicadas:
+- Se usan los nombres reales del SQL.
+- No se renombraron db_table ni db_column.
+- Todos los modelos principales están con managed = False.
+- Esto mantiene el enfoque DB-first: Django no crea ni modifica las tablas principales.
+- Las tablas con llave primaria compuesta usan models.CompositePrimaryKey.
+- Se requiere Django 5.2 o superior para que CompositePrimaryKey funcione.
+- No registrar en el admin de Django modelos con CompositePrimaryKey porque el admin aún tiene limitaciones con estos modelos.
+
+Tablas con CompositePrimaryKey identificadas:
+- rol_permiso
+- usuario_rol
+- producto_atributo_valor
+- producto_favorito
+- producto_relacionado
+- promocion_producto
+- wishlist_detalle
+
+Distribución de modelos:
+core:
+- rol
+- permiso
+- rol_permiso
+- usuario
+- usuario_rol
+- perfil_usuario
+- direccion_usuario
+- intento_login
+- auditoria
+- parametro_sistema
+- estado_producto
+- estado_pedido
+- estado_pago
+- estado_membresia
+- tipo_movimiento_inventario
+- tipo_evento_tracking
+
+clientes:
+- producto_favorito
+- wishlist
+- wishlist_detalle
+- carrito
+- carrito_detalle
+- membresia_usuario
+- pago_membresia
+- compra_recurrente
+- compra_recurrente_detalle
+- uso_beneficio
+- producto_pregunta
+- producto_respuesta
+- contenido_digital
+- biblioteca_usuario
+
+administracion:
+- categoria
+- marca
+- producto
+- producto_imagen
+- producto_atributo
+- producto_atributo_valor
+- producto_relacionado
+- producto_resena
+- regla_limite_compra
+- historial_precio_producto
+- almacen
+- inventario
+- movimiento_inventario
+- reserva_inventario
+- alerta_stock
+- cupon
+- cupon_uso
+- promocion
+- promocion_producto
+- log_busqueda
+- log_producto_visto
+- log_carrito_abandonado
+- evento_recomendacion
+- resumen_venta_diaria
+- snapshot_kpi
+- segmento_cliente
+
+proveedores:
+- proveedor
+- proveedor_contacto
+- producto_proveedor
+- proveedor_stock
+- orden_abastecimiento
+- orden_abastecimiento_detalle
+- historial_proveedor
+
+operaciones:
+- pedido
+- pedido_detalle
+- pedido_estado_historial
+- factura
+- devolucion
+- devolucion_detalle
+- bin_tarjeta
+- metodo_pago
+- cuenta_simulada
+- transaccion_pago
+- autorizacion_pago
+- reembolso_pago
+- transportista
+- metodo_envio
+- zona_entrega
+- envio
+- tracking_evento
+- notificacion
+- cola_email
+- soporte_ticket
+- soporte_ticket_mensaje
+
+============================================================
+24. CUSTOM USER MODEL CON TABLA usuario
+============================================================
+
+Se decidió usar la tabla usuario de PostgreSQL como usuario principal de Django.
+
+Configuración realizada:
+- AUTH_USER_MODEL = "core.Usuario"
+- AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
+
+La clase Usuario ahora hereda de AbstractBaseUser.
+
+Mapeo importante:
+- Django usa internamente password.
+- La columna real en PostgreSQL es password_hash.
+- Se mapea así:
+  password = models.TextField(db_column="password_hash")
+
+También:
+- Django espera last_login.
+- La columna real es ultimo_login.
+- Se mapea así:
+  last_login = models.DateTimeField(db_column="ultimo_login", blank=True, null=True)
+
+Campos clave del modelo Usuario:
+- cod_usuario = primary_key
+- email = unique
+- password -> password_hash
+- nombres
+- apellidos
+- telefono
+- documento_identidad
+- email_verificado
+- activo
+- fecha_creacion
+- fecha_actualizacion
+- last_login -> ultimo_login
+
+Propiedades implementadas:
+- is_active devuelve activo
+- is_staff verifica que el usuario tenga rol ADMIN activo en usuario_rol
+- is_superuser devuelve is_staff
+- has_perm valida permisos usando rol_permiso y permiso.codigo
+- has_module_perms devuelve is_staff
+
+Se creó:
+apps/core/managers.py
+
+Con UsuarioManager:
+- create_user
+- create_superuser
+- _asignar_rol_admin
+
+Se creó/ajustó:
+apps/core/admin.py
+
+Con UsuarioAdmin básico para registrar Usuario en el admin de Django.
+
+Importante:
+- El usuario admin actual en datos.sql tenía una contraseña simulada.
+- Se actualizó desde shell usando set_password.
+- Luego el login funcionó.
+
+Comandos usados/recomendados:
+python manage.py check
+python manage.py makemigrations core
+python manage.py migrate --fake-initial
+
+No ejecutar makemigrations para todas las apps sin necesidad.
+No ejecutar python manage.py makemigrations a secas por ahora.
+No ejecutar makemigrations clientes administracion proveedores operaciones por ahora porque los modelos están managed = False.
+
+============================================================
+25. ESTADO DE MIGRACIONES
+============================================================
+
+Estado actual:
+- Se generó core/migrations/0001_initial.py.
+- Se ejecutó migrate --fake-initial.
+- El login ya funciona.
+- El usuario admin puede iniciar sesión.
+- Se verificó desde shell:
+  u.is_staff = True
+  u.is_superuser = True
+
+Importante:
+- No crear migraciones para clientes, administracion, proveedores y operaciones todavía.
+- Las tablas principales las controla PostgreSQL mediante SQL, no Django.
+- Si se agregan tablas nuevas propias de Django en el futuro, se evaluará si requieren migrations.
+
+============================================================
+26. SERVICIOS SQL CREADOS Y CORREGIDOS
+============================================================
+
+Se creó una capa de servicios para que las vistas no llamen SQL directamente.
+
+Estructura de servicios actual:
+apps/core/services/
+- sql_service.py
+- usuario_service.py
+
+apps/clientes/services/
+- carrito_service.py
+- checkout_service.py
+- membresia_service.py
+- recurrente_service.py
+- soporte_service.py
+- wishlist_service.py
+
+apps/administracion/services/
+- inventario_service.py
+- producto_service.py
+- promocion_service.py
+- reportes_service.py
+
+apps/proveedores/services/
+- proveedor_service.py
+
+apps/operaciones/services/
+- notificacion_service.py
+- pago_service.py
+- tracking_service.py
+
+Se entregó un ZIP llamado:
+servicios_retail_prime_sql_corregidos.zip
+
+Motivo de corrección:
+Al probar:
+from apps.administracion.services.producto_service import calcular_stock_disponible
+print(calcular_stock_disponible(1))
+
+Falló con:
+no existe la función fn_calcular_stock_disponible(integer)
+
+Causa:
+La función esperada inicialmente no existía con ese nombre.
+En funciones.sql la función real era:
+fn_stock_disponible_producto(p_cod_producto BIGINT)
+
+Se corrigieron los servicios usando los nombres reales de funciones SQL y casteos explícitos.
+
+Ejemplos de correcciones:
+- fn_calcular_stock_disponible -> fn_stock_disponible_producto
+- fn_obtener_o_crear_carrito -> fn_obtener_o_crear_carrito_activo
+- fn_registrar_tracking_evento -> fn_registrar_evento_tracking
+- fn_crear_envio_pedido -> fn_generar_tracking_inicial
+
+También se agregaron casteos explícitos en llamadas SQL cuando correspondía:
+- %s::BIGINT
+- %s::INTEGER
+- %s::NUMERIC
+- %s::TEXT
+
+Estado actual:
+- Se probó calcular_stock_disponible(1) desde shell.
+- Ya devuelve un valor correctamente.
+- Esto confirma que Django puede llamar funciones SQL desde los servicios.
+
+============================================================
+27. VIEWS, URLS, TEMPLATES Y ESTÁTICOS GENERADOS
+============================================================
+
+El usuario pidió generar de una sola vez:
+- views.py por app
+- urls.py por app
+- urls.py principal
+- templates mínimos
+- CSS propio
+- JS propio
+- APIs internas con JsonResponse
+
+El usuario entregó:
+- RetailStore.zip
+- estructura_actual.txt
+- estructura.sql
+- funciones.sql
+- triggers.sql
+- datos.sql
+
+Se revisó la estructura y se identificó:
+- Proyecto principal: TiendaRetail
+- apps existentes: core, clientes, administracion, proveedores, operaciones
+- servicios ya creados por app
+- templates aún no estaban organizados visualmente
+
+Se entregó un ZIP llamado:
+retail_prime_views_urls_templates.zip
+
+Ese ZIP incluyó:
+- TiendaRetail/urls.py
+- apps/core/urls.py
+- apps/core/views.py
+- apps/clientes/urls.py
+- apps/clientes/views.py
+- apps/administracion/urls.py
+- apps/administracion/views.py
+- apps/proveedores/urls.py
+- apps/proveedores/views.py
+- apps/operaciones/urls.py
+- apps/operaciones/views.py
+- apps/clientes/templates/clientes/inicio.html
+- apps/core/templates/core/login.html
+- apps/core/templates/core/perfil.html
+- apps/administracion/templates/administracion/panel.html
+- apps/core/static/retail/css/retail.css
+- apps/core/static/retail/js/retail.js
+- README_INSTALACION.txt
+
+Características generadas:
+- Login propio en /login/
+- Perfil propio en /perfil/
+- Panel administrativo propio en /panel/
+- Inicio cliente en /
+- APIs internas JSON
+- Cliente con una sola pantalla principal inicio.html
+- Secciones independientes cargadas con fetch/AJAX
+- Modal/card flotante para detalle de producto
+- Carrito sin recargar página
+- Panel administrativo único con sidebar, cards, KPIs, tablas y barras
+- Botón de modo claro/oscuro
+- CSS propio orientado a retail tecnológico
+- No usar el login visual del admin de Django como flujo principal del sistema
+
+============================================================
+28. PREFERENCIAS DE FRONTEND Y UX DEFINIDAS
+============================================================
+
+Preferencias del usuario para el frontend:
+
+Cliente:
+- No quiere muchos templates.
+- Quiere un template de inicio que cargue todo mediante secciones independientes.
+- No quiere una página larga donde la navbar solo haga scroll hacia abajo.
+- Quiere una interfaz donde la navbar permita buscar por catálogos/productos.
+- En cada producto debe existir botón "producto detalle".
+- El detalle del producto debe abrirse en una card/modal flotante.
+- No debe cargar otro template para ver el detalle.
+- El carrito debe funcionar sin recargar la página.
+- Las secciones deben cargarse de forma independiente con APIs internas.
+- El perfil de usuario sí puede estar en un template separado.
+
+Administración:
+- Quiere un solo template para administración.
+- Ese template debe contener todo mediante secciones independientes.
+- Debe tener sidebar.
+- Debe tener cards, KPIs, estadísticas, barras y resúmenes visuales.
+- El diseño actual generado funciona, pero visualmente se ve mal y debe mejorarse después.
+
+Diseño:
+- Quiere modo claro/oscuro mediante botón.
+- No quiere Bootstrap 5.
+- Quiere CSS propio.
+- El diseño debe inspirarse en Amazon, pero no ser una copia literal.
+- Debe sentirse como una plataforma retail tecnológica propia.
+- El diseño se corregirá en una fase posterior.
+
+Login:
+- No usar el login visual del admin nativo de Django como principal.
+- Crear login propio para cliente y administrador.
+- Un mismo login debe redirigir según rol:
+  - admin -> panel de administración
+  - cliente -> inicio/perfil cliente
+
+============================================================
+29. PROBLEMA ACTUAL DETECTADO
+============================================================
+
+Después de aplicar el ZIP retail_prime_views_urls_templates.zip:
+- El sistema funciona.
+- El usuario pudo entrar.
+- Pero al iniciar sesión con usuario admin, el sistema lo manda a cliente registrado.
+- Eso está mal.
+- Debe redirigir al panel administrativo.
+
+Verificación realizada por el usuario:
+Desde shell:
+from apps.core.models import Usuario
+u = Usuario.objects.get(email="admin@retailprime.local")
+print(u.email)
+print(u.is_staff)
+print(u.is_superuser)
+
+Resultado:
+- is_staff = True
+- is_superuser = True
+
+Conclusión:
+- El problema NO está en el rol del usuario.
+- El usuario admin sí está correctamente identificado como admin.
+- El problema está en la lógica de redirección del login propio o en la función que decide a dónde enviar después de login.
+- Posiblemente apps/core/views.py redirige siempre a clientes/inicio o perfil sin revisar user.is_staff.
+
+============================================================
+30. SIGUIENTE PASO EXACTO AL ABRIR NUEVO CHAT
+============================================================
+
+Prioridad inmediata:
+Corregir la redirección por rol en el login propio.
+
+Se debe revisar y corregir:
+- apps/core/views.py
+- apps/core/urls.py si hace falta
+- apps/administracion/views.py si hace falta
+- apps/administracion/urls.py si hace falta
+- templates si hay links hardcodeados
+
+Lógica correcta esperada:
+
+def redireccionar_usuario_por_rol(user):
+    if user.is_staff:
+        return "administracion:panel"
+    return "clientes:inicio"
+
+En login:
+- Si request.user.is_authenticated:
+  - redirigir según rol
+- Si POST y authenticate es correcto:
+  - login(request, user)
+  - redirigir según rol
+
+También:
+- Proteger /panel/ con login_required.
+- Proteger /panel/ con validación de admin.
+- Proteger las APIs administrativas con validación de admin.
+- Si un cliente intenta entrar a /panel/, redirigirlo o devolver 403.
+- Si un admin entra, debe ir a /panel/.
+
+Decoradores recomendados:
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def es_administrador(user):
+    return user.is_authenticated and user.is_staff
+
+@login_required
+@user_passes_test(es_administrador, login_url="core:login")
+def panel(request):
+    ...
+
+Para APIs administrativas, además de login_required, validar es_administrador.
+
+Después de corregir esto:
+1. Probar login con admin.
+2. Confirmar que admin va a /panel/.
+3. Probar login con cliente.
+4. Confirmar que cliente va a /.
+5. Confirmar que cliente no pueda entrar a /panel/.
+6. Confirmar que APIs administrativas no respondan a cliente normal.
+
+============================================================
+31. SIGUIENTE PASO FUNCIONAL DESPUÉS DE CORREGIR REDIRECCIÓN
+============================================================
+
+Después de corregir la redirección por rol, el siguiente paso funcional recomendado es:
+
+Flujo checkout + pago simulado + pedido + tracking.
+
+Orden sugerido:
+1. Revisar funciones SQL reales para carrito, checkout y pagos.
+2. Confirmar firmas exactas en funciones.sql.
+3. Ajustar servicios:
+   - checkout_service.py
+   - pago_service.py
+   - tracking_service.py
+   - carrito_service.py si hace falta
+4. Crear APIs internas para:
+   - ver carrito
+   - actualizar cantidad
+   - eliminar producto
+   - crear pedido desde carrito
+   - listar métodos de envío
+   - registrar/seleccionar método de pago simulado
+   - autorizar pago simulado
+   - capturar pago simulado
+   - generar factura si aplica
+   - consultar tracking
+5. Conectar esas APIs al inicio.html o a una sección de checkout.
+6. Mantener pocos templates.
+7. Evitar rediseño visual profundo todavía.
+
+============================================================
+32. NOTAS DE SEGURIDAD Y ORDEN
+============================================================
+
+No repetir ni almacenar credenciales reales.
+No exponer .env.
+No subir entorno virtual.
+No crear migraciones innecesarias.
+No usar el admin nativo de Django como interfaz principal del sistema, aunque puede quedar disponible para depuración.
+No registrar modelos con CompositePrimaryKey en admin.py.
+No hacer lógica crítica dispersa en views.
+Las views deben llamar servicios.
+Los servicios deben llamar funciones SQL.
+Las APIs deben devolver JSON.
+Los templates deben consumir APIs mediante fetch/AJAX.
+
+============================================================
+33. ARCHIVOS IMPORTANTES ACTUALES
+============================================================
+
+Archivos clave que conviene pasar al nuevo chat si se sigue trabajando:
+- RetailStore.zip actualizado o proyecto comprimido sin entorno/
+- estructura_actual.txt
+- estructura.sql
+- funciones.sql
+- triggers.sql
+- datos.sql
+- apps/core/views.py
+- apps/core/urls.py
+- apps/administracion/views.py
+- apps/administracion/urls.py
+- apps/clientes/views.py
+- apps/clientes/urls.py
+- apps/core/static/retail/js/retail.js
+- apps/core/static/retail/css/retail.css
+- apps/clientes/templates/clientes/inicio.html
+- apps/core/templates/core/login.html
+- apps/administracion/templates/administracion/panel.html
+
+Pero si se abre un nuevo chat, lo más práctico es pasar:
+1. Este archivo de contexto actualizado.
+2. Un ZIP del proyecto actual sin entorno/.
+3. Los 4 SQL actualizados.
+
+============================================================
+34. RESUMEN CORTO DEL PUNTO ACTUAL
+============================================================
+
+El proyecto Retail Prime ya tiene Django conectado a PostgreSQL, modelos divididos por apps, CustomUser usando la tabla usuario, admin/login funcionando, servicios SQL funcionando y una primera interfaz con templates/API internas.
+
+El problema actual es que el login propio manda al admin al área de cliente aunque u.is_staff y u.is_superuser son True. Hay que corregir core/views.py para redirigir por rol: admin a administracion:panel y cliente a clientes:inicio. Luego proteger /panel/ y APIs administrativas.
+
+Después de eso se debe continuar con checkout, pago simulado, pedido y tracking. El diseño visual actual funciona pero se ve mal; se corregirá más adelante con CSS propio inspirado en retail tecnológico tipo Amazon, sin copiar Amazon directamente.
+
+============================================================
+FIN DE LA ACTUALIZACIÓN 2026-06-07
+============================================================
+
+============================================================
+35. ACTUALIZACIÓN FASE 1 - SEGURIDAD, MODELOS Y CHECKOUT BASE
+============================================================
+
+Fecha de actualización: 2026-06-12
+
+Se aplicó un parche de avance sobre el proyecto Django actual. El objetivo fue estabilizar la base web antes de continuar con funcionalidades más grandes.
+
+Cambios principales realizados:
+
+1. settings.py
+- Se eliminó la SECRET_KEY hardcodeada del archivo de configuración y se pasó a lectura por variable de entorno.
+- DEBUG, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, zona horaria, cookies seguras y correo ahora pueden configurarse desde .env.
+- Se configuró LANGUAGE_CODE por defecto en es-ec.
+- Se configuró TIME_ZONE por defecto en America/Guayaquil.
+- Se agregó WhiteNoiseMiddleware y configuración STORAGES para archivos estáticos.
+- Se mantuvo PostgreSQL como base principal.
+
+2. Redirección por rol en login
+- Se reforzó apps/core/views.py.
+- El login propio ahora redirige por rol de manera más estricta.
+- Si el usuario es admin/staff, solo respeta next si apunta a /panel/ o /admin/.
+- Esto evita que un admin termine en la tienda cliente por un next=/ accidental.
+- Si un cliente intenta entrar a zona administrativa, se redirige al inicio cliente.
+
+3. Modelos Django corregidos por cardinalidad real
+Se corrigieron campos generados por inspectdb que aparecían como OneToOneField aunque la relación real en PostgreSQL era ForeignKey con índice único parcial.
+
+Se cambiaron a ForeignKey:
+- apps/administracion/models.py
+  - ProductoImagen.cod_producto
+  - ReglaLimiteCompra.cod_categoria
+  - ReglaLimiteCompra.cod_producto
+- apps/clientes/models.py
+  - Carrito.cod_usuario
+  - Wishlist.cod_usuario
+- apps/core/models.py
+  - DireccionUsuario.cod_usuario
+- apps/proveedores/models.py
+  - ProveedorContacto.cod_proveedor
+
+Se conservaron como OneToOneField las relaciones que sí son únicas por diseño real:
+- PerfilUsuario.cod_usuario
+- ProductoRespuesta.cod_pregunta
+- Factura.cod_pedido
+- CuentaSimulada.cod_metodo_pago
+- AutorizacionPago.cod_transaccion
+- Envio.cod_pedido
+- ProveedorStock.cod_producto_proveedor
+
+4. Validaciones de pago más seguras
+- Se modificó apps/operaciones/views.py.
+- Antes de autorizar pago, Django valida que:
+  - el pedido exista y pertenezca al usuario autenticado;
+  - el método de pago exista, esté activo y pertenezca al mismo usuario.
+- Se agregó sensitive_post_parameters para evitar exposición accidental de número de tarjeta y CVV en errores.
+- Se agregó validación básica de número de tarjeta, mes, año y CVV antes de llamar a PostgreSQL.
+- La validación fuerte de tarjeta sigue en PostgreSQL mediante funciones SQL.
+
+5. Checkout cliente mejorado
+- Se modificó apps/clientes/views.py.
+- api_carrito_validar normaliza el JSONB devuelto por PostgreSQL.
+- api_checkout_crear_pedido valida el carrito antes de crear pedido.
+- Si el carrito tiene errores de stock o límite retail, responde 409 con el detalle de validación.
+- Se mantiene la creación del pedido mediante fn_crear_pedido_desde_carrito.
+
+6. Frontend JS endurecido
+- Se reescribió apps/core/static/retail/js/retail.js.
+- Se agregó escapeHTML para evitar inyección XSS al pintar productos, reseñas, pedidos, tracking, categorías, perfil y panel admin.
+- El carrito ahora valida antes de crear pedido.
+- Después de pago aprobado, se oculta el bloque de pago, se recarga carrito, se cargan pedidos y se muestra la vista de pedidos.
+- Se agregaron mensajes de estado en el carrito.
+
+7. Formulario de tarjeta simulada en carrito
+- Se modificó apps/clientes/templates/clientes/inicio.html.
+- Ahora el usuario puede registrar una tarjeta simulada desde el mismo drawer del carrito.
+- El formulario llama a /operaciones/api/metodos-pago/registrar/.
+- Luego se refresca el selector de métodos de pago.
+
+8. CSS mínimo para checkout
+- Se agregó estilo mínimo en apps/core/static/retail/css/retail.css.
+- Se agregaron estilos para payment-box, formulario de tarjeta y mensajes de error.
+
+9. Errores JSON menos filtradores
+- Se modificaron vistas de core, clientes, administracion, proveedores y operaciones.
+- Cuando DEBUG=False, los errores devuelven mensajes genéricos.
+- Cuando DEBUG=True, siguen mostrando detalle útil para desarrollo.
+
+10. Archivos auxiliares
+- Se agregó .env.example.
+- Se agregó README_REEMPLAZO_FASE1.txt con instrucciones para aplicar el parche.
+
+Validaciones hechas sobre los archivos:
+- Se compiló sintácticamente el proyecto Python excluyendo entorno y __pycache__.
+- Se validó la sintaxis de retail.js con node --check.
+- Se verificó que las 86 tablas de estructura.sql siguen mapeadas en modelos Django.
+- Se verificó que las 105 funciones SQL llamadas desde Django existen en funciones.sql.
+- No se modificaron estructura.sql, funciones.sql, triggers.sql ni datos.sql en esta fase.
+
+Archivos modificados/creados en esta fase:
+- TiendaRetail/settings.py
+- apps/core/models.py
+- apps/core/views.py
+- apps/clientes/models.py
+- apps/clientes/views.py
+- apps/clientes/templates/clientes/inicio.html
+- apps/administracion/models.py
+- apps/administracion/views.py
+- apps/proveedores/models.py
+- apps/proveedores/views.py
+- apps/operaciones/views.py
+- apps/core/static/retail/js/retail.js
+- apps/core/static/retail/css/retail.css
+- .env.example
+- README_REEMPLAZO_FASE1.txt
+
+Siguiente paso recomendado:
+Después de probar este parche, continuar con el flujo completo de checkout y administración:
+1. Probar login admin y cliente.
+2. Probar carrito, dirección, método de envío, registro de tarjeta simulada, creación de pedido, autorización y captura de pago.
+3. Si el flujo funciona, avanzar con panel administrativo real:
+   - crear/editar productos;
+   - cargar imágenes;
+   - asociar proveedores;
+   - gestionar stock;
+   - revisar producto publicable;
+   - cambiar estados de pedido.
+4. Recién después mejorar diseño visual profundo.
+
+============================================================
+FIN DE LA ACTUALIZACIÓN FASE 1 - 2026-06-12
+============================================================
+
+
+
+============================================================
+36. ACTUALIZACIÓN FASE 1.1 - LOGIN Y HASH DE CONTRASEÑAS EN POSTGRESQL
+============================================================
+
+Fecha de actualización: 2026-06-12
+
+Problema detectado:
+Al intentar iniciar sesión en /login/, Django lanzó:
+ValueError: not enough values to unpack (expected 4, got 2).
+
+Causa:
+En datos.sql los usuarios de prueba tenían password_hash = 'pbkdf2_sha256$demo'.
+Ese texto no es un hash Django válido. Django espera el formato:
+pbkdf2_sha256$iteraciones$salt$hash.
+
+Decisión aplicada:
+El hash de las contraseñas demo debe generarse en PostgreSQL, no manualmente desde Python ni con valores simulados.
+
+Cambios aplicados:
+1. funciones.sql
+- Se agregó fn_generar_password_hash_django(p_password, p_salt, p_iterations).
+- La función implementa PBKDF2-HMAC-SHA256 usando pgcrypto.
+- Devuelve un hash compatible con Django AbstractBaseUser/check_password.
+- Se agregó fn_cambiar_password_usuario(p_cod_usuario, p_password, p_iterations) para cambiar contraseñas desde PostgreSQL usando texto plano de entrada y guardando solo el hash.
+- Se endureció fn_cambiar_password_simulado para rechazar hashes que no cumplan el patrón pbkdf2_sha256$iteraciones$salt$hash.
+
+2. datos.sql
+- Se reemplazó 'pbkdf2_sha256$demo' por llamadas a fn_generar_password_hash_django().
+- La contraseña demo para todos los usuarios sembrados es: RetailPrime2026*
+- ON CONFLICT (email) ahora actualiza también password_hash para corregir usuarios existentes si se reejecuta datos.sql.
+
+3. sql_fix_passwords_demo.sql
+- Se creó un script independiente para actualizar la base actual sin recrear toda la BD.
+- Crea/actualiza las funciones necesarias y actualiza password_hash de los usuarios demo.
+- Debe ejecutarse una vez sobre la base actual si ya se cargó el datos.sql antiguo.
+
+4. apps/core/views.py
+- login_view ahora captura ValueError durante authenticate().
+- Si existe un hash malformado, el login no tumba el servidor con traceback.
+- En DEBUG=True muestra mensaje técnico indicando ejecutar sql_fix_passwords_demo.sql.
+- En producción muestra un mensaje genérico.
+
+Credenciales demo después del fix:
+- admin@retailprime.local / RetailPrime2026*
+- ana.cliente@example.com / RetailPrime2026*
+- carla.prime@example.com / RetailPrime2026*
+
+Modo recomendado de aplicación:
+1. Reemplazar archivos del parche.
+2. Ejecutar sql_fix_passwords_demo.sql en pgAdmin o psql.
+3. Reiniciar runserver.
+4. Probar login con los usuarios demo.
+
+Si se reconstruye la base desde cero:
+Ejecutar estructura.sql, funciones.sql, triggers.sql y datos.sql en ese orden.
+
+============================================================
+FIN DE LA ACTUALIZACIÓN FASE 1.1 - 2026-06-12
+============================================================
+
+
+============================================================
+37. ACTUALIZACIÓN FASE 2 - EXPERIENCIA CLIENTE TIPO MARKETPLACE / PRIME
+============================================================
+
+Fecha de actualización: 2026-06-12
+
+Objetivo de la fase:
+Mejorar la experiencia del cliente tomando como referencia funcional un e-commerce tipo Amazon, pero sin copiarlo literalmente. Se trabajó la vista del cliente en tres estados:
+- Visitante no logueado.
+- Usuario logueado no Prime.
+- Usuario logueado Prime.
+
+Cambios funcionales principales:
+
+1. Vista visitante
+- El visitante puede explorar catálogo, ver productos destacados, buscar por categoría y abrir detalle de producto.
+- No puede agregar al carrito, favoritos ni comprar sin iniciar sesión.
+- En tarjetas y detalle se muestran beneficios Prime como bloqueados/sombreados para incentivar registro o membresía.
+- Se agregó enlace visible para crear cuenta cliente desde login.
+
+2. Registro de usuario cliente
+- Se agregó pantalla /registro/.
+- Se agregó core.registro_view.
+- Se agregó función SQL fn_crear_usuario_cliente(...), que genera hash de contraseña en PostgreSQL usando fn_generar_password_hash_django().
+- El registro crea usuarios con rol CUSTOMER.
+- Después de crear la cuenta, intenta autenticar e iniciar sesión automáticamente.
+
+3. Vista usuario logueado no Prime
+- El usuario cliente puede comprar, usar carrito, direcciones, métodos de pago simulados, pedidos, facturación y tracking.
+- En detalle de producto se muestran beneficios Prime bloqueados.
+- En membresía se muestran planes y beneficios disponibles.
+- Puede activar membresía Prime desde la vista cliente/perfil usando /api/membresia/activar/.
+
+4. Vista usuario logueado Prime
+- Se detecta membresía activa mediante MembresiaUsuario con estado ACTIVA.
+- El producto y checkout muestran beneficios Prime desbloqueados.
+- Los métodos de envío elegibles muestran beneficio de envío gratis Prime cuando corresponde.
+- La sesión API ahora devuelve es_prime.
+
+5. Perfil de cliente ampliado
+Se reemplazó el perfil básico por un centro de cuenta con pestañas:
+- Perfil.
+- Direcciones.
+- Métodos de pago.
+- Facturación.
+- Prime.
+
+Ahora el cliente puede:
+- Actualizar datos personales.
+- Crear/eliminar direcciones.
+- Registrar/eliminar métodos de pago simulados.
+- Ver facturas generadas por pagos capturados.
+- Ver y activar planes Prime.
+
+6. Provincias y cantones de Ecuador
+- Se agregaron tablas provincia y canton en estructura.sql.
+- Se agregó catálogo estático de 24 provincias y 221 cantones base en datos.sql.
+- Se agregó modelo Django Provincia y Canton con managed=False.
+- Se agregó API /api/ubicaciones/ para poblar selects.
+- El formulario de dirección ya no pide escribir provincia/cantón libremente: ahora usa selects dependientes.
+- fn_crear_direccion_usuario valida que provincia y cantón existan antes de insertar.
+
+7. Pasarela de pago más realista
+- El drawer del carrito ahora muestra bloque RetailPay Secure.
+- El flujo queda más cercano a checkout real:
+  producto -> carrito -> validar stock/límite -> dirección -> método envío -> crear pedido -> pasarela -> autorizar/capturar pago -> factura -> tracking.
+- La pasarela sigue siendo simulada, pero con UI de sesión segura, pedido asociado y métodos guardados.
+- No se guarda CVV ni número completo de tarjeta.
+
+8. Tracking progresivo desde vista cliente
+- api_tracking_pedido ahora complementa eventos reales de BD con una línea de tiempo simulada progresiva.
+- La simulación calcula avance según minutos transcurridos desde la creación del pedido.
+- El cliente ve progreso, ETA, eventos completados y pendientes.
+- Los eventos reales de BD siguen siendo prioridad; los simulados solo complementan la experiencia visual.
+
+9. Facturación
+- fn_capturar_pago_simulado ya genera factura en PostgreSQL cuando el pago se captura.
+- Se agregó API /operaciones/api/facturas/ para consultar facturas del usuario.
+- El perfil muestra facturas asociadas a pedidos pagados.
+
+10. Métodos de pago
+- Se agregó API para desactivar método de pago del usuario:
+  /operaciones/api/metodos-pago/<cod_metodo_pago>/desactivar/
+- El perfil ahora permite gestionar métodos guardados.
+
+11. Corrección SQL adicional
+- Se corrigió en funciones.sql una duplicación accidental de INTO v_pedido dentro de fn_autorizar_pago_simulado.
+- Se creó sql_cliente_fase2_patch.sql para aplicar cambios incrementales sin reconstruir toda la BD.
+
+Archivos modificados/creados:
+- estructura.sql
+- funciones.sql
+- datos.sql
+- sql_cliente_fase2_patch.sql
+- apps/core/models.py
+- apps/core/services/usuario_service.py
+- apps/core/views.py
+- apps/core/urls.py
+- apps/core/templates/core/login.html
+- apps/core/templates/core/registro.html
+- apps/core/templates/core/perfil.html
+- apps/core/static/retail/js/retail.js
+- apps/core/static/retail/css/retail.css
+- apps/clientes/views.py
+- apps/clientes/urls.py
+- apps/clientes/templates/clientes/inicio.html
+- apps/operaciones/views.py
+- apps/operaciones/urls.py
+- README_CLIENTE_FASE2.txt
+
+Forma recomendada de aplicar:
+1. Reemplazar archivos del parche.
+2. Ejecutar sql_cliente_fase2_patch.sql si la base ya existe.
+3. Si se reconstruye la base desde cero, ejecutar estructura.sql, funciones.sql, triggers.sql y datos.sql en orden.
+4. Ejecutar python manage.py check.
+5. Probar visitante, cliente normal y cliente Prime.
+
+Credenciales demo vigentes:
+- admin@retailprime.local / RetailPrime2026*
+- ana.cliente@example.com / RetailPrime2026*
+- carla.prime@example.com / RetailPrime2026*
+
+Siguiente paso recomendado:
+Después de probar esta fase cliente, avanzar con:
+1. Mejoras visuales finas del catálogo y checkout.
+2. Panel administrativo real para crear/editar productos, proveedores, stock e imágenes.
+3. Gestión de estados de pedido desde administración para alimentar tracking real.
+4. Devoluciones desde vista cliente.
+
+============================================================
+FIN DE LA ACTUALIZACIÓN FASE 2 - 2026-06-12
+============================================================
+
+
+============================================================
+38. ACTUALIZACIÓN PARA TRABAJO CON CODEX - FASE 3 SQL
+============================================================
+
+Fecha de actualización: 2026-07-28
+
+Se realizó una auditoría estática de:
+- estructura.sql
+- funciones.sql
+- triggers.sql
+- datos.sql
+- proyecto Django comprimido
+
+No se modificó ni ejecutó la base durante la auditoría.
+
+Resultados cuantitativos:
+- 88 tablas detectadas.
+- 125 declaraciones CREATE OR REPLACE FUNCTION en funciones.sql.
+- 13 funciones trigger detectadas en triggers.sql.
+- 14 vistas SQL detectadas.
+
+La existencia de muchas funciones no significa que toda la cobertura esté completa.
+Se confirmó que varias entidades maestras no tienen CRUD suficiente y que faltan
+reglas centrales del negocio.
+
+============================================================
+39. DECISIÓN DE USO DE CODEX
+============================================================
+
+Se utilizará Codex para acelerar la edición coordinada de los archivos SQL.
+
+Codex podrá:
+- leer el repositorio completo;
+- analizar dependencias;
+- modificar estructura.sql, funciones.sql, triggers.sql y datos.sql;
+- mostrar diffs;
+- realizar comprobaciones estáticas.
+
+Codex no deberá:
+- conectarse a la base real;
+- ejecutar scripts destructivos;
+- mostrar o modificar .env;
+- modificar Django durante la primera fase;
+- cambiar firmas consumidas por Django sin conservar compatibilidad.
+
+El usuario ejecutará los SQL manualmente en una base de desarrollo.
+
+============================================================
+40. CORRECCIÓN DEL CRITERIO CRUD
+============================================================
+
+La frase anterior "todo se hace con funciones CRUD por cada tabla" se precisa así:
+
+1. Entidades maestras o administrables:
+   Deben tener CRUD lógico mediante funciones SQL:
+   crear, obtener/listar, actualizar y desactivar.
+
+2. Relaciones administrables:
+   Deben tener asociar, actualizar, desasociar y listar.
+
+3. Tablas transaccionales:
+   Deben usar funciones de negocio y cambios de estado; no DELETE genérico.
+
+4. Tablas históricas, pagos, auditoría y logs:
+   Deben preservar trazabilidad. No se permite borrado físico común.
+
+Por lo tanto, no se crearán funciones genéricas como:
+- fn_eliminar_pedido
+- fn_eliminar_transaccion_pago
+- fn_eliminar_factura
+- fn_eliminar_auditoria
+- fn_eliminar_movimiento_inventario
+
+============================================================
+41. BRECHAS CRUD CONFIRMADAS
+============================================================
+
+Entidades con cobertura ausente o incompleta:
+- rol
+- permiso
+- rol_permiso
+- perfil_usuario
+- parametro_sistema
+- producto_imagen
+- producto_atributo
+- producto_atributo_valor
+- producto_relacionado
+- producto_resena
+- regla_limite_compra
+- almacen
+- alerta_stock
+- proveedor_contacto
+- producto_proveedor
+- transportista
+- metodo_envio
+- zona_entrega
+- plan_membresia
+- beneficio_membresia
+- uso_beneficio
+- promocion
+- promocion_producto
+- cupon
+- contenido_digital
+- log_carrito_abandonado
+
+Usuario, categoría, marca, producto y proveedor tienen operaciones principales, pero
+deben completarse con funciones explícitas de obtener/listar y, cuando corresponda,
+reactivar o administrar relaciones.
+
+============================================================
+42. REGLAS CENTRALES A IMPLEMENTAR EN FASE 3
+============================================================
+
+Prioridad 1:
+- lotes/tandadas de inventario;
+- costo histórico por lote;
+- PVP calculado por lote;
+- asignación FIFO;
+- pedido dividido entre varios lotes;
+- trazabilidad del costo y precio de cada unidad.
+
+Prioridad 2:
+- reposición preventiva;
+- stock proyectado;
+- uso de múltiples proveedores;
+- órdenes sin duplicados;
+- recepción de abastecimiento creando lotes.
+
+Prioridad 3:
+- una sola función de precio final;
+- promociones reales en checkout;
+- beneficios Prime reales;
+- cupones;
+- uso_beneficio;
+- precio mostrado igual al cobrado.
+
+Prioridad 4:
+- método de envío guardado en pedido;
+- recargo por zona;
+- impuesto configurable;
+- factura consistente.
+
+Prioridad 5:
+- protección de pago, cancelación e idempotencia;
+- expiración de reservas;
+- tracking persistente y progresivo.
+
+Prioridad 6:
+- CRUD lógico de entidades maestras;
+- datos del nicho de informática y redes.
+
+============================================================
+43. MODELO DE LOTES REQUERIDO
+============================================================
+
+Debe incorporarse una estructura equivalente a:
+- regla_precio
+- lote_inventario
+- pedido_detalle_lote
+- reservas asociadas a lote
+
+Caso obligatorio:
+- lote A: 30 teclados disponibles con costo $2;
+- lote B: 10 o más teclados disponibles con costo $3;
+- compra de 40;
+- asignación FIFO 30 + 10;
+- subtotal obtenido del PVP individual de cada lote;
+- precio promedio solo informativo;
+- costo y margen auditables.
+
+producto.precio_actual quedará como precio de exhibición o "desde", pero no será la
+única fuente de cobro.
+
+============================================================
+44. REPOSICIÓN AUTOMÁTICA REQUERIDA
+============================================================
+
+La reposición no debe depender únicamente de que el pedido supere el stock propio.
+
+Después de consumir stock:
+- calcular stock proyectado;
+- considerar reservas y órdenes pendientes;
+- comparar con stock_minimo;
+- abastecer hasta stock_maximo;
+- seleccionar proveedores por prioridad, costo, plazo, stock y calificación;
+- evitar órdenes duplicadas;
+- crear alerta si no existe cobertura.
+
+No se puede garantizar venta infinita si todos los proveedores están agotados. La
+regla se implementará como prevención y abastecimiento automático verificable.
+
+============================================================
+45. CORRECCIONES DE PRECIO, ENVÍO, PAGO Y TRACKING
+============================================================
+
+Precio:
+- El checkout debe recalcular el precio real.
+- No debe confiar únicamente en precio_unitario_snapshot.
+- Promoción, Prime y cupón deben guardarse y auditarse.
+
+Envío:
+- Guardar método y zona en pedido.
+- El envío generado debe respetar la elección.
+- Aplicar recargo y beneficio Prime.
+
+Impuesto:
+- Eliminar 12% hardcodeado.
+- Leer la tasa desde parametro_sistema.
+- Pedido y factura deben coincidir.
+
+Pago:
+- No capturar pedidos cancelados.
+- Cancelar autorizaciones pendientes al cancelar pedido.
+- Mantener idempotencia y bloqueos.
+
+Tracking:
+- Crear eventos programados persistentes.
+- Procesarlos mediante función idempotente.
+- Actualizar tracking_evento, envio y pedido de forma consistente.
+
+============================================================
+46. DATOS DE PRUEBA
+============================================================
+
+datos.sql debe eliminar el marketplace generalista y usar únicamente informática y
+redes.
+
+Debe contener:
+- categorías técnicas;
+- marcas técnicas;
+- mínimo 20 productos;
+- atributos;
+- imágenes;
+- límites retail;
+- 5 proveedores activos por producto publicable;
+- stock propio;
+- stock proveedor;
+- lotes con costos diferentes;
+- clientes normal y Prime;
+- pedidos y tracking demo;
+- promociones, cupones y membresías.
+
+============================================================
+47. ARCHIVOS PARA CODEX
+============================================================
+
+Entregar a Codex:
+1. contexto_retail_prime_actualizado_codex_fase3.txt
+2. instrucciones_codex_correcciones_sql_retail_prime.txt
+3. auditoria_crud_funciones_sql_retail_prime.txt
+4. estructura.sql
+5. funciones.sql
+6. triggers.sql
+7. datos.sql
+8. proyecto Django limpio como referencia
+
+No entregar:
+- .env
+- entorno/
+- __pycache__/
+- credenciales
+- base de datos real
+
+============================================================
+48. SIGUIENTE PASO EXACTO
+============================================================
+
+1. Abrir el repositorio limpio en Codex.
+2. Pedir análisis sin edición.
+3. Aplicar primero la fase de lotes, PVP, FIFO y reposición.
+4. Revisar diff.
+5. Continuar con precio final, envío, impuestos y pagos.
+6. Continuar con tracking.
+7. Completar CRUD y datos técnicos.
+8. Ejecutar los cuatro SQL en una base nueva de pruebas.
+9. Solo después actualizar modelos y servicios Django.
+============================================================
+FIN DE LA ACTUALIZACIÓN PARA CODEX - FASE 3
+============================================================

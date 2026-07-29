@@ -1,0 +1,30 @@
+<div class="rp-card-visual-wrap">
+  <div class="rp-card-visual" id="pay-card-visual">
+    <div class="rp-card-visual-front">
+      <div class="rp-card-logo"><strong id="pay-card-type">TARJETA</strong><span id="pay-card-logo">💳</span></div>
+      <div class="rp-card-number" id="pay-display-number">#### #### #### ####</div>
+      <div class="rp-card-info"><div><span>TITULAR</span><strong id="pay-display-name">NOMBRE APELLIDO</strong></div><div><span>VENCE</span><strong id="pay-display-date">MM/AA</strong></div></div>
+    </div>
+    <div class="rp-card-visual-back">
+      <div class="rp-mag-strip"></div><span>CVV</span><div class="rp-cvv-area" id="pay-display-cvv">•••</div>
+    </div>
+  </div>
+</div>
+<form id="new-card-form" class="rp-form" autocomplete="off" novalidate>
+  {% csrf_token %}
+  <label>Número de tarjeta</label>
+  <input name="numero_tarjeta" id="pay-card-number" inputmode="numeric" maxlength="23" placeholder="4111 1111 1111 1111">
+  <div class="rp-card-detect"><span id="pay-card-brand">Marca: -</span><span id="pay-card-kind">Tipo: -</span></div>
+  <p class="rp-message" id="pay-card-error"></p>
+  <label>Nombre del titular</label>
+  <input name="titular" id="pay-card-name" maxlength="180" placeholder="Como aparece en la tarjeta">
+  <div class="rp-form-row">
+    <input name="expiry" id="pay-card-expiry" maxlength="5" placeholder="MM/AA">
+    <input name="cvv" id="pay-card-cvv" inputmode="numeric" maxlength="4" placeholder="CVV">
+  </div>
+  <div class="rp-form-row">
+    <input name="saldo_disponible" inputmode="decimal" value="1000" placeholder="Saldo simulado">
+    <input name="limite_diario" inputmode="decimal" value="1000" placeholder="Límite diario">
+  </div>
+  <button class="rp-secondary" type="submit">Guardar tarjeta simulada</button>
+</form>

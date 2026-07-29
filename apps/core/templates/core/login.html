@@ -1,0 +1,32 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingresar | Retail Prime</title>
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+</head>
+<body data-page="login">
+  <main class="rp-auth-shell">
+    <form class="rp-auth-card" method="post">
+      {% csrf_token %}
+      <a class="rp-brand rp-auth-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
+      <h1>Ingresar</h1>
+      <p class="rp-muted">Usa tu cuenta cliente o administrativa.</p>
+      {% if messages %}
+        {% for message in messages %}<div class="rp-alert">{{ message }}</div>{% endfor %}
+      {% endif %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <label>Correo</label>
+      <input name="email" type="email" required autofocus placeholder="admin@retailprime.local">
+      <label>Contraseña</label>
+      <input name="password" type="password" required placeholder="••••••••">
+      <button class="rp-primary" type="submit">Entrar</button>
+      <a class="rp-link" href="{% url 'core:registro' %}">Crear cuenta cliente</a>
+      <a class="rp-link" href="/">Volver a la tienda</a>
+    </form>
+  </main>
+  <script src="{% static 'retail/js/retail.js' %}"></script>
+</body>
+</html>

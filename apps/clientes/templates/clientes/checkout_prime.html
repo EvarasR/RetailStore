@@ -1,0 +1,62 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comprar Prime | Retail Prime</title>
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+</head>
+<body data-page="checkout-prime" data-plan-id="{{ plan.cod_plan }}">
+<header class="rp-topbar">
+  <a class="rp-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
+  <nav class="rp-actions">
+    <a class="rp-icon-btn" href="/">Tienda</a>
+    <a class="rp-icon-btn" href="{% url 'core:perfil' %}">Mi cuenta</a>
+    <button class="rp-icon-btn" id="theme-toggle" type="button">☾</button>
+  </nav>
+</header>
+<main class="rp-checkout-shell">
+  <section class="rp-checkout-head rp-card">
+    <div>
+      <p class="rp-kicker">Retail Prime</p>
+      <h1>Comprar membresía</h1>
+      <p class="rp-muted">Prime se activa solo después de procesar el pago simulado. Nada de botones mágicos; esto ya parece tienda seria.</p>
+    </div>
+    <div class="rp-price">${{ plan.precio_mensual }}</div>
+  </section>
+  <section class="rp-checkout-grid">
+    <div class="rp-checkout-main">
+      <article class="rp-card">
+        <p class="rp-kicker">Plan seleccionado</p>
+        <h2>{{ plan.nombre }}</h2>
+        <p class="rp-muted">Duración: {{ plan.duracion_dias }} días. Renovación automática simulada opcional.</p>
+        <label class="rp-check"><input id="prime-renewal" type="checkbox" checked> Renovación automática simulada</label>
+      </article>
+      <article class="rp-card">
+        <p class="rp-kicker">Pasarela</p>
+        <h2>Pago de membresía</h2>
+        <label>Método guardado</label>
+        <select id="prime-payment-method"></select>
+        <button id="checkout-toggle-new-card" class="rp-secondary" type="button">Usar nueva tarjeta simulada</button>
+        <div id="checkout-card-form" class="rp-payform rp-hidden">
+          {% include "clientes/partials/card_gateway.html" %}
+        </div>
+        <button id="prime-pay" class="rp-primary" type="button">Pagar y activar Prime</button>
+        <p id="prime-pay-message" class="rp-message"></p>
+      </article>
+      <article id="prime-result" class="rp-card rp-hidden"><h2>Prime activado</h2><div id="prime-result-box"></div></article>
+    </div>
+    <aside class="rp-checkout-side rp-card">
+      <p class="rp-kicker">Beneficios</p>
+      <h2>Lo que desbloqueas</h2>
+      <div id="prime-benefits-box" class="rp-mini-list"></div>
+      <p class="rp-muted">El saldo se descuenta de la cuenta simulada asociada a la tarjeta guardada.</p>
+    </aside>
+  </section>
+</main>
+<div id="toast" class="rp-toast"></div>
+<script src="{% static 'retail/js/retail.js' %}"></script>
+<script src="{% static 'retail/js/checkout.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear cuenta | Retail Prime</title>
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+</head>
+<body data-page="login">
+  <main class="rp-auth-shell">
+    <form class="rp-auth-card rp-register-card" method="post" autocomplete="off">
+      {% csrf_token %}
+      <a class="rp-brand rp-auth-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
+      <p class="rp-kicker">Cuenta cliente</p>
+      <h1>Crear cuenta</h1>
+      <p class="rp-muted">Regístrate para comprar, guardar direcciones, métodos de pago simulados, facturación y tracking.</p>
+      {% if messages %}
+        {% for message in messages %}<div class="rp-alert">{{ message }}</div>{% endfor %}
+      {% endif %}
+      <div class="rp-form-row">
+        <div><label>Nombres</label><input name="nombres" required maxlength="120" placeholder="Ana"></div>
+        <div><label>Apellidos</label><input name="apellidos" required maxlength="120" placeholder="Mendoza"></div>
+      </div>
+      <label>Correo</label>
+      <input name="email" type="email" required maxlength="180" placeholder="cliente@example.com">
+      <div class="rp-form-row">
+        <div><label>Teléfono</label><input name="telefono" maxlength="30" placeholder="0999999999"></div>
+        <div><label>Documento</label><input name="documento_identidad" maxlength="40" placeholder="Opcional"></div>
+      </div>
+      <label>Contraseña</label>
+      <input name="password" type="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+      <label>Repetir contraseña</label>
+      <input name="password2" type="password" required minlength="8" placeholder="Repite la contraseña">
+      <label class="rp-check"><input name="acepta" type="checkbox" required> Acepto las condiciones de uso académico y la política simulada de Retail Prime.</label>
+      <button class="rp-primary" type="submit">Crear cuenta</button>
+      <a class="rp-link" href="{% url 'core:login' %}">Ya tengo cuenta</a>
+      <a class="rp-link" href="/">Volver a la tienda</a>
+    </form>
+  </main>
+  <script src="{% static 'retail/js/retail.js' %}"></script>
+</body>
+</html>

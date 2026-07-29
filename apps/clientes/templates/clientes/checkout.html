@@ -1,0 +1,94 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout seguro | Retail Prime</title>
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+</head>
+<body data-page="checkout" data-checkout-kind="pedido">
+<header class="rp-topbar">
+  <a class="rp-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
+  <nav class="rp-actions">
+    <a class="rp-icon-btn" href="/">Volver a tienda</a>
+    <a class="rp-icon-btn" href="{% url 'core:perfil' %}">Mi cuenta</a>
+    <button class="rp-icon-btn" id="theme-toggle" type="button">☾</button>
+  </nav>
+</header>
+
+<main class="rp-checkout-shell">
+  <section class="rp-checkout-head rp-card">
+    <div>
+      <p class="rp-kicker">RetailPay Secure</p>
+      <h1>Checkout del pedido</h1>
+      <p class="rp-muted">Primero confirmas dirección y envío. El tracking solo se genera cuando el pago se captura correctamente.</p>
+    </div>
+    <ol class="rp-checkout-steps">
+      <li class="is-active" data-step-dot="1">Carrito</li>
+      <li data-step-dot="2">Dirección</li>
+      <li data-step-dot="3">Pago</li>
+      <li data-step-dot="4">Tracking</li>
+    </ol>
+  </section>
+
+  <section class="rp-checkout-grid">
+    <div class="rp-checkout-main">
+      <article class="rp-card">
+        <p class="rp-kicker">Paso 1</p>
+        <h2>Resumen del carrito</h2>
+        <div id="checkout-cart" class="rp-list"></div>
+        <div class="rp-checkout-total">Total carrito: <strong>$<span id="checkout-cart-total">0.00</span></strong></div>
+        <p id="checkout-validation" class="rp-message"></p>
+      </article>
+
+      <article class="rp-card">
+        <p class="rp-kicker">Paso 2</p>
+        <h2>Dirección y envío</h2>
+        <label>Dirección de entrega</label>
+        <select id="checkout-address"></select>
+        <label>Método de envío</label>
+        <select id="checkout-shipping"></select>
+        <div id="checkout-prime-note" class="rp-prime-ribbon is-locked">Prime puede desbloquear envío elegible gratis.</div>
+        <button id="checkout-create-order" class="rp-primary" type="button">Confirmar pedido y continuar al pago</button>
+        <p id="checkout-order-message" class="rp-message"></p>
+      </article>
+
+      <article id="checkout-payment-section" class="rp-card rp-hidden">
+        <p class="rp-kicker">Paso 3</p>
+        <h2>Pasarela de pago</h2>
+        <div class="rp-gateway-head">
+          <div><span class="rp-chip">RetailPay Secure</span><h3 id="checkout-order-title">Pedido pendiente</h3><p class="rp-muted">Autorización + captura simulada. No uses tarjetas reales.</p></div>
+          <div class="rp-gateway-lock">🔒 Sesión segura simulada</div>
+        </div>
+        <label>Método guardado</label>
+        <select id="checkout-payment-method"></select>
+        <button id="checkout-toggle-new-card" class="rp-secondary" type="button">Usar nueva tarjeta simulada</button>
+        <div id="checkout-card-form" class="rp-payform rp-hidden">
+          {% include "clientes/partials/card_gateway.html" %}
+        </div>
+        <button id="checkout-pay" class="rp-primary" type="button">Pagar pedido</button>
+        <p id="checkout-pay-message" class="rp-message"></p>
+      </article>
+
+      <article id="checkout-result" class="rp-card rp-hidden">
+        <p class="rp-kicker">Paso 4</p>
+        <h2>Pago confirmado</h2>
+        <div id="checkout-result-box"></div>
+      </article>
+    </div>
+
+    <aside class="rp-checkout-side rp-card">
+      <p class="rp-kicker">Cuenta</p>
+      <h2>Simulación realista</h2>
+      <div id="checkout-account-box" class="rp-mini-list"></div>
+      <hr>
+      <p class="rp-muted">La tarjeta guardada tiene una cuenta simulada con saldo disponible, límite diario y estado. Si no alcanza el saldo, la pasarela rechaza el pago.</p>
+    </aside>
+  </section>
+</main>
+<div id="toast" class="rp-toast"></div>
+<script src="{% static 'retail/js/retail.js' %}"></script>
+<script src="{% static 'retail/js/checkout.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel administrativo | Retail Prime</title>
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+</head>
+<body data-page="admin">
+{% if sin_permiso %}
+  <main class="rp-auth-shell">
+    <section class="rp-auth-card">
+      <h1>Acceso restringido</h1>
+      <p class="rp-muted">Tu cuenta no tiene rol administrativo.</p>
+      <a class="rp-primary rp-button-link" href="/">Volver a la tienda</a>
+    </section>
+  </main>
+{% else %}
+  <aside class="rp-admin-sidebar">
+    <a class="rp-brand" href="/"><span class="rp-brand-mark">RP</span><span>Admin</span></a>
+    <button data-admin-section="dashboard">Dashboard</button>
+    <button data-admin-section="productos">Productos</button>
+    <button data-admin-section="pedidos">Pedidos</button>
+    <button data-admin-section="inventario">Inventario</button>
+    <button data-admin-section="proveedores">Proveedores</button>
+    <button data-admin-section="reportes">Reportes</button>
+    <a href="/">Tienda</a>
+    <a href="{% url 'core:logout' %}">Salir</a>
+    <button id="theme-toggle" type="button">Modo</button>
+  </aside>
+
+  <main class="rp-admin-main">
+    <header class="rp-admin-head">
+      <div>
+        <p class="rp-kicker">Retail Prime</p>
+        <h1>Panel administrativo</h1>
+      </div>
+      <div class="rp-muted">Dashboard con datos en vivo desde PostgreSQL</div>
+    </header>
+
+    <section class="rp-admin-section" data-admin-panel="dashboard">
+      <div id="admin-kpis" class="rp-kpi-grid"></div>
+      <div class="rp-admin-grid">
+        <article class="rp-card"><h2>Ventas diarias</h2><div id="sales-chart" class="rp-bars"></div></article>
+        <article class="rp-card"><h2>Estados de pedido</h2><div id="orders-chart" class="rp-bars"></div></article>
+      </div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="productos">
+      <div class="rp-section-title">
+        <div><p class="rp-kicker">Catálogo</p><h2>Productos</h2></div>
+        <div class="rp-form-row"><input id="admin-product-search" placeholder="Buscar producto"><select id="admin-product-state"><option value="">Todos</option><option value="PUBLICADO">Publicado</option><option value="BORRADOR">Borrador</option><option value="PAUSADO">Pausado</option></select></div>
+      </div>
+      <div id="admin-products" class="rp-table-wrap"></div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="pedidos">
+      <div class="rp-section-title"><div><p class="rp-kicker">Operación</p><h2>Pedidos</h2></div><select id="admin-order-state"><option value="">Todos los estados</option></select></div>
+      <div id="admin-orders" class="rp-table-wrap"></div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="inventario">
+      <div class="rp-section-title"><div><p class="rp-kicker">Stock</p><h2>Inventario</h2></div></div>
+      <div id="admin-inventory" class="rp-table-wrap"></div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="proveedores">
+      <div class="rp-section-title"><div><p class="rp-kicker">Abastecimiento</p><h2>Proveedores</h2></div></div>
+      <div id="admin-suppliers" class="rp-table-wrap"></div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="reportes">
+      <div class="rp-section-title"><div><p class="rp-kicker">BI</p><h2>Reportes</h2></div></div>
+      <div class="rp-card"><div id="admin-reports" class="rp-bars"></div></div>
+    </section>
+  </main>
+{% endif %}
+<div id="toast" class="rp-toast"></div>
+<script src="{% static 'retail/js/retail.js' %}"></script>
+</body>
+</html>

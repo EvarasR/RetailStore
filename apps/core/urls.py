@@ -1,0 +1,20 @@
+from django.urls import path
+from . import views
+
+app_name = "core"
+
+urlpatterns = [
+    path("login/", views.login_view, name="login"),
+    path("registro/", views.registro_view, name="registro"),
+    path("logout/", views.logout_view, name="logout"),
+    path("perfil/", views.perfil_view, name="perfil"),
+
+    # APIs internas de sesión/perfil/direcciones.
+    path("api/session/", views.api_session, name="api_session"),
+    path("api/perfil/", views.api_perfil, name="api_perfil"),
+    path("api/perfil/actualizar/", views.api_actualizar_perfil, name="api_actualizar_perfil"),
+    path("api/ubicaciones/", views.api_ubicaciones, name="api_ubicaciones"),
+    path("api/direcciones/", views.api_direcciones, name="api_direcciones"),
+    path("api/direcciones/crear/", views.api_crear_direccion, name="api_crear_direccion"),
+    path("api/direcciones/<int:cod_direccion>/eliminar/", views.api_eliminar_direccion, name="api_eliminar_direccion"),
+]
