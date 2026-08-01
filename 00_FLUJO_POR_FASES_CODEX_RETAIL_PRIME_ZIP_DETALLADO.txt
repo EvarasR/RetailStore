@@ -1,0 +1,1208 @@
+FLUJO POR FASES PARA CODEX - RETAIL PRIME
+Versión corregida después de inspeccionar RetailStore (3).zip
+Fecha: 2026-08-01
+Stack real detectado: Django 5.2 + PostgreSQL 15 + Django Templates + APIs internas JSON
+Arquitectura: DB-first, esquema public
+Rutas SQL reales: ARCHIVOS SQL/estructura.sql, ARCHIVOS SQL/funciones.sql, ARCHIVOS SQL/triggers.sql, ARCHIVOS SQL/datos.sql
+
+============================================================
+0. REGLA CENTRAL DEL FLUJO
+============================================================
+
+Codex no debe recibir una orden gigante de "haz todo". Debe trabajar como editor controlado por fases.
+
+Ciclo fijo de cada fase:
+1. Codex lee contexto y archivos autorizados.
+2. Codex explica qué va a tocar.
+3. Codex edita solo los archivos permitidos de esa fase.
+4. Codex entrega diff/resumen/firms/pruebas sugeridas.
+5. Tú revisas diff.
+6. Tú ejecutas comandos o SQL manualmente.
+7. Si hay error, copias el error completo y Codex corrige la misma fase.
+8. Cuando pase, haces commit.
+
+Motivo:
+Django ya llama 107 funciones SQL desde services. Cambiar firmas sin wrappers puede romper carrito, checkout, pagos, tracking, productos, inventario, proveedores y membresía.
+
+============================================================
+1. PRE-FASE - LIMPIEZA DEL REPOSITORIO ANTES DE CODEX
+============================================================
+
+Objetivo:
+Crear una carpeta limpia que Codex pueda inspeccionar sin secretos ni basura técnica.
+
+Estado detectado en el ZIP:
+- Existe .env dentro del ZIP. No debe entregarse ni imprimirse.
+- Existe entorno/ dentro del ZIP. No debe entregarse a Codex.
+- Existe .git/ dentro del ZIP. Puedes conservarlo solo si sabes que es el repo correcto; de lo contrario, crea Git limpio.
+- Los SQL no están en raíz, están en ARCHIVOS SQL/.
+
+Tú debes hacer:
+1. Extraer RetailStore (3).zip.
+2. Crear una copia llamada, por ejemplo, RetailStore_codex_limpio.
+3. Borrar dentro de esa copia:
+   - .env
+   - entorno/
+   - __pycache__/
+   - *.pyc
+   - copias antiguas de ZIP
+4. Crear .env.example si no existe, sin credenciales reales.
+5. Verificar que sigan existiendo:
+   - manage.py
+   - requirements.txt
+   - TiendaRetail/
+   - apps/
+   - ARCHIVOS SQL/estructura.sql
+   - ARCHIVOS SQL/funciones.sql
+   - ARCHIVOS SQL/triggers.sql
+   - ARCHIVOS SQL/datos.sql
+   - los 3 TXT corregidos y este flujo.
+
+Comandos sugeridos en PowerShell, desde la copia limpia:
+
+git init
+git add .
+git commit -m "Estado base limpio antes de fase SQL Codex"
+git switch -c fase3-sql-lotes-precios-tracking-crud
+
+Qué debe tocar Codex en esta pre-fase:
+- Nada. Esta fase la haces tú manualmente.
+
+Qué debes esperar:
+- Una carpeta limpia, sin .env ni entorno.
+- Un commit base recuperable.
+
+Criterio de aceptación:
+- git status limpio.
+- No existe .env en la carpeta entregada a Codex.
+- No existe entorno/ en la carpeta entregada a Codex.
+
+============================================================
+2. FASE 0 - ANÁLISIS SIN EDICIÓN
+============================================================
+
+Objetivo:
+Que Codex entienda el proyecto real antes de editar.
+
+Codex puede leer:
+- contexto_retail_prime_actualizado_codex_fase3_ZIP_CORREGIDO.txt
+- auditoria_crud_funciones_sql_retail_prime_ZIP_CORREGIDA.txt
+- instrucciones_codex_correcciones_sql_retail_prime_ZIP_CORREGIDAS.txt
+- 00_FLUJO_POR_FASES_CODEX_RETAIL_PRIME_ZIP_DETALLADO.txt
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+- apps/**/*.py únicamente para compatibilidad de services/modelos/urls
+- TiendaRetail/settings.py únicamente para configuración general
+
+Codex NO puede tocar:
+- Ningún archivo.
+- .env.
+- Base de datos.
+
+Prompt exacto para Codex:
+
+Lee completamente y en este orden:
+1. contexto_retail_prime_actualizado_codex_fase3_ZIP_CORREGIDO.txt
+2. auditoria_crud_funciones_sql_retail_prime_ZIP_CORREGIDA.txt
+3. instrucciones_codex_correcciones_sql_retail_prime_ZIP_CORREGIDAS.txt
+4. 00_FLUJO_POR_FASES_CODEX_RETAIL_PRIME_ZIP_DETALLADO.txt
+5. ARCHIVOS SQL/estructura.sql
+6. ARCHIVOS SQL/funciones.sql
+7. ARCHIVOS SQL/triggers.sql
+8. ARCHIVOS SQL/datos.sql
+9. El proyecto Django solo como referencia de compatibilidad: apps/, TiendaRetail/urls.py, TiendaRetail/settings.py, requirements.txt.
+
+No modifiques nada todavía.
+No leas ni muestres .env.
+No ejecutes SQL.
+No ejecutes comandos destructivos.
+
+Entrégame:
+- mapa de dependencias entre los 4 SQL;
+- lista de tablas que agregarías o modificarías;
+- lista de funciones nuevas;
+- lista de funciones existentes que reemplazarías;
+- lista de wrappers/sobrecargas necesarias para no romper Django;
+- lista de archivos Django que se verán afectados después, pero sin modificarlos;
+- riesgos de compatibilidad;
+- plan por fases alineado con este documento;
+- criterios de aceptación verificables;
+- dudas técnicas detectadas.
+
+Qué debe entregar Codex:
+- Informe de análisis.
+- Cero cambios en archivos.
+
+Qué debes revisar tú:
+
+git diff --stat
+
+Debe salir vacío.
+
+Criterio de aceptación:
+- Codex menciona que las rutas SQL reales están en ARCHIVOS SQL/.
+- Codex identifica que Django usa services y que no puede romper firmas.
+- Codex no modifica nada.
+
+============================================================
+3. FASE A - SQL: LOTES, PVP POR LOTE, FIFO, RESERVAS Y REPOSICIÓN
+============================================================
+
+Objetivo:
+Corregir la base del inventario. Hoy existe inventario agregado, pero no trazabilidad por tandada/costo/PVP. Esta fase permite que una venta salga de varios lotes con costos diferentes.
+
+Codex puede modificar únicamente:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Codex no puede modificar todavía:
+- apps/**/*.py
+- templates
+- JS/CSS
+- migrations
+- settings.py
+
+Tablas/columnas que debe tocar:
+1. Agregar tabla regla_precio.
+2. Agregar tabla lote_inventario.
+3. Agregar tabla pedido_detalle_lote.
+4. Adaptar reserva_inventario con:
+   - cod_lote nullable o not null según transición diseñada;
+   - cod_pedido_detalle nullable;
+   - estado_reserva/estado consistente;
+   - fecha_expiracion o reutilizar expira_en;
+   - índices para reservas activas por lote/pedido.
+5. Evaluar si inventario debe quedar como tabla agregada sincronizada desde lotes.
+6. Agregar índices para FIFO: cod_producto, cod_almacen, estado, fecha_recepcion, cod_lote.
+7. Agregar índice para órdenes abiertas y evitar reposición duplicada.
+
+Funciones nuevas mínimas:
+- fn_obtener_regla_precio_producto(p_cod_producto BIGINT, p_fecha_referencia TIMESTAMPTZ DEFAULT now())
+- fn_calcular_pvp_lote(p_cod_producto BIGINT, p_costo_unitario NUMERIC, p_fecha_referencia TIMESTAMPTZ DEFAULT now())
+- fn_crear_lote_inventario(...)
+- fn_cotizar_producto_por_lotes(p_cod_usuario BIGINT, p_cod_producto BIGINT, p_cantidad INTEGER)
+- fn_reservar_stock_por_lotes(p_cod_usuario BIGINT, p_cod_producto BIGINT, p_cantidad INTEGER, p_cod_pedido BIGINT DEFAULT NULL, p_cod_pedido_detalle BIGINT DEFAULT NULL)
+- fn_consumir_reservas_lote_pedido(p_cod_pedido BIGINT)
+- fn_liberar_reservas_lote_pedido(p_cod_pedido BIGINT)
+- fn_recalcular_inventario_desde_lotes(p_cod_producto BIGINT DEFAULT NULL, p_cod_almacen BIGINT DEFAULT NULL)
+- fn_recalcular_precio_actual_producto(p_cod_producto BIGINT)
+- fn_stock_proyectado_producto_almacen(p_cod_producto BIGINT, p_cod_almacen BIGINT)
+- fn_cantidad_pendiente_abastecimiento(p_cod_producto BIGINT, p_cod_almacen BIGINT DEFAULT NULL)
+- fn_generar_reposicion_automatica(p_cod_producto BIGINT, p_cod_almacen BIGINT)
+- fn_recalcular_reposicion_producto(p_cod_producto BIGINT)
+
+Funciones existentes que debe conservar con wrapper o adaptar sin romper firma:
+- fn_crear_pedido_desde_carrito(p_cod_usuario BIGINT, p_cod_direccion_envio BIGINT, p_cod_metodo_envio BIGINT DEFAULT NULL) RETURNS BIGINT
+- fn_reservar_stock(p_cod_usuario BIGINT, p_cod_producto BIGINT, p_cantidad INTEGER, p_cod_pedido BIGINT DEFAULT NULL) RETURNS INTEGER
+- fn_consumir_reservas_pedido(p_cod_pedido BIGINT) RETURNS VOID
+- fn_liberar_reservas_pedido(p_cod_pedido BIGINT) RETURNS VOID
+- fn_expirar_reservas_vencidas() RETURNS INTEGER
+- fn_generar_ordenes_abastecimiento(p_cod_pedido BIGINT, p_cod_producto BIGINT, p_cantidad_faltante INTEGER) RETURNS INTEGER
+- fn_recibir_orden_abastecimiento(p_cod_orden_abastecimiento BIGINT, p_cod_almacen BIGINT, p_observacion TEXT DEFAULT 'Recepción de orden de abastecimiento') RETURNS VOID
+- fn_stock_disponible_producto(p_cod_producto BIGINT) RETURNS INTEGER
+
+Reglas obligatorias:
+- Seleccionar lotes por FIFO: fecha_recepcion, cod_lote.
+- Usar SELECT ... FOR UPDATE sobre lotes/inventario en reservas y consumo.
+- Evitar sobreventa con checkouts simultáneos.
+- No recalcular el costo histórico de un lote recibido.
+- producto.precio_actual queda como precio de exhibición “desde”, no como única fuente de cobro.
+- La reposición debe activarse al consumir stock aunque la venta se haya cubierto.
+- Si ningún proveedor cubre, crear alerta; no inventar stock.
+
+Caso obligatorio en datos.sql:
+- Producto teclado técnico.
+- Lote A: 30 unidades disponibles con costo 2.
+- Lote B: mínimo 10 unidades disponibles con costo 3.
+- Cotización de 40 unidades debe usar 30 + 10.
+
+Prompt exacto para Codex:
+
+Aplica FASE A.
+Modifica solo:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Implementa lotes/tandadas, regla de precio, PVP por lote, FIFO, reservas por lote, consumo/liberación/expiración y reposición preventiva.
+Mantén compatibilidad con todas las funciones llamadas desde Django. Si reemplazas una función usada por Django, deja wrapper con la misma firma y que delegue a la nueva lógica.
+No modifiques Python, HTML, CSS, JS ni migrations.
+No ejecutes SQL.
+
+Al terminar entrégame:
+- tablas creadas;
+- columnas agregadas;
+- constraints agregados;
+- índices agregados;
+- funciones nuevas;
+- funciones reemplazadas;
+- wrappers compatibles conservados;
+- triggers agregados/modificados;
+- consultas SELECT de verificación;
+- riesgos pendientes para Django.
+
+Qué debes revisar tú:
+
+git diff --stat
+git diff -- "ARCHIVOS SQL/estructura.sql" "ARCHIVOS SQL/funciones.sql" "ARCHIVOS SQL/triggers.sql" "ARCHIVOS SQL/datos.sql"
+
+Qué debes ejecutar tú en una base de pruebas:
+
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/estructura.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/funciones.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/triggers.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/datos.sql"
+
+Qué debes esperar:
+- Los cuatro SQL cargan sin error.
+- Existe regla_precio.
+- Existe lote_inventario.
+- Existe pedido_detalle_lote.
+- reserva_inventario puede vincular reservas a lote.
+- fn_cotizar_producto_por_lotes devuelve desglose FIFO.
+- fn_reservar_stock conserva stock correcto ante concurrencia.
+- fn_expirar_reservas_vencidas devuelve cantidades a lote.
+- fn_recibir_orden_abastecimiento crea lote con costo real.
+- producto.precio_actual se recalcula como “desde”.
+
+Errores probables que debes pegar completos si aparecen:
+- foreign key rota por orden de creación de tablas;
+- función duplicada con firma incompatible;
+- columna usada antes de existir;
+- llamada antigua de Django sin wrapper;
+- CHECK demasiado restrictivo para datos.sql;
+- ON CONFLICT apuntando a índice inexistente.
+
+Commit si pasa:
+
+git add "ARCHIVOS SQL/estructura.sql" "ARCHIVOS SQL/funciones.sql" "ARCHIVOS SQL/triggers.sql" "ARCHIVOS SQL/datos.sql"
+git commit -m "Fase A SQL lotes PVP FIFO reservas y reposicion"
+
+============================================================
+4. FASE A.1 - CORRECCIÓN DE ERRORES SQL REALES
+============================================================
+
+Objetivo:
+No avanzar hasta que Fase A ejecute desde cero.
+
+Codex puede modificar:
+- Los mismos 4 SQL.
+
+Prompt para Codex cuando haya error:
+
+La FASE A falló al ejecutar los SQL. No cambies el alcance. Corrige solo el error y efectos relacionados.
+Aquí está el error completo de PostgreSQL:
+[PEGAR ERROR COMPLETO]
+
+Archivos que puedes tocar:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+No modifiques Django.
+No ejecutes SQL.
+Explícame causa raíz, cambio aplicado y prueba SELECT sugerida.
+
+Criterio de aceptación:
+- Los cuatro SQL vuelven a cargar desde cero.
+- El caso FIFO 30 + 10 funciona.
+
+============================================================
+5. FASE B - SQL: PRECIO FINAL, PRIME, PROMOCIONES, ENVÍO, IMPUESTO, FACTURA Y PAGO
+============================================================
+
+Objetivo:
+Que el precio mostrado sea igual al precio cobrado y facturado. Prime debe aplicar beneficios reales sin saltarse límites retail, stock ni pago.
+
+Codex puede modificar únicamente:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Tablas/columnas a revisar o modificar:
+- pedido: agregar/confirmar cod_metodo_envio, cod_zona_entrega, subtotal, descuento, impuesto, tasa_impuesto, costo_envio, total, fecha_estimada_entrega.
+- pedido_detalle: guardar precio_base, descuento_promocion, descuento_prime, descuento_cupon, precio_final_unitario cuando aplique.
+- pedido_detalle_lote: guardar costo_unitario_historico, pvp_unitario_historico, descuentos y precio_final_unitario.
+- factura: copiar exactamente subtotal, descuento, impuesto, tasa, costo_envio, total.
+- uso_beneficio: registrar beneficios Prime aplicados.
+- cupon/cupon_uso/promocion/promocion_producto: asegurar consistencia.
+- metodo_envio/zona_entrega/envio: asegurar que método elegido sea el generado.
+- parametro_sistema: guardar tasa de impuesto configurable.
+
+Funciones nuevas mínimas:
+- fn_obtener_tasa_impuesto()
+- fn_calcular_descuento_promocion(...)
+- fn_calcular_descuento_prime(...)
+- fn_calcular_precio_final_item(...)
+- fn_calcular_costo_envio(p_cod_usuario BIGINT, p_cod_metodo_envio BIGINT, p_cod_zona_entrega BIGINT, p_subtotal NUMERIC)
+- fn_registrar_uso_beneficio(...)
+- fn_anular_autorizaciones_pedido(p_cod_pedido BIGINT)
+- fn_validar_transicion_pedido(...)
+
+Funciones existentes que debe conservar/adaptar:
+- fn_validar_checkout_carrito(p_cod_usuario BIGINT) RETURNS JSONB
+- fn_crear_pedido_desde_carrito(p_cod_usuario BIGINT, p_cod_direccion_envio BIGINT, p_cod_metodo_envio BIGINT DEFAULT NULL) RETURNS BIGINT
+- fn_cancelar_pedido(p_cod_pedido BIGINT, p_motivo TEXT DEFAULT 'Cancelación solicitada') RETURNS VOID
+- fn_recalcular_total_pedido(p_cod_pedido BIGINT) RETURNS VOID
+- fn_autorizar_pago_simulado(p_cod_pedido BIGINT, p_cod_metodo_pago BIGINT, p_idempotency_key TEXT) RETURNS BIGINT
+- fn_capturar_pago_simulado(p_cod_transaccion BIGINT) RETURNS VOID
+- fn_generar_reembolso_simulado(p_cod_devolucion BIGINT) RETURNS BIGINT
+- fn_precio_producto_con_promocion(p_cod_producto BIGINT) RETURNS NUMERIC
+- fn_registrar_metodo_pago_simulado(p_cod_usuario BIGINT, p_numero_tarjeta TEXT, p_titular TEXT, p_exp_mes SMALLINT, p_exp_anio SMALLINT, p_cvv TEXT, p_saldo_disponible NUMERIC DEFAULT 1000, p_limite_diario NUMERIC DEFAULT 1000) RETURNS BIGINT
+- fn_registrar_metodo_pago_simulado(p_cod_usuario BIGINT, p_numero_tarjeta TEXT, p_titular TEXT, p_exp_mes INTEGER, p_exp_anio INTEGER, p_cvv TEXT, p_saldo_disponible NUMERIC DEFAULT 1000, p_limite_diario NUMERIC DEFAULT 1000) RETURNS BIGINT
+- fn_registrar_metodo_pago_simulado(p_cod_usuario BIGINT, p_numero_tarjeta TEXT, p_titular TEXT, p_exp_mes INTEGER, p_exp_anio INTEGER, p_cvv TEXT, p_saldo_disponible INTEGER, p_limite_diario INTEGER) RETURNS BIGINT
+- fn_pagar_activar_membresia_simulada(p_cod_usuario BIGINT, p_cod_plan BIGINT, p_cod_metodo_pago BIGINT, p_idempotency_key TEXT, p_renovacion_automatica BOOLEAN DEFAULT TRUE) RETURNS JSONB
+
+Reglas obligatorias:
+- El checkout recalcula, no confía ciegamente en snapshots del carrito.
+- La función única de precio final debe ser fuente de catálogo/checkouts futuros.
+- Prime no elimina límites retail, stock, pago ni antifraude.
+- Descuento total no puede superar subtotal.
+- impuesto no debe estar hardcodeado a 12%; debe leerse de parametro_sistema.
+- factura debe coincidir con pedido y transacción capturada.
+- captura tardía no puede revivir pedido cancelado.
+- captura debe ser idempotente.
+- cancelación debe anular autorizaciones pendientes.
+- no guardar CVV ni PAN completo.
+
+Prompt exacto para Codex:
+
+Aplica FASE B.
+Modifica solo los 4 SQL dentro de ARCHIVOS SQL/.
+Unifica precio final, promociones, Prime, cupones, envío, zona, impuesto configurable, factura y pagos.
+Mantén wrappers compatibles para funciones usadas por Django.
+No modifiques Django.
+No ejecutes SQL.
+
+Al terminar reporta:
+- columnas nuevas en pedido/pedido_detalle/factura/envio;
+- funciones de precio final;
+- orden de aplicación de descuentos;
+- lógica de impuesto;
+- lógica de envío Prime;
+- endurecimiento de autorización/captura/cancelación;
+- SELECTs de verificación.
+
+Qué debes esperar:
+- fn_crear_pedido_desde_carrito usa método de envío elegido.
+- fn_recalcular_total_pedido calcula subtotal - descuento + impuesto + envío.
+- fn_capturar_pago_simulado factura exactamente el total del pedido.
+- fn_cancelar_pedido anula autorizaciones no capturadas.
+- Dos llamadas a captura no duplican cobro.
+
+Commit si pasa:
+
+git add "ARCHIVOS SQL/estructura.sql" "ARCHIVOS SQL/funciones.sql" "ARCHIVOS SQL/triggers.sql" "ARCHIVOS SQL/datos.sql"
+git commit -m "Fase B SQL precio final Prime envio factura y pagos"
+
+============================================================
+6. FASE C - SQL: TRACKING PERSISTENTE, RESERVAS VENCIDAS Y MANTENIMIENTO
+============================================================
+
+Objetivo:
+Pasar de tracking visual/simulado desde Django a tracking persistente en BD, procesable sin depender de que el cliente abra la pantalla.
+
+Codex puede modificar únicamente:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Tablas a agregar/modificar:
+- tracking_evento_programado
+- tracking_evento, si requiere columnas de orden/procesamiento
+- envio, para estado, fecha_estimada_entrega, fecha_entrega, transición válida
+- pedido_estado_historial, si debe ligar tracking real
+- reserva_inventario, para expiración robusta
+- log_carrito_abandonado, si no tiene función de registro
+
+Funciones nuevas mínimas:
+- fn_programar_tracking_pedido(p_cod_pedido BIGINT)
+- fn_procesar_tracking_pendiente(p_fecha_hasta TIMESTAMPTZ DEFAULT now())
+- fn_actualizar_envio_estado(...)
+- fn_validar_transicion_envio(...)
+- fn_registrar_carritos_abandonados(...)
+- fn_cancelar_pedidos_impagos_vencidos(...)
+
+Funciones existentes que debe conservar/adaptar:
+- fn_generar_tracking_inicial(p_cod_pedido BIGINT, p_cod_metodo_envio BIGINT DEFAULT NULL) RETURNS BIGINT
+- fn_registrar_evento_tracking(p_cod_pedido BIGINT, p_cod_tipo_evento VARCHAR, p_descripcion TEXT, p_ubicacion TEXT DEFAULT 'Centro de operación', p_visible_cliente BOOLEAN DEFAULT TRUE) RETURNS BIGINT
+- fn_actualizar_estado_pedido(p_cod_pedido BIGINT, p_cod_estado_pedido VARCHAR, p_comentario TEXT DEFAULT NULL) RETURNS VOID
+- fn_marcar_pedido_entregado(p_cod_pedido BIGINT, p_comentario TEXT DEFAULT 'Pedido entregado al cliente') RETURNS VOID
+- fn_expirar_reservas_vencidas() RETURNS INTEGER
+
+Reglas obligatorias:
+- Programar eventos después de pago capturado.
+- Procesar solo eventos vencidos/no procesados.
+- Insertar tracking_evento real.
+- Actualizar envio y pedido en la misma transacción.
+- Idempotencia: procesar dos veces no duplica eventos.
+- ENTREGADO debe guardar fecha_entrega.
+- No permitir retrocesos de estado inválidos.
+- Reservas vencidas liberan lotes y actualizan inventario agregado.
+- Pedidos impagos vencidos liberan reservas y quedan cancelados/controlados.
+
+Prompt exacto para Codex:
+
+Aplica FASE C.
+Modifica solo los 4 SQL dentro de ARCHIVOS SQL/.
+Implementa tracking persistente/progresivo, procesamiento idempotente, expiración robusta de reservas, cancelación de pedidos impagos y registro de carritos abandonados.
+Mantén wrappers compatibles para tracking_service.py e inventario_service.py.
+No modifiques Django.
+No ejecutes SQL.
+
+Qué debes esperar:
+- Existe tracking_evento_programado.
+- Al capturar pago se programa tracking.
+- fn_procesar_tracking_pendiente crea eventos reales.
+- Django podrá seguir llamando fn_generar_tracking_inicial y fn_registrar_evento_tracking.
+- Reservas y carritos no quedan eternos.
+
+Commit si pasa:
+
+git add "ARCHIVOS SQL/estructura.sql" "ARCHIVOS SQL/funciones.sql" "ARCHIVOS SQL/triggers.sql" "ARCHIVOS SQL/datos.sql"
+git commit -m "Fase C SQL tracking persistente y mantenimiento"
+
+============================================================
+7. FASE D - SQL: CRUD LÓGICO DE ENTIDADES MAESTRAS Y DATOS TÉCNICOS
+============================================================
+
+Objetivo:
+Que el administrador pueda administrar el negocio usando funciones SQL, sin DELETE físico donde no corresponde.
+
+Codex puede modificar únicamente:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Entidades maestras que deben tener CRUD lógico o administración equivalente:
+
+Seguridad:
+- rol
+- permiso
+- rol_permiso
+- perfil_usuario
+- parametro_sistema
+
+Catálogo:
+- categoria
+- marca
+- producto
+- producto_imagen
+- producto_atributo
+- producto_atributo_valor
+- producto_relacionado
+- producto_resena
+- regla_limite_compra
+- regla_precio
+
+Inventario/configuración:
+- almacen
+- alerta_stock, con resolver/cerrar en vez de borrar
+
+Proveedores:
+- proveedor
+- proveedor_contacto
+- producto_proveedor
+
+Envíos:
+- transportista
+- metodo_envio
+- zona_entrega
+
+Prime:
+- plan_membresia
+- beneficio_membresia
+- membresia_usuario con cancelación controlada
+- uso_beneficio con consultas controladas, no borrado libre
+
+Marketing:
+- promocion
+- promocion_producto
+- cupon
+
+Contenido:
+- contenido_digital
+
+Convención esperada para maestras:
+- fn_crear_<entidad>
+- fn_obtener_<entidad>
+- fn_listar_<entidad>
+- fn_actualizar_<entidad>
+- fn_desactivar_<entidad>
+
+Convención esperada para relaciones:
+- fn_asociar_<relacion>
+- fn_actualizar_<relacion>
+- fn_desasociar_<relacion>
+- fn_listar_<relacion>
+
+No crear CRUD físico para:
+- auditoria
+- intento_login
+- movimiento_inventario
+- reserva_inventario histórica
+- pedido
+- pedido_detalle
+- pedido_estado_historial
+- factura
+- transaccion_pago
+- autorizacion_pago
+- reembolso_pago
+- tracking_evento
+- historial_precio_producto
+- historial_proveedor
+- pago_membresia
+- uso_beneficio
+- logs/snapshots BI
+
+Datos.sql debe quedar con:
+- Solo informática/redes.
+- Mínimo 20 productos técnicos.
+- Categorías técnicas: redes, seguridad, cableado, servidores, almacenamiento, UPS, videovigilancia IP, periféricos, racks, herramientas.
+- Marcas coherentes: Cisco, Ubiquiti, MikroTik, TP-Link, Fortinet, Hikvision, Dahua, APC, Dell, Lenovo, HP, Kingston, Logitech, Panduit, Synology, QNAP, etc.
+- Mínimo 5 proveedores activos por producto publicable.
+- Lotes con costos distintos.
+- Clientes normal y Prime.
+- Promociones, cupones y membresías.
+- Pedidos demo y tracking demo.
+- Caso teclado 30 + 10.
+
+Prompt exacto para Codex:
+
+Aplica FASE D.
+Modifica solo los 4 SQL dentro de ARCHIVOS SQL/.
+Completa CRUD lógico de entidades maestras y relaciones administrables.
+No crees DELETE físico genérico para tablas transaccionales, históricas, pagos, auditoría, tracking, inventario histórico ni logs.
+Reemplaza datos generalistas por datos de informática y redes.
+Asegura mínimo 5 proveedores activos por producto publicable y el caso obligatorio de teclado por lotes.
+Mantén firmas compatibles con Django.
+No modifiques Django.
+No ejecutes SQL.
+
+Qué debes esperar:
+- Admin puede administrar base por funciones SQL.
+- datos.sql es coherente con el nicho.
+- No hay ropa/alimentos/belleza/juguetes/mascotas.
+- Funciones de lectura/listado existen para panel admin futuro.
+
+Commit si pasa:
+
+git add "ARCHIVOS SQL/estructura.sql" "ARCHIVOS SQL/funciones.sql" "ARCHIVOS SQL/triggers.sql" "ARCHIVOS SQL/datos.sql"
+git commit -m "Fase D SQL CRUD logico y datos tecnicos"
+
+============================================================
+8. FASE E - VALIDACIÓN SQL COMPLETA MANUAL
+============================================================
+
+Objetivo:
+Validar que SQL reconstruye una base desde cero.
+
+Codex no toca nada al inicio de esta fase.
+
+Tú debes ejecutar en PostgreSQL 15, base nueva o descartable:
+
+createdb -U postgres retail_prime_db_pruebas
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/estructura.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/funciones.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/triggers.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/datos.sql"
+
+Validaciones manuales mínimas:
+- SELECT count(*) FROM producto;
+- SELECT count(*) FROM lote_inventario;
+- SELECT fn_cotizar_producto_por_lotes(... caso teclado 40 ...);
+- Probar publicar producto con menos de 5 proveedores: debe fallar.
+- Probar publicar producto con 5 proveedores e imagen/límite/stock: debe pasar.
+- Probar reserva y expiración.
+- Probar crear pedido desde carrito.
+- Probar autorizar y capturar pago.
+- Probar cancelar antes de captura.
+- Probar captura dos veces: no debe duplicar cobro.
+- Probar procesar tracking dos veces: no debe duplicar eventos.
+- Verificar factura = pedido = pago capturado.
+
+Si falla:
+- Copia error completo.
+- Vuelve a Codex con prompt de corrección de Fase E.
+
+Prompt de corrección:
+
+La validación completa falló. Corrige solo lo necesario para que los 4 SQL ejecuten desde cero y las pruebas mínimas pasen.
+Error completo:
+[PEGAR ERROR]
+No modifiques Django.
+No ejecutes SQL.
+Entrega causa raíz, diff esperado y consulta de verificación.
+
+Commit si pasa:
+
+git add "ARCHIVOS SQL/estructura.sql" "ARCHIVOS SQL/funciones.sql" "ARCHIVOS SQL/triggers.sql" "ARCHIVOS SQL/datos.sql"
+git commit -m "Fase E SQL validado desde cero"
+
+============================================================
+9. FASE F - DJANGO: MODELOS MANAGED=FALSE Y SERVICIOS SQL
+============================================================
+
+Objetivo:
+Actualizar Django para conocer las nuevas tablas/columnas y consumir las nuevas funciones SQL sin dispersar lógica en views.
+
+Esta fase empieza SOLO después de que SQL pase Fase E.
+
+Codex puede modificar:
+- apps/core/models.py
+- apps/clientes/models.py
+- apps/administracion/models.py
+- apps/proveedores/models.py
+- apps/operaciones/models.py
+- apps/core/services/sql_service.py
+- apps/clientes/services/carrito_service.py
+- apps/clientes/services/checkout_service.py
+- apps/clientes/services/membresia_service.py
+- apps/administracion/services/producto_service.py
+- apps/administracion/services/inventario_service.py
+- apps/administracion/services/promocion_service.py
+- apps/administracion/services/reportes_service.py
+- apps/proveedores/services/proveedor_service.py
+- apps/operaciones/services/pago_service.py
+- apps/operaciones/services/tracking_service.py
+- apps/operaciones/services/notificacion_service.py
+
+Codex no debe modificar aún:
+- templates
+- JS/CSS
+- diseño visual
+- migrations innecesarias para tablas SQL managed=False
+
+Qué debe hacer:
+1. Actualizar modelos con nuevas tablas:
+   - ReglaPrecio
+   - LoteInventario
+   - PedidoDetalleLote
+   - TrackingEventoProgramado
+   - columnas nuevas en ReservaInventario, Pedido, PedidoDetalle, Factura, Envio.
+2. Mantener managed = False para tablas controladas por SQL.
+3. No crear migraciones para las tablas SQL principales.
+4. Actualizar services para llamar nuevas funciones:
+   - cotizar_producto_por_lotes
+   - reservar_stock_por_lotes
+   - calcular_precio_final_item
+   - calcular_costo_envio
+   - procesar_tracking_pendiente
+   - CRUD lógico admin.
+5. Mantener wrappers Python para funciones antiguas que todavía consuman vistas.
+6. Usar casteos explícitos ::BIGINT, ::INTEGER, ::NUMERIC, ::TEXT.
+7. No poner SQL directo en templates ni JS.
+
+Archivos services actuales que ya llaman funciones SQL y deben revisarse:
+
+apps/administracion/services/inventario_service.py
+- fn_ajustar_inventario
+- fn_consumir_reservas_pedido
+- fn_crear_almacen
+- fn_crear_o_actualizar_inventario
+- fn_eliminar_inventario_si_sin_stock
+- fn_expirar_reservas_vencidas
+- fn_liberar_reservas_pedido
+- fn_registrar_movimiento_inventario
+- fn_reservar_stock
+
+apps/administracion/services/producto_service.py
+- fn_actualizar_categoria
+- fn_actualizar_marca
+- fn_actualizar_producto
+- fn_agregar_imagen_producto
+- fn_contar_proveedores_activos_producto
+- fn_crear_categoria
+- fn_crear_marca
+- fn_crear_producto
+- fn_desactivar_producto
+- fn_eliminar_categoria_logica
+- fn_eliminar_marca_logica
+- fn_pausar_producto
+- fn_precio_producto_con_promocion
+- fn_producto_tiene_imagen_principal
+- fn_publicar_producto
+- fn_registrar_busqueda
+- fn_registrar_producto_visto
+- fn_stock_disponible_producto
+- fn_stock_proveedor_disponible_producto
+- fn_validar_producto_publicable
+
+apps/administracion/services/promocion_service.py
+- fn_aplicar_cupon_pedido
+- fn_asociar_promocion_producto
+- fn_calcular_descuento_cupon
+- fn_crear_cupon
+- fn_crear_promocion
+
+apps/administracion/services/reportes_service.py
+- fn_generar_recomendaciones_usuario
+- fn_generar_snapshot_kpis
+- fn_refrescar_resumen_venta_diaria
+- fn_segmentar_clientes
+
+apps/clientes/services/carrito_service.py
+- fn_actualizar_cantidad_carrito
+- fn_agregar_producto_carrito
+- fn_eliminar_producto_carrito
+- fn_limpiar_carrito
+- fn_obtener_limite_retail
+- fn_obtener_o_crear_carrito_activo
+- fn_total_carrito
+- fn_validar_checkout_carrito
+- fn_validar_limite_retail
+
+apps/clientes/services/checkout_service.py
+- fn_actualizar_estado_pedido
+- fn_aplicar_cupon_pedido
+- fn_aprobar_devolucion
+- fn_cancelar_pedido
+- fn_crear_pedido_desde_carrito
+- fn_recalcular_total_pedido
+- fn_solicitar_devolucion_total
+
+apps/clientes/services/membresia_service.py
+- fn_activar_membresia_usuario
+- fn_crear_plan_membresia
+- fn_desactivar_plan_membresia
+- fn_usuario_tiene_membresia_activa
+
+apps/clientes/services/recurrente_service.py
+- fn_agregar_contenido_biblioteca
+- fn_agregar_producto_compra_recurrente
+- fn_crear_compra_recurrente
+- fn_preparar_carrito_compra_recurrente
+
+apps/clientes/services/soporte_service.py
+- fn_cerrar_ticket_soporte
+- fn_crear_ticket_soporte
+- fn_responder_ticket_soporte
+
+apps/clientes/services/wishlist_service.py
+- fn_agregar_a_wishlist
+- fn_obtener_o_crear_wishlist_default
+- fn_quitar_de_wishlist
+
+apps/core/services/sql_service.py
+- fn_consultar_proveedores_para_faltante
+- fn_stock_disponible_producto
+
+apps/core/services/usuario_service.py
+- fn_actualizar_direccion_usuario
+- fn_asignar_rol_usuario
+- fn_cambiar_password_simulado
+- fn_crear_direccion_usuario
+- fn_crear_usuario_cliente
+- fn_eliminar_direccion_usuario
+- fn_obtener_usuario
+- fn_quitar_rol_usuario
+- fn_registrar_intento_login
+- fn_usuario_tiene_permiso
+- fn_verificar_email_usuario
+
+apps/operaciones/services/notificacion_service.py
+- fn_crear_notificacion
+- fn_encolar_email
+- fn_marcar_email_enviado
+- fn_marcar_email_fallido
+- fn_marcar_notificacion_leida
+
+apps/operaciones/services/pago_service.py
+- fn_ajustar_saldo_cuenta_simulada
+- fn_autorizar_pago_simulado
+- fn_bloquear_metodo_pago_simulado
+- fn_capturar_pago_simulado
+- fn_cvv_longitud_por_marca
+- fn_desactivar_metodo_pago
+- fn_detectar_marca_tarjeta
+- fn_generar_reembolso_simulado
+- fn_luhn_valid
+- fn_pagar_activar_membresia_simulada
+- fn_registrar_metodo_pago_simulado
+
+apps/operaciones/services/tracking_service.py
+- fn_actualizar_estado_pedido
+- fn_generar_tracking_inicial
+- fn_marcar_pedido_entregado
+- fn_registrar_evento_tracking
+
+apps/proveedores/services/proveedor_service.py
+- fn_actualizar_proveedor
+- fn_actualizar_stock_proveedor
+- fn_asociar_producto_proveedor
+- fn_cancelar_orden_abastecimiento
+- fn_consultar_proveedores_para_faltante
+- fn_contar_proveedores_activos_producto
+- fn_crear_proveedor
+- fn_eliminar_proveedor_logico
+- fn_generar_ordenes_abastecimiento
+- fn_recibir_orden_abastecimiento
+
+Prompt exacto para Codex:
+
+Aplica FASE F.
+SQL ya fue validado desde cero. Actualiza modelos managed=False y services para las nuevas tablas/funciones.
+No muevas lógica crítica a Django; Django solo debe llamar funciones SQL.
+No cambies templates ni JS/CSS todavía.
+No crees migraciones para tablas controladas por SQL.
+Usa casteos explícitos en llamadas SQL.
+Ejecuta solo comprobaciones estáticas no destructivas si están disponibles.
+
+Qué debe entregar Codex:
+- Archivos Django modificados.
+- Lista de modelos agregados/modificados.
+- Lista de services modificados.
+- Lista de funciones SQL llamadas.
+- Riesgos pendientes para views/templates.
+
+Qué debes ejecutar tú:
+
+python manage.py check
+python manage.py shell
+
+En shell probar services clave:
+- calcular_stock_disponible(1)
+- cotizar_producto_por_lotes(usuario, producto_teclado, 40)
+- validar_checkout_carrito(usuario)
+- listar_lotes_producto(producto)
+- procesar_tracking_pendiente()
+
+Commit si pasa:
+
+git add apps
+ git commit -m "Fase F Django modelos y services para SQL fase 3"
+
+============================================================
+10. FASE G - DJANGO: APIs INTERNAS Y FLUJO CHECKOUT COMPLETO
+============================================================
+
+Objetivo:
+Conectar las nuevas funciones SQL con endpoints internos consumidos por templates.
+
+Codex puede modificar:
+- apps/clientes/views.py
+- apps/clientes/urls.py
+- apps/operaciones/views.py
+- apps/operaciones/urls.py
+- apps/administracion/views.py si hace falta solo para APIs admin
+- apps/proveedores/views.py si hace falta solo para APIs proveedor
+- services relacionados si faltó algo menor
+
+Codex no debe hacer rediseño visual profundo todavía.
+
+APIs actuales detectadas que deben revisarse:
+- /api/carrito/
+- /api/carrito/agregar/
+- /api/carrito/actualizar/
+- /api/carrito/eliminar/
+- /api/carrito/validar/
+- /api/checkout/crear-pedido/
+- /operaciones/api/metodos-envio/
+- /operaciones/api/metodos-pago/
+- /operaciones/api/pagos/autorizar/
+- /operaciones/api/pagos/capturar/
+- /api/pedidos/<cod_pedido>/tracking/
+- /panel/api/productos/
+- /panel/api/inventario/
+- /panel/api/pedidos/
+- /panel/api/proveedores/
+
+Qué debe hacer:
+1. Agregar API de cotización por lotes antes de crear pedido.
+2. Hacer que carrito muestre precio final real.
+3. Hacer que checkout use método envío + zona + impuesto.
+4. Hacer que captura de pago responda factura/tracking.
+5. Hacer que tracking consulte eventos persistentes y opcionalmente dispare procesamiento controlado si decides permitirlo desde backend.
+6. Endurecer permisos: cliente solo ve sus pedidos, admin solo panel, proveedor solo endpoints de proveedor.
+7. Mantener JsonResponse y services.
+8. Manejar errores con DEBUG seguro.
+
+Prompt exacto para Codex:
+
+Aplica FASE G.
+Actualiza views/urls/APIs internas para consumir los services de Fase F.
+No rediseñes todavía.
+No muevas lógica crítica a Django.
+Valida permisos y ownership.
+El cliente no puede ver pedidos de otro usuario.
+Admin APIs requieren user.is_staff.
+Entrega endpoints agregados/modificados, payload esperado y ejemplos JSON.
+
+Qué debes probar:
+- visitante ve catálogo pero no compra;
+- cliente agrega producto;
+- carrito cotiza por lotes;
+- checkout crea pedido;
+- pago autoriza/captura;
+- factura coincide;
+- tracking persiste;
+- cliente no accede a panel;
+- admin accede a panel.
+
+Commit si pasa:
+
+git add apps
+ git commit -m "Fase G APIs checkout pago tracking integradas"
+
+============================================================
+11. FASE H - DJANGO: PANEL ADMINISTRATIVO REAL
+============================================================
+
+Objetivo:
+Convertir el panel administrativo actual en panel operativo conectado a CRUD lógico SQL.
+
+Codex puede modificar:
+- apps/administracion/views.py
+- apps/administracion/urls.py
+- apps/administracion/services/*.py
+- apps/administracion/templates/administracion/panel.html
+- apps/core/static/retail/js/retail.js o un JS admin separado si Codex lo propone
+- apps/core/static/retail/css/retail.css
+
+Qué debe implementar:
+- Gestión de productos.
+- Categorías.
+- Marcas.
+- Imágenes.
+- Atributos.
+- Límites retail.
+- Reglas de precio.
+- Lotes.
+- Inventario.
+- Proveedores asociados.
+- Promociones/cupones.
+- Métodos de envío/zonas/transportistas.
+- Planes/beneficios Prime.
+- Alertas de stock.
+- Pedidos y cambios de estado.
+- Reportes/KPIs.
+
+Regla:
+Las acciones admin llaman funciones SQL; no hacen UPDATE directo desde views salvo lectura controlada.
+
+Prompt exacto para Codex:
+
+Aplica FASE H.
+Implementa panel administrativo real usando services y funciones SQL CRUD lógicas.
+Mantén un solo template principal con secciones independientes.
+No uses Bootstrap.
+No copies Amazon literalmente.
+Protege todas las APIs admin con login_required y user.is_staff.
+Entrega lista de endpoints admin, forms/payloads y funciones SQL llamadas.
+
+Qué debes esperar:
+- Admin puede crear/editar/desactivar productos.
+- Admin puede asociar proveedores.
+- Admin puede crear lotes o recibir orden.
+- Admin puede publicar producto solo si cumple reglas.
+- Admin ve alertas de stock y KPIs.
+
+Commit si pasa:
+
+git add apps
+ git commit -m "Fase H panel administrativo operativo"
+
+============================================================
+12. FASE I - DJANGO: EXPERIENCIA CLIENTE Y PROVEEDORES
+============================================================
+
+Objetivo:
+Completar experiencia marketplace/Prime sin crear demasiados templates.
+
+Codex puede modificar:
+- apps/clientes/views.py
+- apps/clientes/urls.py
+- apps/clientes/templates/clientes/inicio.html
+- apps/clientes/templates/clientes/checkout.html
+- apps/clientes/templates/clientes/checkout_prime.html
+- apps/core/templates/core/perfil.html
+- apps/proveedores/views.py
+- apps/proveedores/urls.py
+- apps/proveedores/services/proveedor_service.py
+- JS/CSS propios
+
+Qué debe hacer cliente:
+- Catálogo por categorías.
+- Detalle modal/card.
+- Wishlist/favoritos.
+- Reseñas/preguntas.
+- Carrito sin recargar.
+- Checkout claro.
+- Beneficios Prime reales.
+- Facturas.
+- Tracking persistente.
+- Devoluciones.
+- Compras recurrentes.
+- Soporte.
+
+Qué debe hacer proveedor:
+- Ver productos asociados.
+- Ver solicitudes/órdenes.
+- Actualizar stock proveedor si el rol lo permite.
+- Ver historial de cumplimiento.
+
+Prompt exacto para Codex:
+
+Aplica FASE I.
+Mejora cliente y proveedor usando las APIs/services ya validadas.
+Mantén pocos templates y secciones dinámicas.
+No uses Bootstrap.
+No copies Amazon literalmente.
+No metas lógica crítica en JS.
+Entrega endpoints, secciones modificadas y pruebas manuales.
+
+Commit si pasa:
+
+git add apps
+ git commit -m "Fase I experiencia cliente Prime y proveedores"
+
+============================================================
+13. FASE J - SEGURIDAD, VALIDACIÓN Y HARDENING
+============================================================
+
+Objetivo:
+Cerrar huecos de seguridad y navegación por rutas antes de diseño final/deploy.
+
+Codex puede modificar:
+- settings.py
+- urls/views/services según hallazgos
+- templates si hay exposición de datos
+- JS si hay XSS o manejo inseguro
+- README/.env.example
+
+Qué revisar:
+- Permisos por rol.
+- Ownership de pedidos/métodos de pago/direcciones/facturas.
+- CSRF.
+- Errores JSON sin filtrar datos en producción.
+- No exponer secretos.
+- No confiar en cantidades/precios enviados por cliente.
+- Validar métodos de pago simulados por dueño.
+- Validar que admin/proveedor/cliente no crucen rutas.
+- Rate limiting básico si decides implementarlo desde Django.
+- Subida de imágenes controlada.
+- MIME/size de archivos.
+- Logs sin PAN/CVV.
+
+Prompt exacto para Codex:
+
+Aplica FASE J.
+Audita seguridad de Django y flujo de navegación.
+No cambies lógica SQL salvo wrappers menores indispensables.
+No expongas .env.
+Endurece permisos, ownership, CSRF, errores JSON, validación de inputs y rutas.
+Entrega lista de vulnerabilidades corregidas y pruebas manuales.
+
+Commit si pasa:
+
+git add .
+ git commit -m "Fase J hardening seguridad rutas y permisos"
+
+============================================================
+14. FASE K - DISEÑO VISUAL Y UX FINAL
+============================================================
+
+Objetivo:
+Mejorar la apariencia sin romper lógica.
+
+Codex puede modificar:
+- templates
+- CSS
+- JS visual
+- componentes parciales
+
+No debe modificar:
+- SQL salvo bug menor.
+- Services críticos salvo bug menor.
+
+Qué debe lograr:
+- Diseño retail tecnológico propio.
+- Inspiración Amazon, sin copia literal.
+- Modo claro/oscuro.
+- Cards limpias.
+- Checkout entendible.
+- Panel admin con sidebar, KPIs, tablas y estados.
+- Modal detalle producto.
+- Carrito drawer funcional.
+- Perfil como centro de cuenta.
+
+Prompt exacto para Codex:
+
+Aplica FASE K.
+Mejora diseño visual y UX sin cambiar reglas de negocio.
+No uses Bootstrap.
+No copies Amazon literalmente.
+Mantén CSS propio.
+No rompas IDs/clases usados por JS.
+Entrega capturas o descripción de secciones modificadas y pruebas manuales.
+
+Commit si pasa:
+
+git add apps
+ git commit -m "Fase K UX visual retail tecnologico"
+
+============================================================
+15. FASE L - PRUEBAS FINALES Y CIERRE
+============================================================
+
+Objetivo:
+Validar el proyecto completo.
+
+Tú o Codex deben preparar un checklist, pero tú ejecutas lo crítico.
+
+Pruebas mínimas:
+1. Base reconstruye desde cero.
+2. python manage.py check pasa.
+3. Login admin redirige a /panel/.
+4. Login cliente redirige a inicio/perfil.
+5. Visitante no compra.
+6. Cliente compra con carrito.
+7. Límite retail bloquea cantidades exageradas.
+8. Producto publicable exige 5 proveedores.
+9. FIFO 30 + 10 funciona.
+10. Reposición se genera al bajar stock.
+11. Prime aplica envío/descuento y registra uso.
+12. Cupón válido aplica; cupón inválido falla.
+13. Pago simulado autoriza/captura.
+14. Captura repetida no duplica.
+15. Cancelación antes de captura libera reservas/anula autorización.
+16. Factura coincide con pedido/pago.
+17. Tracking persistente procesa eventos.
+18. Cliente no ve pedidos ajenos.
+19. Admin no queda en área cliente por error.
+20. Proveedor no accede a panel admin.
+21. No hay .env en repositorio.
+22. No hay entorno/ ni __pycache__.
+
+Commit final:
+
+git commit -m "Retail Prime flujo completo validado"
+
+============================================================
+16. ORDEN RECOMENDADO RESUMIDO
+============================================================
+
+1. Limpiar ZIP.
+2. Fase 0 análisis sin edición.
+3. Fase A SQL lotes/PVP/FIFO/reposición.
+4. Fase A.1 correcciones hasta ejecutar sin error.
+5. Fase B SQL precio/Prime/envío/factura/pago.
+6. Fase C SQL tracking/mantenimiento.
+7. Fase D SQL CRUD/datos técnicos.
+8. Fase E validación SQL completa.
+9. Fase F Django modelos/services.
+10. Fase G APIs checkout/pago/tracking.
+11. Fase H panel admin.
+12. Fase I cliente/proveedor.
+13. Fase J seguridad.
+14. Fase K diseño.
+15. Fase L pruebas finales.

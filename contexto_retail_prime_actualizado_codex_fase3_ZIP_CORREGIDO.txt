@@ -1,0 +1,343 @@
+CONTEXTO OFICIAL CORREGIDO - RETAIL PRIME
+Versión ajustada después de inspeccionar RetailStore (3).zip
+Fecha: 2026-08-01
+
+============================================================
+1. RESUMEN EJECUTIVO
+============================================================
+
+Proyecto:
+Retail Prime.
+
+Tipo de sistema:
+Tienda web retail tipo Amazon simplificada, enfocada en consumidor final, con membresías tipo Prime, catálogo, carrito, checkout, pago simulado, tracking, proveedores, reposición, inventario, promociones, reseñas, wishlist, soporte, reportes y panel administrativo.
+
+Nicho definitivo:
+Informática, redes, seguridad de red, cableado estructurado, servidores, almacenamiento, videovigilancia IP, UPS, racks, herramientas de red, laptops empresariales y periféricos.
+
+Stack:
+- Django 5.2.x.
+- PostgreSQL 15.
+- psycopg 3.
+- Django Templates.
+- APIs internas JSON consumidas con fetch/JS.
+- CSS propio, sin Bootstrap.
+
+Arquitectura:
+Monolito modular Django + PostgreSQL DB-first.
+
+Principio central:
+La lógica crítica vive en PostgreSQL mediante funciones, triggers, constraints, foreign keys, índices, validaciones, auditoría y automatización. Django autentica, valida entradas, renderiza, expone APIs internas y llama funciones SQL desde services.
+
+============================================================
+2. ESTADO REAL DETECTADO EN EL ZIP
+============================================================
+
+Proyecto principal:
+- TiendaRetail/
+
+Apps Django detectadas:
+- apps/core
+- apps/clientes
+- apps/administracion
+- apps/proveedores
+- apps/operaciones
+
+SQL detectado en carpeta real:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Conteo estático:
+- 88 tablas en estructura.sql.
+- 125 funciones en funciones.sql.
+- 13 funciones trigger en triggers.sql.
+- 14 vistas SQL.
+- 107 funciones SQL referenciadas desde Django.
+
+Riesgo principal:
+Como Django ya consume funciones SQL desde services, Codex no debe renombrar ni cambiar firmas consumidas sin crear wrappers o sobrecargas compatibles.
+
+============================================================
+3. ELEMENTOS QUE NO DEBEN ENTREGARSE A CODEX
+============================================================
+
+El ZIP contiene elementos que deben eliminarse de la copia limpia:
+- .env
+- entorno/
+- __pycache__/
+- *.pyc
+- credenciales reales
+- copias antiguas de ZIP
+
+El contenido de .env no debe leerse, imprimirse ni copiarse. Debe existir solo .env.example con valores de ejemplo.
+
+============================================================
+4. ESTRUCTURA DJANGO REAL
+============================================================
+
+TiendaRetail/urls.py incluye:
+- admin/ para admin nativo de Django, solo soporte/desarrollo.
+- raíz "" para clientes.
+- core en raíz para login/registro/perfil.
+- panel/ para administración.
+- proveedores/ para APIs proveedor.
+- operaciones/ para pagos, tracking, facturas, notificaciones y soporte.
+
+Modelos por app:
+
+apps/administracion/models.py
+Tablas mapeadas: categoria, marca, producto, producto_imagen, producto_atributo, producto_atributo_valor, producto_relacionado, producto_resena, regla_limite_compra, historial_precio_producto, almacen, inventario, movimiento_inventario, reserva_inventario, alerta_stock, cupon, cupon_uso, promocion, promocion_producto, log_busqueda, log_producto_visto, log_carrito_abandonado, evento_recomendacion, resumen_venta_diaria, snapshot_kpi, segmento_cliente
+
+apps/clientes/models.py
+Tablas mapeadas: carrito, carrito_detalle, producto_favorito, wishlist, wishlist_detalle, producto_pregunta, producto_respuesta, plan_membresia, beneficio_membresia, membresia_usuario, pago_membresia, compra_recurrente, compra_recurrente_detalle, uso_beneficio, contenido_digital, biblioteca_usuario
+
+apps/core/models.py
+Tablas mapeadas: rol, permiso, rol_permiso, usuario, usuario_rol, perfil_usuario, direccion_usuario, provincia, canton, intento_login, auditoria, parametro_sistema, estado_producto, estado_pedido, estado_pago, estado_membresia, tipo_movimiento_inventario, tipo_evento_tracking
+
+apps/operaciones/models.py
+Tablas mapeadas: pedido, pedido_detalle, pedido_estado_historial, factura, devolucion, devolucion_detalle, bin_tarjeta, metodo_pago, cuenta_simulada, transaccion_pago, autorizacion_pago, reembolso_pago, transportista, metodo_envio, zona_entrega, envio, tracking_evento, notificacion, cola_email, soporte_ticket, soporte_ticket_mensaje
+
+apps/proveedores/models.py
+Tablas mapeadas: proveedor, proveedor_contacto, producto_proveedor, proveedor_stock, orden_abastecimiento, orden_abastecimiento_detalle, historial_proveedor
+
+
+============================================================
+5. SERVICES SQL REALES
+============================================================
+
+Django ya tiene services para encapsular llamadas SQL. No se deben poner llamadas SQL dispersas en views.
+
+Archivos services detectados:
+- apps/core/services/sql_service.py
+- apps/core/services/usuario_service.py
+- apps/clientes/services/carrito_service.py
+- apps/clientes/services/checkout_service.py
+- apps/clientes/services/membresia_service.py
+- apps/clientes/services/recurrente_service.py
+- apps/clientes/services/soporte_service.py
+- apps/clientes/services/wishlist_service.py
+- apps/administracion/services/inventario_service.py
+- apps/administracion/services/producto_service.py
+- apps/administracion/services/promocion_service.py
+- apps/administracion/services/reportes_service.py
+- apps/proveedores/services/proveedor_service.py
+- apps/operaciones/services/pago_service.py
+- apps/operaciones/services/tracking_service.py
+- apps/operaciones/services/notificacion_service.py
+
+Funciones SQL críticas llamadas desde Django:
+
+apps/administracion/services/inventario_service.py
+- fn_ajustar_inventario
+- fn_consumir_reservas_pedido
+- fn_crear_almacen
+- fn_crear_o_actualizar_inventario
+- fn_eliminar_inventario_si_sin_stock
+- fn_expirar_reservas_vencidas
+- fn_liberar_reservas_pedido
+- fn_registrar_movimiento_inventario
+- fn_reservar_stock
+
+apps/administracion/services/producto_service.py
+- fn_actualizar_categoria
+- fn_actualizar_marca
+- fn_actualizar_producto
+- fn_agregar_imagen_producto
+- fn_contar_proveedores_activos_producto
+- fn_crear_categoria
+- fn_crear_marca
+- fn_crear_producto
+- fn_desactivar_producto
+- fn_eliminar_categoria_logica
+- fn_eliminar_marca_logica
+- fn_pausar_producto
+- fn_precio_producto_con_promocion
+- fn_producto_tiene_imagen_principal
+- fn_publicar_producto
+- fn_registrar_busqueda
+- fn_registrar_producto_visto
+- fn_stock_disponible_producto
+- fn_stock_proveedor_disponible_producto
+- fn_validar_producto_publicable
+
+apps/administracion/services/promocion_service.py
+- fn_aplicar_cupon_pedido
+- fn_asociar_promocion_producto
+- fn_calcular_descuento_cupon
+- fn_crear_cupon
+- fn_crear_promocion
+
+apps/administracion/services/reportes_service.py
+- fn_generar_recomendaciones_usuario
+- fn_generar_snapshot_kpis
+- fn_refrescar_resumen_venta_diaria
+- fn_segmentar_clientes
+
+apps/clientes/services/carrito_service.py
+- fn_actualizar_cantidad_carrito
+- fn_agregar_producto_carrito
+- fn_eliminar_producto_carrito
+- fn_limpiar_carrito
+- fn_obtener_limite_retail
+- fn_obtener_o_crear_carrito_activo
+- fn_total_carrito
+- fn_validar_checkout_carrito
+- fn_validar_limite_retail
+
+apps/clientes/services/checkout_service.py
+- fn_actualizar_estado_pedido
+- fn_aplicar_cupon_pedido
+- fn_aprobar_devolucion
+- fn_cancelar_pedido
+- fn_crear_pedido_desde_carrito
+- fn_recalcular_total_pedido
+- fn_solicitar_devolucion_total
+
+apps/clientes/services/membresia_service.py
+- fn_activar_membresia_usuario
+- fn_crear_plan_membresia
+- fn_desactivar_plan_membresia
+- fn_usuario_tiene_membresia_activa
+
+apps/clientes/services/recurrente_service.py
+- fn_agregar_contenido_biblioteca
+- fn_agregar_producto_compra_recurrente
+- fn_crear_compra_recurrente
+- fn_preparar_carrito_compra_recurrente
+
+apps/clientes/services/soporte_service.py
+- fn_cerrar_ticket_soporte
+- fn_crear_ticket_soporte
+- fn_responder_ticket_soporte
+
+apps/clientes/services/wishlist_service.py
+- fn_agregar_a_wishlist
+- fn_obtener_o_crear_wishlist_default
+- fn_quitar_de_wishlist
+
+apps/core/services/sql_service.py
+- fn_consultar_proveedores_para_faltante
+- fn_stock_disponible_producto
+
+apps/core/services/usuario_service.py
+- fn_actualizar_direccion_usuario
+- fn_asignar_rol_usuario
+- fn_cambiar_password_simulado
+- fn_crear_direccion_usuario
+- fn_crear_usuario_cliente
+- fn_eliminar_direccion_usuario
+- fn_obtener_usuario
+- fn_quitar_rol_usuario
+- fn_registrar_intento_login
+- fn_usuario_tiene_permiso
+- fn_verificar_email_usuario
+
+apps/operaciones/services/notificacion_service.py
+- fn_crear_notificacion
+- fn_encolar_email
+- fn_marcar_email_enviado
+- fn_marcar_email_fallido
+- fn_marcar_notificacion_leida
+
+apps/operaciones/services/pago_service.py
+- fn_ajustar_saldo_cuenta_simulada
+- fn_autorizar_pago_simulado
+- fn_bloquear_metodo_pago_simulado
+- fn_capturar_pago_simulado
+- fn_cvv_longitud_por_marca
+- fn_desactivar_metodo_pago
+- fn_detectar_marca_tarjeta
+- fn_generar_reembolso_simulado
+- fn_luhn_valid
+- fn_pagar_activar_membresia_simulada
+- fn_registrar_metodo_pago_simulado
+
+apps/operaciones/services/tracking_service.py
+- fn_actualizar_estado_pedido
+- fn_generar_tracking_inicial
+- fn_marcar_pedido_entregado
+- fn_registrar_evento_tracking
+
+apps/proveedores/services/proveedor_service.py
+- fn_actualizar_proveedor
+- fn_actualizar_stock_proveedor
+- fn_asociar_producto_proveedor
+- fn_cancelar_orden_abastecimiento
+- fn_consultar_proveedores_para_faltante
+- fn_contar_proveedores_activos_producto
+- fn_crear_proveedor
+- fn_eliminar_proveedor_logico
+- fn_generar_ordenes_abastecimiento
+- fn_recibir_orden_abastecimiento
+
+
+============================================================
+6. DECISIONES ARQUITECTÓNICAS VIGENTES
+============================================================
+
+1. DB-first.
+2. Esquema public, no schema retail.
+3. IDs en snake_case tipo cod_usuario, cod_producto, cod_proveedor.
+4. Tablas principales controladas por SQL; modelos Django con managed=False.
+5. Django llama funciones SQL desde services.
+6. Las views no deben tener lógica crítica de negocio.
+7. Templates consumen APIs internas JSON.
+8. React queda para después.
+9. Docker queda para el final.
+10. CSS propio, sin Bootstrap.
+11. Admin nativo de Django solo soporte/desarrollo, no interfaz principal.
+
+============================================================
+7. REGLAS DE NEGOCIO VIGENTES
+============================================================
+
+Retail:
+La tienda vende al consumidor final. No vende al mayorista. Deben existir límites de compra por producto/categoría.
+
+Producto publicable:
+Un producto solo se publica si tiene categoría, marca, SKU único, precio de exhibición mayor a cero, imagen principal, límite retail, mínimo 5 proveedores activos y stock propio o stock de proveedor.
+
+Proveedores:
+Un producto debe tener mínimo 5 proveedores activos para poder estar publicado. Un proveedor puede proveer muchos productos.
+
+Inventario:
+La tienda intenta no dejar de vender mediante stock propio + proveedores + reposición preventiva. Esto no significa stock infinito; si proveedores no cubren, se debe alertar y bloquear/limitar.
+
+Lotes:
+Debe existir trazabilidad por lote/tandada: costo histórico, PVP calculado, stock disponible/reservado y asignación FIFO al pedido.
+
+Precio:
+producto.precio_actual debe ser precio de exhibición o “desde”. El cobro real debe salir de lotes + función única de precio final.
+
+Prime:
+Prime da beneficios, pero no salta límites retail, stock, pago, antifraude ni validaciones.
+
+Pago simulado:
+Debe validar tarjeta, BIN, Luhn, expiración, CVV, saldo, límites, estado, idempotencia. No guardar CVV ni PAN completo.
+
+Tracking:
+Debe ser persistente en base de datos y progresivo; no depender únicamente de una simulación en Django.
+
+Auditoría:
+Tablas históricas, pagos, factura, tracking, movimientos, reservas históricas y auditoría no deben tener DELETE físico genérico.
+
+============================================================
+8. SIGUIENTE ORDEN CORRECTO
+============================================================
+
+1. Limpiar repo extraído del ZIP.
+2. Fase 0 con Codex: análisis sin edición.
+3. Fase A SQL: lotes, PVP, FIFO, reservas, reposición.
+4. Fase B SQL: precio final, Prime, promociones, envío, impuesto, factura, pago.
+5. Fase C SQL: tracking persistente, reservas vencidas, mantenimiento.
+6. Fase D SQL: CRUD lógico y datos técnicos.
+7. Fase E: ejecutar SQL completo en base nueva.
+8. Fase F: actualizar Django models/services.
+9. Fase G: APIs internas checkout/pago/tracking.
+10. Fase H: panel admin real.
+11. Fase I: cliente/proveedor.
+12. Fase J: seguridad.
+13. Fase K: UX visual.
+14. Fase L: pruebas finales.

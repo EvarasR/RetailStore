@@ -1,0 +1,336 @@
+AUDITORÍA CORREGIDA DESPUÉS DE INSPECCIONAR EL ZIP - RETAIL PRIME
+Fecha: 2026-08-01
+Tipo: revisión estática de estructura real del ZIP; no se ejecutó PostgreSQL; no se leyó .env.
+
+============================================================
+1. RESUMEN DE HALLAZGOS
+============================================================
+
+El ZIP confirma que el proyecto ya tiene una integración Django + PostgreSQL avanzada, no solo archivos SQL sueltos.
+
+Datos detectados:
+- SQL reales en ARCHIVOS SQL/.
+- 88 tablas en estructura.sql.
+- 125 funciones SQL en funciones.sql.
+- 13 funciones trigger en triggers.sql.
+- 14 vistas SQL.
+- 107 funciones SQL referenciadas desde Django.
+- 5 apps Django principales.
+- Services por app para llamadas SQL.
+- Templates cliente/admin/perfil/login/checkout.
+- JS y CSS propios.
+
+Hallazgo operativo:
+Las instrucciones deben decir rutas reales: ARCHIVOS SQL/estructura.sql, ARCHIVOS SQL/funciones.sql, ARCHIVOS SQL/triggers.sql y ARCHIVOS SQL/datos.sql.
+
+Hallazgo de seguridad/proceso:
+El ZIP incluye .env y entorno/. Deben excluirse antes de abrir en Codex.
+
+============================================================
+2. BRECHAS CRÍTICAS CONFIRMADAS
+============================================================
+
+1. Lotes/tandadas:
+No existe modelo suficiente para diferenciar unidades compradas a costos distintos.
+
+2. PVP por lote:
+producto.precio_actual no debe seguir siendo única fuente de cobro.
+
+3. FIFO/concurrencia:
+El inventario agregado necesita reservas por lote con SELECT ... FOR UPDATE.
+
+4. Reposición preventiva:
+No basta con abastecer faltantes. Debe reponerse al bajar a stock mínimo/proyectado.
+
+5. Precio mostrado vs cobrado:
+Catálogo, carrito, checkout, pedido, pago y factura deben usar una misma ruta de cálculo.
+
+6. Envío/zona/impuesto:
+pedido debe conservar método/zona/tasa/costo y factura debe copiar total exacto.
+
+7. Pago/cancelación:
+Captura tardía no puede revivir pedido cancelado ni duplicar transacciones.
+
+8. Tracking persistente:
+El tracking no debe depender solo de cálculo visual en Django.
+
+9. CRUD lógico:
+Faltan funciones administrativas para muchas entidades maestras.
+
+10. Datos demo:
+datos.sql debe quedar solo con informática/redes y mínimo 20 productos técnicos.
+
+============================================================
+3. MATRIZ DE COMPATIBILIDAD DJANGO-SQL
+============================================================
+
+Funciones usadas desde Django que deben conservar compatibilidad:
+
+apps/administracion/services/inventario_service.py
+- fn_ajustar_inventario
+- fn_consumir_reservas_pedido
+- fn_crear_almacen
+- fn_crear_o_actualizar_inventario
+- fn_eliminar_inventario_si_sin_stock
+- fn_expirar_reservas_vencidas
+- fn_liberar_reservas_pedido
+- fn_registrar_movimiento_inventario
+- fn_reservar_stock
+
+apps/administracion/services/producto_service.py
+- fn_actualizar_categoria
+- fn_actualizar_marca
+- fn_actualizar_producto
+- fn_agregar_imagen_producto
+- fn_contar_proveedores_activos_producto
+- fn_crear_categoria
+- fn_crear_marca
+- fn_crear_producto
+- fn_desactivar_producto
+- fn_eliminar_categoria_logica
+- fn_eliminar_marca_logica
+- fn_pausar_producto
+- fn_precio_producto_con_promocion
+- fn_producto_tiene_imagen_principal
+- fn_publicar_producto
+- fn_registrar_busqueda
+- fn_registrar_producto_visto
+- fn_stock_disponible_producto
+- fn_stock_proveedor_disponible_producto
+- fn_validar_producto_publicable
+
+apps/administracion/services/promocion_service.py
+- fn_aplicar_cupon_pedido
+- fn_asociar_promocion_producto
+- fn_calcular_descuento_cupon
+- fn_crear_cupon
+- fn_crear_promocion
+
+apps/administracion/services/reportes_service.py
+- fn_generar_recomendaciones_usuario
+- fn_generar_snapshot_kpis
+- fn_refrescar_resumen_venta_diaria
+- fn_segmentar_clientes
+
+apps/clientes/services/carrito_service.py
+- fn_actualizar_cantidad_carrito
+- fn_agregar_producto_carrito
+- fn_eliminar_producto_carrito
+- fn_limpiar_carrito
+- fn_obtener_limite_retail
+- fn_obtener_o_crear_carrito_activo
+- fn_total_carrito
+- fn_validar_checkout_carrito
+- fn_validar_limite_retail
+
+apps/clientes/services/checkout_service.py
+- fn_actualizar_estado_pedido
+- fn_aplicar_cupon_pedido
+- fn_aprobar_devolucion
+- fn_cancelar_pedido
+- fn_crear_pedido_desde_carrito
+- fn_recalcular_total_pedido
+- fn_solicitar_devolucion_total
+
+apps/clientes/services/membresia_service.py
+- fn_activar_membresia_usuario
+- fn_crear_plan_membresia
+- fn_desactivar_plan_membresia
+- fn_usuario_tiene_membresia_activa
+
+apps/clientes/services/recurrente_service.py
+- fn_agregar_contenido_biblioteca
+- fn_agregar_producto_compra_recurrente
+- fn_crear_compra_recurrente
+- fn_preparar_carrito_compra_recurrente
+
+apps/clientes/services/soporte_service.py
+- fn_cerrar_ticket_soporte
+- fn_crear_ticket_soporte
+- fn_responder_ticket_soporte
+
+apps/clientes/services/wishlist_service.py
+- fn_agregar_a_wishlist
+- fn_obtener_o_crear_wishlist_default
+- fn_quitar_de_wishlist
+
+apps/clientes/views.py
+- fn_registrar_pregunta_producto
+
+apps/core/services/sql_service.py
+- fn_consultar_proveedores_para_faltante
+- fn_stock_disponible_producto
+
+apps/core/services/usuario_service.py
+- fn_actualizar_direccion_usuario
+- fn_asignar_rol_usuario
+- fn_cambiar_password_simulado
+- fn_crear_direccion_usuario
+- fn_crear_usuario_cliente
+- fn_eliminar_direccion_usuario
+- fn_obtener_usuario
+- fn_quitar_rol_usuario
+- fn_registrar_intento_login
+- fn_usuario_tiene_permiso
+- fn_verificar_email_usuario
+
+apps/operaciones/services/notificacion_service.py
+- fn_crear_notificacion
+- fn_encolar_email
+- fn_marcar_email_enviado
+- fn_marcar_email_fallido
+- fn_marcar_notificacion_leida
+
+apps/operaciones/services/pago_service.py
+- fn_ajustar_saldo_cuenta_simulada
+- fn_autorizar_pago_simulado
+- fn_bloquear_metodo_pago_simulado
+- fn_capturar_pago_simulado
+- fn_cvv_longitud_por_marca
+- fn_desactivar_metodo_pago
+- fn_detectar_marca_tarjeta
+- fn_generar_reembolso_simulado
+- fn_luhn_valid
+- fn_pagar_activar_membresia_simulada
+- fn_registrar_metodo_pago_simulado
+
+apps/operaciones/services/tracking_service.py
+- fn_actualizar_estado_pedido
+- fn_generar_tracking_inicial
+- fn_marcar_pedido_entregado
+- fn_registrar_evento_tracking
+
+apps/proveedores/services/proveedor_service.py
+- fn_actualizar_proveedor
+- fn_actualizar_stock_proveedor
+- fn_asociar_producto_proveedor
+- fn_cancelar_orden_abastecimiento
+- fn_consultar_proveedores_para_faltante
+- fn_contar_proveedores_activos_producto
+- fn_crear_proveedor
+- fn_eliminar_proveedor_logico
+- fn_generar_ordenes_abastecimiento
+- fn_recibir_orden_abastecimiento
+
+
+Regla:
+Si Codex cambia una función de esta lista, debe dejar una función wrapper con el mismo nombre/firma usada por Django o actualizar Django solo en una fase posterior, nunca durante Fase A-D SQL.
+
+============================================================
+4. TABLAS NUEVAS O MODIFICACIONES PRIORITARIAS
+============================================================
+
+Prioridad A:
+- regla_precio
+- lote_inventario
+- pedido_detalle_lote
+- reserva_inventario con cod_lote/cod_pedido_detalle/estado/expiración robusta
+- índices FIFO y reservas activas
+
+Prioridad B:
+- pedido con cod_metodo_envio, cod_zona_entrega, impuesto, tasa_impuesto, costo_envio, total consistente
+- pedido_detalle con desglose de precio/descuento
+- factura con copia exacta de totales
+- uso_beneficio operativo
+
+Prioridad C:
+- tracking_evento_programado
+- tracking_evento/envio/pedido con transición persistente
+- log_carrito_abandonado con función de registro
+
+Prioridad D:
+- completar CRUD lógico de entidades maestras
+- datos.sql técnico completo
+
+============================================================
+5. ENTIDADES QUE REQUIEREN CRUD LÓGICO O ADMINISTRACIÓN
+============================================================
+
+Seguridad:
+- rol
+- permiso
+- rol_permiso
+- perfil_usuario
+- parametro_sistema
+
+Catálogo:
+- categoria
+- marca
+- producto
+- producto_imagen
+- producto_atributo
+- producto_atributo_valor
+- producto_relacionado
+- producto_resena
+- regla_limite_compra
+- regla_precio
+
+Inventario:
+- almacen
+- alerta_stock, con resolver/cerrar
+- lote_inventario, con bloquear/anular controlado, no borrar histórico
+
+Proveedores:
+- proveedor
+- proveedor_contacto
+- producto_proveedor
+
+Envíos:
+- transportista
+- metodo_envio
+- zona_entrega
+
+Prime:
+- plan_membresia
+- beneficio_membresia
+- cancelación de membresía
+- uso_beneficio con consultas, no borrado físico
+
+Marketing:
+- promocion
+- promocion_producto
+- cupon
+
+Contenido:
+- contenido_digital
+
+============================================================
+6. TABLAS QUE NO DEBEN TENER DELETE FÍSICO GENÉRICO
+============================================================
+
+- auditoria
+- intento_login
+- movimiento_inventario
+- reserva_inventario histórica
+- pedido
+- pedido_detalle
+- pedido_estado_historial
+- factura
+- transaccion_pago
+- autorizacion_pago
+- reembolso_pago
+- tracking_evento
+- historial_precio_producto
+- historial_proveedor
+- pago_membresia
+- uso_beneficio
+- logs BI
+- snapshots KPI
+
+============================================================
+7. PRUEBAS DE ACEPTACIÓN FINAL SQL
+============================================================
+
+- Los cuatro SQL ejecutan desde cero en PostgreSQL 15.
+- No se crea schema retail.
+- Todas las tablas están en public.
+- Producto publicable exige 5 proveedores activos.
+- Cotización FIFO 30 + 10 funciona.
+- Dos reservas concurrentes no sobre-venden.
+- Reserva expirada libera lote.
+- Pago capturado genera factura consistente.
+- Captura repetida no duplica cobro.
+- Cancelación antes de captura libera reservas y anula autorización.
+- Tracking programado se procesa una sola vez.
+- Prime aplica beneficios y registra uso.
+- datos.sql no contiene categorías ajenas al nicho.

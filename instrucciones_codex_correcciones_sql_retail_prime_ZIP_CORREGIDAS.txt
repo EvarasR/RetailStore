@@ -1,0 +1,302 @@
+INSTRUCCIONES CORREGIDAS PARA TRABAJAR CON CODEX - RETAIL PRIME
+Versión ajustada después de inspeccionar RetailStore (3).zip
+Fecha: 2026-08-01
+
+============================================================
+1. ARCHIVOS Y RUTAS REALES
+============================================================
+
+Codex debe abrir la carpeta raíz extraída y limpia:
+RetailStore/
+
+Los SQL están en:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Cuando un prompt diga estructura.sql, funciones.sql, triggers.sql o datos.sql, debe entenderse como esos archivos dentro de ARCHIVOS SQL/.
+
+============================================================
+2. LIMPIEZA OBLIGATORIA ANTES DE CODEX
+============================================================
+
+Eliminar antes de abrir en Codex:
+- .env
+- entorno/
+- __pycache__/
+- *.pyc
+- copias antiguas de ZIP
+- credenciales
+- dumps sensibles
+
+No leer ni imprimir .env.
+Crear o mantener .env.example sin secretos reales.
+
+============================================================
+3. REGLAS GLOBALES PARA CODEX
+============================================================
+
+Codex debe respetar:
+- PostgreSQL 15.
+- Esquema public.
+- No crear schema retail.
+- No usar SET search_path = retail, public.
+- DB-first.
+- No ejecutar SQL contra la base real.
+- No ejecutar comandos destructivos.
+- No tocar .env.
+- No modificar Django durante Fase A-D SQL.
+- No cambiar firmas SQL consumidas por Django sin wrapper o sobrecarga compatible.
+- No crear DELETE físico genérico para tablas históricas/transaccionales.
+- Usar BIGINT para IDs.
+- Usar INTEGER para cantidades.
+- Usar NUMERIC para dinero.
+- No usar MONEY ni FLOAT para importes.
+- Usar SELECT ... FOR UPDATE en reservas, stock, pagos y órdenes cuando corresponda.
+- Mantener ejecución: estructura, funciones, triggers, datos.
+
+============================================================
+4. PROMPT INICIAL OBLIGATORIO
+============================================================
+
+Pegar a Codex:
+
+Lee completamente y en este orden:
+1. contexto_retail_prime_actualizado_codex_fase3_ZIP_CORREGIDO.txt
+2. auditoria_crud_funciones_sql_retail_prime_ZIP_CORREGIDA.txt
+3. instrucciones_codex_correcciones_sql_retail_prime_ZIP_CORREGIDAS.txt
+4. 00_FLUJO_POR_FASES_CODEX_RETAIL_PRIME_ZIP_DETALLADO.txt
+5. ARCHIVOS SQL/estructura.sql
+6. ARCHIVOS SQL/funciones.sql
+7. ARCHIVOS SQL/triggers.sql
+8. ARCHIVOS SQL/datos.sql
+9. apps/ y TiendaRetail/ solo como referencia de compatibilidad.
+
+No modifiques nada todavía.
+No leas ni muestres .env.
+No ejecutes SQL.
+No cambies Python, HTML, CSS ni JS.
+
+Primero entrégame:
+- mapa de dependencias entre los 4 SQL;
+- tablas que agregarías/modificarías;
+- funciones nuevas;
+- funciones a reemplazar;
+- wrappers necesarios para conservar compatibilidad Django;
+- archivos Django que se verán afectados después;
+- riesgos de compatibilidad;
+- plan por fases;
+- criterios de aceptación verificables;
+- dudas o contradicciones detectadas.
+
+Criterio de aceptación:
+- git diff debe seguir vacío.
+
+============================================================
+5. PROMPT FASE A
+============================================================
+
+Aplica FASE A.
+Modifica solo:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+Implementa:
+- regla_precio;
+- lote_inventario;
+- pedido_detalle_lote;
+- reservas por lote;
+- PVP por lote;
+- FIFO con SELECT ... FOR UPDATE;
+- consumo/liberación/expiración de reservas por lote;
+- recalcular inventario desde lotes;
+- producto.precio_actual como precio de exhibición “desde”;
+- reposición preventiva hasta stock_maximo;
+- caso teclado 30 unidades costo 2 + 10 unidades costo 3.
+
+Mantén wrappers compatibles para funciones usadas por Django.
+No modifiques Django.
+No ejecutes SQL.
+
+Entrega:
+- tablas/columnas/índices/constraints;
+- funciones nuevas/reemplazadas;
+- wrappers conservados;
+- triggers;
+- SELECTs de verificación;
+- riesgos pendientes.
+
+============================================================
+6. PROMPT FASE B
+============================================================
+
+Aplica FASE B.
+Modifica solo los 4 SQL dentro de ARCHIVOS SQL/.
+Implementa precio final único, promociones, Prime, cupones, envío por método/zona, impuesto configurable, factura consistente, pago/cancelación/idempotencia.
+Mantén wrappers compatibles.
+No modifiques Django.
+No ejecutes SQL.
+
+Entrega:
+- columnas nuevas;
+- funciones de cálculo;
+- orden de descuentos;
+- reglas Prime;
+- reglas de impuesto/envío;
+- endurecimiento de pago/cancelación;
+- SELECTs de verificación.
+
+============================================================
+7. PROMPT FASE C
+============================================================
+
+Aplica FASE C.
+Modifica solo los 4 SQL dentro de ARCHIVOS SQL/.
+Implementa tracking_evento_programado, programación después de pago capturado, procesamiento idempotente, actualización de envio/pedido, expiración robusta de reservas, cancelación de pedidos impagos vencidos y carritos abandonados.
+Mantén wrappers compatibles para tracking_service.py e inventario_service.py.
+No modifiques Django.
+No ejecutes SQL.
+
+Entrega:
+- tabla tracking_evento_programado;
+- funciones nuevas;
+- triggers modificados;
+- reglas de transición;
+- SELECTs de verificación.
+
+============================================================
+8. PROMPT FASE D
+============================================================
+
+Aplica FASE D.
+Modifica solo los 4 SQL dentro de ARCHIVOS SQL/.
+Completa CRUD lógico de entidades maestras y relaciones administrables.
+No crees DELETE físico genérico para tablas transaccionales, históricas, pagos, auditoría, tracking, movimientos ni logs.
+Reemplaza datos generalistas por informática/redes.
+Asegura mínimo 20 productos técnicos y 5 proveedores activos por producto publicable.
+Mantén caso teclado 30 + 10.
+Mantén wrappers compatibles.
+No modifiques Django.
+No ejecutes SQL.
+
+Entrega:
+- funciones CRUD lógico por entidad;
+- funciones de relaciones;
+- datos técnicos agregados;
+- validaciones de 5 proveedores;
+- SELECTs de verificación.
+
+============================================================
+9. PROMPT FASE E CORRECCIÓN DE ERRORES SQL
+============================================================
+
+Usar cuando tú ejecutes y PostgreSQL devuelva error:
+
+La validación SQL falló.
+Corrige solo el error y consecuencias directas.
+Error completo:
+[PEGAR ERROR COMPLETO]
+
+Puedes modificar solo:
+- ARCHIVOS SQL/estructura.sql
+- ARCHIVOS SQL/funciones.sql
+- ARCHIVOS SQL/triggers.sql
+- ARCHIVOS SQL/datos.sql
+
+No modifiques Django.
+No ejecutes SQL.
+Explica causa raíz, corrección aplicada y SELECT de verificación.
+
+============================================================
+10. PROMPT FASE F DJANGO MODELOS/SERVICES
+============================================================
+
+Usar solo después de que SQL ejecute desde cero:
+
+Aplica FASE F.
+SQL ya fue validado. Actualiza modelos managed=False y services para las nuevas tablas, columnas y funciones.
+No crees migraciones para tablas controladas por SQL.
+No muevas lógica crítica a Django.
+No cambies templates ni JS/CSS todavía.
+Usa casteos explícitos.
+Entrega modelos agregados/modificados, services modificados y funciones SQL llamadas.
+
+============================================================
+11. PROMPT FASE G APIS
+============================================================
+
+Aplica FASE G.
+Actualiza APIs internas para carrito, cotización por lotes, checkout, pago, factura y tracking persistente.
+Valida ownership y permisos.
+No rediseñes todavía.
+No muevas lógica crítica a Django.
+Entrega endpoints, payloads y pruebas.
+
+============================================================
+12. PROMPT FASE H ADMIN
+============================================================
+
+Aplica FASE H.
+Implementa panel administrativo real usando CRUD lógico SQL.
+Mantén un solo template principal con secciones.
+Protege APIs admin con user.is_staff.
+No uses Bootstrap.
+Entrega endpoints, secciones y funciones SQL llamadas.
+
+============================================================
+13. PROMPT FASE I CLIENTE/PROVEEDOR
+============================================================
+
+Aplica FASE I.
+Completa experiencia cliente Prime y proveedor usando APIs/services validados.
+Mantén pocos templates, secciones dinámicas y CSS propio.
+No metas lógica crítica en JS.
+Entrega pruebas manuales.
+
+============================================================
+14. PROMPT FASE J SEGURIDAD
+============================================================
+
+Aplica FASE J.
+Audita rutas, permisos, ownership, CSRF, errores JSON, inputs, métodos de pago, pedidos, facturas, proveedor/admin/cliente.
+No expongas secretos.
+No modifiques SQL salvo bug menor necesario.
+Entrega vulnerabilidades corregidas y pruebas.
+
+============================================================
+15. PROMPT FASE K UX
+============================================================
+
+Aplica FASE K.
+Mejora UI/UX con CSS propio, modo claro/oscuro, diseño retail tecnológico, cards, panel admin, checkout, carrito drawer y detalle modal.
+No copies Amazon literalmente.
+No cambies reglas de negocio.
+No rompas IDs/clases usados por JS.
+
+============================================================
+16. COMANDOS DE REVISIÓN
+============================================================
+
+Después de fases SQL:
+
+git diff --stat
+git diff -- "ARCHIVOS SQL/estructura.sql" "ARCHIVOS SQL/funciones.sql" "ARCHIVOS SQL/triggers.sql" "ARCHIVOS SQL/datos.sql"
+
+Ejecución SQL manual:
+
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/estructura.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/funciones.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/triggers.sql"
+psql -U postgres -d retail_prime_db_pruebas -f "ARCHIVOS SQL/datos.sql"
+
+Después de fases Django:
+
+python manage.py check
+python manage.py runserver
+
+============================================================
+FIN
+============================================================
