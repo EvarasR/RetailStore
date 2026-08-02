@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
-{% block title %}Mis pedidos | TechTail{% endblock %}
+{% block title %}TechTail | Mis pedidos{% endblock %}
 {% block page %}pedidos{% endblock %}
 {% block content %}
-<main class="tt-page"><nav class="tt-breadcrumb"><a href="{% url 'clientes:inicio' %}">Inicio</a><span>›</span><strong>Mis pedidos</strong></nav><header class="tt-section-heading"><div><p class="tt-eyebrow">Postventa</p><h1>Pedidos y tracking</h1><p>Consulta el estado, factura y eventos persistentes de cada compra.</p></div></header><div id="tt-orders-page" class="tt-orders-list"></div></main>
+<main class="rp-page rp-orders-page"><nav class="rp-breadcrumb"><a href="{% url 'clientes:inicio' %}">Inicio</a><span>›</span><a href="{% url 'core:perfil' %}">Mi cuenta</a><span>›</span><strong>Pedidos</strong></nav><header class="rp-page-hero"><div><p class="rp-kicker">Postventa</p><h1>Pedidos y tracking</h1><p>Consulta estados, facturas y cada evento de entrega en un solo lugar.</p></div><a href="{% url 'clientes:catalogo' %}">Seguir comprando →</a></header><section class="rp-orders-toolbar"><span>⌖ Tracking persistente</span><span>▤ Facturas después del pago</span><span>↻ Historial completo</span></section><div id="tt-orders-page" class="tt-orders-list"></div></main>
 {% endblock %}

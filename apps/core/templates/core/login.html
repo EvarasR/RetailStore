@@ -1,35 +1,22 @@
-{% load static %}
-<!doctype html>
-<html lang="es" data-theme="light">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ingresar | TechTail</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
-</head>
-<body data-page="login">
-  <main class="rp-auth-shell">
-    <form class="rp-auth-card" method="post">
-      {% csrf_token %}
-      <a class="rp-brand rp-auth-brand" href="/"><img class="rp-brand-logo" src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>TechTail</span></a>
-      <h1>Ingresar</h1>
-      <p class="rp-muted">Usa tu cuenta cliente o administrativa.</p>
-      {% if messages %}
-        {% for message in messages %}<div class="rp-alert">{{ message }}</div>{% endfor %}
-      {% endif %}
-      <input type="hidden" name="next" value="{{ next }}">
-      <label>Correo</label>
-      <input name="email" type="email" required autofocus placeholder="admin@retailprime.local">
-      <label>Contraseña</label>
-      <input name="password" type="password" required placeholder="••••••••">
-      <button class="rp-primary" type="submit">Entrar</button>
-      <a class="rp-link" href="{% url 'core:registro' %}">Crear cuenta cliente</a>
-      <a class="rp-link" href="/">Volver a la tienda</a>
-    </form>
-  </main>
-  <script src="{% static 'retail/js/retail.js' %}"></script>
-</body>
-</html>
+{% extends 'core/base_auth.html' %}
+{% block title %}TechTail | Login{% endblock %}
+{% block story_title %}Vuelve a tu centro de compras tecnológico.{% endblock %}
+{% block form_content %}
+<form class="rp-auth-form" method="post">
+  {% csrf_token %}
+  <p class="rp-kicker">Acceso seguro</p>
+  <h2>Inicia sesión</h2>
+  <p class="rp-auth-intro">Consulta pedidos, tracking, facturas y beneficios Prime desde una sola cuenta.</p>
+  {% if messages %}{% for message in messages %}<div class="rp-alert">{{ message }}</div>{% endfor %}{% endif %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <label for="login-email">Correo electrónico</label>
+  <input id="login-email" name="email" type="email" required autofocus autocomplete="email" placeholder="tu@empresa.com">
+  <div class="rp-label-row"><label for="login-password">Contraseña</label><span>Acceso privado</span></div>
+  <input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+  <button class="rp-primary rp-auth-submit" type="submit">Ingresar a mi cuenta <span>→</span></button>
+  <div class="rp-auth-divider"><span>¿Primera vez en TechTail?</span></div>
+  <a class="rp-auth-secondary" href="{% url 'core:registro' %}">Crear una cuenta</a>
+  <a class="rp-auth-back" href="/">← Volver a la tienda</a>
+  <p class="rp-auth-security">▣ Sesión cifrada · Nunca compartimos tus credenciales</p>
+</form>
+{% endblock %}

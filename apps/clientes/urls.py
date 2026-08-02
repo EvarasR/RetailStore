@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/productos/<int:cod_producto>/cotizar/", views.api_cotizar_producto_lotes, name="api_cotizar_producto_lotes"),
     path("api/productos/<int:cod_producto>/preguntas/", views.api_preguntas_producto, name="api_preguntas_producto"),
     path("api/productos/<int:cod_producto>/preguntar/", views.api_preguntar_producto, name="api_preguntar_producto"),
+    path("api/productos/<int:cod_producto>/resenas/crear/", views.api_crear_resena_producto, name="api_crear_resena_producto"),
 
     path("api/carrito/", views.api_carrito, name="api_carrito"),
     path("api/carrito/agregar/", views.api_carrito_agregar, name="api_carrito_agregar"),
@@ -36,6 +37,13 @@ urlpatterns = [
     path("api/pedidos/<int:cod_pedido>/devolucion/", views.api_solicitar_devolucion_pedido, name="api_solicitar_devolucion_pedido"),
 
     path("api/favoritos/toggle/", views.api_favorito_toggle, name="api_favorito_toggle"),
+    path("api/favoritos/", views.api_favoritos, name="api_favoritos"),
     path("api/membresia/", views.api_membresia, name="api_membresia"),
     path("api/membresia/activar/", views.api_activar_membresia, name="api_activar_membresia"),
+    path("api/membresia/cancelar/", views.api_cancelar_membresia, name="api_cancelar_membresia"),
+    path("api/compras-recurrentes/", views.api_compras_recurrentes, name="api_compras_recurrentes"),
+    path("api/compras-recurrentes/crear/", views.api_crear_compra_recurrente, name="api_crear_compra_recurrente"),
+    path("api/compras-recurrentes/<int:cod_compra>/actualizar/", views.api_actualizar_compra_recurrente, name="api_actualizar_compra_recurrente"),
+    path("api/compras-recurrentes/<int:cod_compra>/productos/", views.api_producto_compra_recurrente, name="api_producto_compra_recurrente"),
+    path("api/compras-recurrentes/<int:cod_compra>/ejecutar/", views.api_ejecutar_compra_recurrente, name="api_ejecutar_compra_recurrente"),
 ]

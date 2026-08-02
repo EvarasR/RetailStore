@@ -1,81 +1,28 @@
 {% load static %}
 <!doctype html>
 <html lang="es" data-theme="light">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TechTail | Mi cuenta</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/account-redesign.css' %}">
-</head>
-<body data-page="perfil">
-<header class="tt-profile-header">
-  <a class="tt-profile-brand" href="/"><img src="{% static 'retail/img/brand/techtail-mark.svg' %}" alt="TechTail"><span><strong>TechTail</strong><small>Centro de cuenta</small></span></a>
-  <nav class="tt-profile-header-links">
-    <a href="/">Ir a la tienda</a>
-    <a href="{% url 'clientes:pedidos' %}">Mis pedidos</a>
-    {% if user.is_staff %}<a class="rp-icon-btn" href="{% url 'administracion:panel' %}">Panel</a>{% endif %}
-    <form class="rp-logout-form" method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form>
-    <button id="theme-toggle" type="button" aria-label="Cambiar tema">◐</button>
-  </nav>
-</header>
-<main class="tt-account">
-  <section class="tt-account-hero">
-    <div>
-      <p class="tt-account-kicker">Centro de cuenta</p>
-      <h1>Todo lo tuyo, bien organizado.</h1>
-      <p>Actualiza tu perfil, prepara tus direcciones y métodos de pago, consulta comprobantes y descubre los beneficios de TechTail Prime.</p>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#07162b"><title>TechTail | Perfil</title><link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}"><link rel="stylesheet" href="{% static 'retail/css/retail.css' %}"><link rel="stylesheet" href="{% static 'retail/css/account-redesign.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-pages.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-portals.css' %}"></head>
+<body class="rp-account-page" data-page="perfil">
+<header class="rp-account-header"><a href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"></a><nav><a href="/">Tienda</a><a href="{% url 'clientes:pedidos' %}">Mis pedidos</a>{% if user.is_staff %}<a href="{% url 'administracion:panel' %}">Panel admin</a>{% endif %}<form method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form><button id="theme-toggle" type="button" aria-label="Cambiar tema">◐</button></nav></header>
+<main class="rp-account-shell">
+  <section class="rp-account-hero"><div><p class="rp-kicker">Centro de cuenta TechTail</p><h1>Tu tecnología, tus compras, todo bajo control.</h1><p>Administra información, entregas, métodos simulados, pedidos y beneficios desde un solo lugar.</p><div class="rp-account-hero-links"><a href="{% url 'clientes:pedidos' %}">Ver pedidos →</a><a href="{% url 'clientes:catalogo' %}">Explorar catálogo</a></div></div><div id="account-summary" class="rp-account-identity" aria-live="polite"><img src="{% static 'retail/img/brand/techtail-mark.svg' %}" alt=""><div><strong>Cargando tu cuenta</strong><span>Un momento…</span></div></div></section>
+  <section class="rp-account-quick-strip" aria-label="Accesos rápidos"><button data-profile-tab="pedidos"><span>▤</span><strong>Pedidos</strong><small>Historial y estado</small></button><button data-profile-tab="direcciones"><span>⌖</span><strong>Direcciones</strong><small>Entrega y contacto</small></button><button data-profile-tab="pagos"><span>▣</span><strong>Pagos</strong><small>Tarjetas simuladas</small></button><button data-profile-tab="prime"><span>✦</span><strong>Prime</strong><small>Planes y beneficios</small></button><button data-profile-tab="soporte"><span>?</span><strong>Soporte</strong><small>Estamos para ayudarte</small></button></section>
+  <div class="rp-account-layout">
+    <nav class="rp-account-nav" aria-label="Secciones de cuenta"><p>Mi cuenta</p><button class="is-active" data-profile-tab="perfil" type="button"><span>◈</span>Resumen y perfil</button><button data-profile-tab="direcciones" type="button"><span>⌖</span>Direcciones</button><button data-profile-tab="pagos" type="button"><span>▣</span>Métodos de pago</button><button data-profile-tab="facturacion" type="button"><span>▤</span>Facturas</button><button data-profile-tab="prime" type="button"><span>✦</span>TechTail Prime</button><button data-profile-tab="pedidos" type="button"><span>◷</span>Pedidos y tracking</button><button data-profile-tab="favoritos" type="button"><span>♡</span>Wishlist</button><button data-profile-tab="soporte" type="button"><span>?</span>Soporte</button></nav>
+    <div class="rp-account-content">
+      <section class="rp-account-panel is-active" data-profile-panel="perfil"><header><p class="rp-kicker">Resumen</p><h2>Información de tu cuenta</h2><span>Mantén tus datos actualizados para agilizar compras y entregas.</span></header><div class="rp-account-grid"><article class="rp-account-card"><h3>Datos personales</h3><form id="profile-form" class="rp-form rp-form-grid">{% csrf_token %}<label>Nombres<input name="nombres" id="profile-nombres" autocomplete="given-name"></label><label>Apellidos<input name="apellidos" id="profile-apellidos" autocomplete="family-name"></label><label>Teléfono<input name="telefono" id="profile-telefono" autocomplete="tel"></label><label>Documento<input name="documento_identidad" id="profile-documento"></label><button class="rp-primary" type="submit">Guardar cambios</button></form></article><aside class="rp-account-card rp-status-card"><h3>Seguridad y estado</h3><div id="profile-status"></div><div class="rp-security-note"><strong>▣ Cuenta protegida</strong><p>TechTail nunca muestra tu contraseña ni el número completo de tus tarjetas.</p></div></aside></div><article class="rp-account-card"><h3>Continúa donde lo dejaste</h3><div class="rp-account-links"><a href="{% url 'clientes:carrito' %}"><strong>Carrito</strong><small>Revisa productos preparados</small><span>→</span></a><a href="{% url 'clientes:pedidos' %}"><strong>Pedidos</strong><small>Factura y seguimiento</small><span>→</span></a><a href="{% url 'clientes:catalogo' %}"><strong>Catálogo</strong><small>Encuentra tu próxima solución</small><span>→</span></a></div></article></section>
+
+      <section class="rp-account-panel" data-profile-panel="direcciones"><header><p class="rp-kicker">Entrega</p><h2>Direcciones guardadas</h2><span>Define destinos y una dirección predeterminada para el checkout.</span></header><div class="rp-account-grid"><article class="rp-account-card"><h3>Tus direcciones</h3><div id="address-list" class="rp-list"></div></article><article class="rp-account-card"><h3>Agregar dirección</h3><form id="address-form" class="rp-form">{% csrf_token %}<div class="rp-form-row"><label>Alias<input name="alias" placeholder="Casa u oficina"></label><label>Persona que recibe<input name="receptor" placeholder="Nombre completo"></label></div><label>Dirección principal<input name="linea1" required placeholder="Calle, número e intersección"></label><label>Referencia<input name="linea2" placeholder="Edificio, piso o referencia"></label><div class="rp-form-row"><label>Provincia<select name="cod_provincia" id="address-provincia" required><option value="">Selecciona</option></select></label><label>Cantón / ciudad<select name="cod_canton" id="address-canton" required><option value="">Selecciona</option></select></label></div><div class="rp-form-row"><label>País<input name="pais" value="Ecuador" readonly></label><label>Código postal<input name="codigo_postal" placeholder="Opcional"></label></div><label>Teléfono de contacto<input name="telefono_contacto" autocomplete="tel"></label><label class="rp-check"><input name="es_predeterminada" type="checkbox"> Usar como dirección predeterminada</label><button class="rp-primary" type="submit">Guardar dirección</button></form></article></div></section>
+
+      <section class="rp-account-panel" data-profile-panel="pagos"><header><p class="rp-kicker">TechTail Pay Secure</p><h2>Métodos de pago simulados</h2><span>Para la demostración, no uses información financiera real.</span></header><div class="rp-account-grid"><article class="rp-account-card"><h3>Tu billetera</h3><div id="payment-list" class="rp-list"></div></article><article class="rp-account-card"><div class="rp-card-brand"><span>TECHTAIL PAY</span><b>SECURE</b><strong>•••• •••• •••• 0000</strong><small>SIMULACIÓN</small></div><form id="profile-payment-form" class="rp-form" autocomplete="off">{% csrf_token %}<label>Titular<input name="titular" placeholder="Nombre como aparece en la tarjeta"></label><label>Número de tarjeta simulada<input name="numero_tarjeta" inputmode="numeric" maxlength="19" placeholder="4111111111111111"></label><div class="rp-form-row"><label>Mes<input name="exp_mes" inputmode="numeric" maxlength="2" placeholder="MM"></label><label>Año<input name="exp_anio" inputmode="numeric" maxlength="4" placeholder="AAAA"></label><label>CVV<input name="cvv" inputmode="numeric" maxlength="4" placeholder="CVV"></label></div><div class="rp-form-row"><label>Saldo simulado<input name="saldo_disponible" inputmode="decimal" value="1000"></label><label>Límite diario<input name="limite_diario" inputmode="decimal" value="1000"></label></div><button class="rp-primary" type="submit">Guardar método</button><p class="rp-security-note">No se almacena CVV ni el número completo.</p></form></article></div></section>
+
+      <section class="rp-account-panel" data-profile-panel="facturacion"><header><p class="rp-kicker">Comprobantes</p><h2>Facturas y pagos</h2><span>Las facturas aparecen después de una captura de pago exitosa.</span></header><article class="rp-account-card"><div id="invoice-list" class="rp-list"></div></article></section>
+      <section class="rp-account-panel" data-profile-panel="prime"><header><p class="rp-kicker">Membresía</p><h2>TechTail Prime</h2><span>Beneficios comerciales sujetos a stock, pago, límites y envío.</span></header><article class="rp-account-card rp-prime-account"><div id="profile-membership-box"></div></article></section>
+      <section class="rp-account-panel" data-profile-panel="pedidos"><header><p class="rp-kicker">Compras</p><h2>Pedidos y seguimiento</h2><span>Estado y acceso al tracking persistente de cada compra.</span></header><div id="profile-orders" class="rp-list"></div></section>
+      <section class="rp-account-panel" data-profile-panel="favoritos"><header><p class="rp-kicker">Lista personal</p><h2>Wishlist</h2><span>Productos guardados para comparar o comprar después.</span></header><div id="profile-favorites" class="rp-account-favorites"></div></section>
+      <section class="rp-account-panel" data-profile-panel="soporte"><header><p class="rp-kicker">Ayuda</p><h2>Soporte TechTail</h2><span>Crea y consulta solicitudes asociadas a tu cuenta.</span></header><div class="rp-account-grid"><article class="rp-account-card"><h3>Tus tickets</h3><div id="profile-tickets" class="rp-list"></div></article><article class="rp-account-card"><h3>Nueva solicitud</h3><form id="support-form" class="rp-form">{% csrf_token %}<label>Asunto<input name="asunto" required maxlength="180"></label><label>Categoría<select name="categoria"><option value="GENERAL">General</option><option value="PEDIDO">Pedido</option><option value="PAGO">Pago</option><option value="TECNICO">Soporte técnico</option></select></label><label>Prioridad<select name="prioridad"><option value="MEDIA">Media</option><option value="BAJA">Baja</option><option value="ALTA">Alta</option></select></label><label>Mensaje<textarea name="mensaje" required minlength="10" rows="5"></textarea></label><button class="rp-primary" type="submit">Crear ticket</button></form></article></div></section>
     </div>
-    <div id="account-summary" class="tt-account-id" aria-live="polite"><img src="{% static 'retail/img/brand/techtail-mark.svg' %}" alt=""><div><strong>Cargando cuenta</strong><span>Un momento…</span></div></div>
-  </section>
-
-  <section class="tt-account-layout">
-    <nav class="tt-profile-nav" aria-label="Secciones de mi cuenta">
-      <button class="is-active" data-profile-tab="perfil" type="button">◈ Mi perfil</button>
-      <button data-profile-tab="direcciones" type="button">⌖ Direcciones</button>
-      <button data-profile-tab="pagos" type="button">▣ Métodos de pago</button>
-      <button data-profile-tab="facturacion" type="button">▤ Facturas</button>
-      <button data-profile-tab="prime" type="button">✦ TechTail Prime</button>
-      <button data-profile-tab="pedidos" type="button">◷ Pedidos y tracking</button>
-      <button data-profile-tab="favoritos" type="button">♡ Favoritos</button>
-      <a href="mailto:soporte@techtail.local">? Soporte</a>
-    </nav>
-
-    <div>
-      <section class="tt-account-panel is-active" data-profile-panel="perfil">
-        <div class="tt-account-split">
-          <article class="tt-account-card">
-            <p class="tt-account-kicker">Datos personales</p><h2>Tu información</h2>
-            <p>Esta información se usa para personalizar tu experiencia y tus pedidos.</p>
-            <form id="profile-form" class="rp-form rp-form-grid">
-              {% csrf_token %}
-              <label>Nombres<input name="nombres" id="profile-nombres" autocomplete="given-name"></label>
-              <label>Apellidos<input name="apellidos" id="profile-apellidos" autocomplete="family-name"></label>
-              <label>Teléfono<input name="telefono" id="profile-telefono" autocomplete="tel"></label>
-              <label>Documento<input name="documento_identidad" id="profile-documento"></label>
-              <button class="rp-primary" type="submit">Guardar cambios</button>
-            </form>
-          </article>
-          <aside class="tt-account-card"><p class="tt-account-kicker">Seguridad</p><h2>Estado de la cuenta</h2><div id="profile-status" class="tt-account-status"></div></aside>
-        </div>
-        <div class="tt-account-card"><p class="tt-account-kicker">Accesos rápidos</p><div class="tt-account-quick"><a href="{% url 'clientes:carrito' %}">Carrito<small>Revisa tus productos preparados.</small></a><a href="{% url 'clientes:pedidos' %}">Mis pedidos<small>Factura, devolución y seguimiento.</small></a><a href="{% url 'clientes:catalogo' %}">Explorar catálogo<small>Encuentra tecnología para tu proyecto.</small></a></div></div>
-      </section>
-
-      <section class="tt-account-panel" data-profile-panel="direcciones">
-        <div class="tt-account-split"><article class="tt-account-card"><p class="tt-account-kicker">Entrega</p><h2>Direcciones guardadas</h2><div id="address-list" class="rp-list"></div></article>
-        <article class="tt-account-card"><p class="tt-account-kicker">Nueva dirección</p><h2>¿Dónde entregamos?</h2><form id="address-form" class="rp-form" >{% csrf_token %}<input name="alias" placeholder="Alias: Casa, oficina…"><input name="receptor" placeholder="Persona que recibe"><input name="linea1" placeholder="Dirección principal" required><input name="linea2" placeholder="Referencia"><div class="rp-form-row"><select name="cod_provincia" id="address-provincia" required><option value="">Provincia</option></select><select name="cod_canton" id="address-canton" required><option value="">Cantón / ciudad</option></select></div><input name="pais" value="Ecuador" readonly><input name="codigo_postal" placeholder="Código postal (opcional)"><input name="telefono_contacto" placeholder="Teléfono de contacto"><label class="rp-check"><input name="es_predeterminada" type="checkbox"> Usar como dirección predeterminada</label><button class="rp-primary" type="submit">Guardar dirección</button></form></article></div>
-      </section>
-
-      <section class="tt-account-panel" data-profile-panel="pagos"><div class="tt-account-split"><article class="tt-account-card"><p class="tt-account-kicker">Billetera simulada</p><h2>Métodos protegidos</h2><div id="payment-list" class="rp-list"></div></article><article class="tt-account-card"><p class="tt-account-kicker">TechTail Pay Secure</p><h2>Agregar tarjeta simulada</h2><form id="profile-payment-form" class="rp-form" autocomplete="off">{% csrf_token %}<label>Titular<input name="titular" placeholder="Nombre como aparece en la tarjeta"></label><label>Número de tarjeta<input name="numero_tarjeta" inputmode="numeric" maxlength="19" placeholder="4111111111111111"></label><div class="rp-form-row"><input name="exp_mes" inputmode="numeric" maxlength="2" placeholder="MM"><input name="exp_anio" inputmode="numeric" maxlength="4" placeholder="AAAA"><input name="cvv" inputmode="numeric" maxlength="4" placeholder="CVV"></div><div class="rp-form-row"><input name="saldo_disponible" inputmode="decimal" value="1000" placeholder="Saldo simulado"><input name="limite_diario" inputmode="decimal" value="1000" placeholder="Límite diario"></div><button class="rp-primary" type="submit">Guardar tarjeta</button><p class="rp-muted">Por seguridad, no se guarda el CVV ni el número completo.</p></form></article></div></section>
-
-      <section class="tt-account-panel" data-profile-panel="facturacion"><article class="tt-account-card"><p class="tt-account-kicker">Comprobantes</p><h2>Facturas y pedidos pagados</h2><div id="invoice-list" class="rp-list"></div></article></section>
-      <section class="tt-account-panel" data-profile-panel="prime"><article class="tt-account-card"><p class="tt-account-kicker">Membresía</p><h2>TechTail Prime</h2><div id="profile-membership-box"></div></article></section>
-      <section class="tt-account-panel" data-profile-panel="pedidos"><article class="tt-account-card"><p class="tt-account-kicker">Compras</p><h2>Pedidos y seguimiento</h2><p>Consulta el estado, la factura y los eventos de tracking de todas tus compras en un solo lugar.</p><a class="rp-primary" href="{% url 'clientes:pedidos' %}">Ver mis pedidos</a></article></section>
-      <section class="tt-account-panel" data-profile-panel="favoritos"><article class="tt-account-card"><p class="tt-account-kicker">Lista personal</p><h2>Favoritos</h2><div class="tt-account-empty">Tu lista se mostrará aquí cuando agregues productos a favoritos. Mientras tanto, explora el catálogo técnico.</div><p><a class="rp-secondary" href="{% url 'clientes:catalogo' %}">Ver catálogo</a></p></article></section>
-    </div>
-  </section>
+  </div>
 </main>
-<div id="toast" class="rp-toast"></div><script src="{% static 'retail/js/retail.js' %}"></script>
+<div id="toast" class="rp-toast" role="status" aria-live="polite"></div><script src="{% static 'retail/js/retail.js' %}"></script><script src="{% static 'retail/js/customer-control.js' %}"></script><script src="{% static 'retail/js/retail-prime-ui.js' %}"></script>
 </body></html>

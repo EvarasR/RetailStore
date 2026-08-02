@@ -3,7 +3,10 @@ __pycache__/
 *.pyc
 .env
 db.sqlite3
-media/
+media/*
+!media/productos/
+!media/productos/**/
+!media/productos/**/*.svg
 staticfiles/
 .vscode/
 entorno/

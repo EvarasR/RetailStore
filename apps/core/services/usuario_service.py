@@ -151,3 +151,19 @@ def eliminar_direccion_usuario(cod_direccion):
         [cod_direccion],
         ["BIGINT"],
     )
+
+
+def actualizar_usuario(cod_usuario, nombres, apellidos, telefono=None, email_verificado=False, activo=True):
+    return ejecutar_funcion_void(
+        "fn_actualizar_usuario",
+        [cod_usuario, nombres, apellidos, telefono, email_verificado, activo],
+        ["BIGINT", "TEXT", "TEXT", "TEXT", "BOOLEAN", "BOOLEAN"],
+    )
+
+
+def desactivar_usuario(cod_usuario):
+    return ejecutar_funcion_void("fn_eliminar_usuario_logico", [cod_usuario], ["BIGINT"])
+
+
+def cambiar_password_usuario(cod_usuario, password):
+    return ejecutar_funcion_void("fn_cambiar_password_usuario", [cod_usuario, password, 120000], ["BIGINT", "TEXT", "INTEGER"])

@@ -16,5 +16,8 @@ urlpatterns = [
     path("api/ubicaciones/", views.api_ubicaciones, name="api_ubicaciones"),
     path("api/direcciones/", views.api_direcciones, name="api_direcciones"),
     path("api/direcciones/crear/", views.api_crear_direccion, name="api_crear_direccion"),
+    path("api/direcciones/<int:cod_direccion>/actualizar/", views.api_actualizar_direccion, name="api_actualizar_direccion"),
     path("api/direcciones/<int:cod_direccion>/eliminar/", views.api_eliminar_direccion, name="api_eliminar_direccion"),
+    path("api/seguridad/password/", views.api_cambiar_password, name="api_cambiar_password"),
+    path("api/seguridad/verificar-email/", views.api_verificar_email, name="api_verificar_email"),
 ]

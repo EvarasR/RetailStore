@@ -1,5 +1,5 @@
 """
-Configuración Django para Retail Prime.
+Configuración Django para TechTail.
 
 Proyecto DB-first con PostgreSQL 15. La lógica crítica se mantiene en SQL
 (funciones, triggers, constraints) y Django actúa como capa web/API interna.

@@ -69,3 +69,7 @@ def actualizar_beneficio_membresia(cod_beneficio, nombre, valor, descripcion, ac
 
 def desactivar_beneficio_membresia(cod_beneficio):
     return ejecutar_funcion_void("fn_desactivar_beneficio_membresia", [cod_beneficio], ["BIGINT"], usar_transaccion=True)
+
+
+def cancelar_membresia_usuario(cod_membresia):
+    return ejecutar_funcion_void("fn_cancelar_membresia_usuario", [cod_membresia], ["BIGINT"], usar_transaccion=True)

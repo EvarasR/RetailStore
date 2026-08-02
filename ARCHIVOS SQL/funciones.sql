@@ -21,6 +21,179 @@ BEGIN
 END;
 $$;
 
+-- ============================================================
+-- TECHTAIL: CAPACIDADES ADMINISTRATIVAS COMPLEMENTARIAS
+-- Redefiniciones y funciones añadidas sin eliminar contratos anteriores.
+-- ============================================================
+CREATE OR REPLACE FUNCTION fn_configurar_archivo_producto(
+    p_cod_producto BIGINT,
+    p_tipo VARCHAR,
+    p_url TEXT,
+    p_titulo TEXT DEFAULT NULL,
+    p_eliminar BOOLEAN DEFAULT FALSE
+) RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+    v_metadata JSONB;
+    v_videos JSONB;
+BEGIN
+    SELECT COALESCE(metadata, '{}'::jsonb) INTO v_metadata
+    FROM producto WHERE cod_producto=p_cod_producto FOR UPDATE;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Producto no encontrado'; END IF;
+    p_tipo := upper(trim(p_tipo));
+    IF p_tipo='FICHA' THEN
+        v_metadata := CASE WHEN p_eliminar
+            THEN v_metadata - 'ficha_tecnica'
+            ELSE jsonb_set(v_metadata,'{ficha_tecnica}',jsonb_build_object('url',p_url,'titulo',COALESCE(NULLIF(trim(p_titulo),''),'Ficha técnica')),TRUE)
+        END;
+    ELSIF p_tipo='VIDEO' THEN
+        SELECT COALESCE(jsonb_agg(x),'[]'::jsonb) INTO v_videos
+        FROM jsonb_array_elements(COALESCE(v_metadata->'videos','[]'::jsonb)) x
+        WHERE x->>'url' IS DISTINCT FROM p_url;
+        IF NOT p_eliminar THEN
+            v_videos := v_videos || jsonb_build_array(jsonb_build_object('url',p_url,'titulo',COALESCE(NULLIF(trim(p_titulo),''),'Video del producto')));
+        END IF;
+        v_metadata := jsonb_set(v_metadata,'{videos}',v_videos,TRUE);
+    ELSE
+        RAISE EXCEPTION 'Tipo de archivo no soportado';
+    END IF;
+    UPDATE producto SET metadata=v_metadata,fecha_actualizacion=now() WHERE cod_producto=p_cod_producto;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_configurar_limite_producto(
+    p_cod_producto BIGINT,
+    p_limite_pedido INTEGER,
+    p_limite_dia INTEGER DEFAULT NULL,
+    p_limite_mes INTEGER DEFAULT NULL,
+    p_requiere_revision BOOLEAN DEFAULT FALSE,
+    p_activo BOOLEAN DEFAULT TRUE
+) RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE v_id BIGINT;
+BEGIN
+    IF p_limite_pedido<1 OR COALESCE(p_limite_dia,1)<1 OR COALESCE(p_limite_mes,1)<1 THEN
+        RAISE EXCEPTION 'Los límites deben ser positivos';
+    END IF;
+    SELECT cod_regla INTO v_id FROM regla_limite_compra
+    WHERE cod_producto=p_cod_producto ORDER BY activo DESC,fecha_creacion DESC LIMIT 1 FOR UPDATE;
+    IF v_id IS NULL THEN
+        INSERT INTO regla_limite_compra(cod_producto,limite_por_pedido,limite_por_dia,limite_por_mes,requiere_revision,activo)
+        VALUES(p_cod_producto,p_limite_pedido,p_limite_dia,p_limite_mes,p_requiere_revision,p_activo)
+        RETURNING cod_regla INTO v_id;
+    ELSE
+        UPDATE regla_limite_compra SET limite_por_pedido=p_limite_pedido,limite_por_dia=p_limite_dia,
+            limite_por_mes=p_limite_mes,requiere_revision=p_requiere_revision,activo=p_activo
+        WHERE cod_regla=v_id;
+    END IF;
+    RETURN v_id;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_asociar_producto_relacionado(
+    p_cod_producto BIGINT,p_cod_relacionado BIGINT,p_tipo VARCHAR DEFAULT 'RELACIONADO'
+) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+    IF p_cod_producto=p_cod_relacionado THEN RAISE EXCEPTION 'Un producto no puede relacionarse consigo mismo'; END IF;
+    INSERT INTO producto_relacionado(cod_producto,cod_producto_relacionado,tipo_relacion)
+    VALUES(p_cod_producto,p_cod_relacionado,upper(trim(p_tipo)))
+    ON CONFLICT(cod_producto,cod_producto_relacionado) DO UPDATE SET tipo_relacion=EXCLUDED.tipo_relacion;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_desasociar_producto_relacionado(p_cod_producto BIGINT,p_cod_relacionado BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN DELETE FROM producto_relacionado WHERE cod_producto=p_cod_producto AND cod_producto_relacionado=p_cod_relacionado; END; $$;
+
+CREATE OR REPLACE FUNCTION fn_moderar_resena_producto(p_cod_resena BIGINT,p_aprobado BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE producto_resena SET aprobado=p_aprobado WHERE cod_resena=p_cod_resena;
+IF NOT FOUND THEN RAISE EXCEPTION 'Reseña no encontrada'; END IF; END; $$;
+
+CREATE OR REPLACE FUNCTION fn_moderar_pregunta_producto(p_cod_pregunta BIGINT,p_estado VARCHAR)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+    IF upper(p_estado) NOT IN ('PENDIENTE','PUBLICADA','RESPONDIDA','RECHAZADA') THEN RAISE EXCEPTION 'Estado de pregunta inválido'; END IF;
+    UPDATE producto_pregunta SET estado=upper(p_estado) WHERE cod_pregunta=p_cod_pregunta;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Pregunta no encontrada'; END IF;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_desasociar_promocion_producto(p_cod_promocion BIGINT,p_cod_producto BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN DELETE FROM promocion_producto WHERE cod_promocion=p_cod_promocion AND cod_producto=p_cod_producto; END; $$;
+
+CREATE OR REPLACE FUNCTION fn_actualizar_plan_membresia(p_cod_plan BIGINT,p_nombre TEXT,p_precio NUMERIC,p_duracion INTEGER,p_activo BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+    IF p_precio<0 OR p_duracion<1 THEN RAISE EXCEPTION 'Precio o duración inválidos'; END IF;
+    UPDATE plan_membresia SET nombre=trim(p_nombre),precio_mensual=p_precio,duracion_dias=p_duracion,activo=p_activo WHERE cod_plan=p_cod_plan;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Plan no encontrado'; END IF;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_cancelar_membresia_usuario(p_cod_membresia BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE membresia_usuario SET cod_estado_membresia='CANCELADA',renovacion_automatica=FALSE WHERE cod_membresia=p_cod_membresia AND cod_estado_membresia<>'CANCELADA';
+    IF NOT FOUND THEN RAISE EXCEPTION 'Membresía no encontrada o ya cancelada'; END IF;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_crear_rol(p_nombre TEXT,p_descripcion TEXT DEFAULT NULL)
+RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE v_id BIGINT; BEGIN INSERT INTO rol(nombre,descripcion,activo) VALUES(upper(trim(p_nombre)),p_descripcion,TRUE) RETURNING cod_rol INTO v_id; RETURN v_id; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_rol(p_cod_rol BIGINT,p_nombre TEXT,p_descripcion TEXT,p_activo BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE rol SET nombre=upper(trim(p_nombre)),descripcion=p_descripcion,activo=p_activo WHERE cod_rol=p_cod_rol; IF NOT FOUND THEN RAISE EXCEPTION 'Rol no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_crear_permiso(p_codigo TEXT,p_nombre TEXT,p_descripcion TEXT DEFAULT NULL)
+RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE v_id BIGINT; BEGIN INSERT INTO permiso(codigo,nombre,descripcion,activo) VALUES(lower(trim(p_codigo)),trim(p_nombre),p_descripcion,TRUE) RETURNING cod_permiso INTO v_id; RETURN v_id; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_permiso(p_cod_permiso BIGINT,p_codigo TEXT,p_nombre TEXT,p_descripcion TEXT,p_activo BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE permiso SET codigo=lower(trim(p_codigo)),nombre=trim(p_nombre),descripcion=p_descripcion,activo=p_activo WHERE cod_permiso=p_cod_permiso; IF NOT FOUND THEN RAISE EXCEPTION 'Permiso no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_asignar_permiso_rol(p_cod_rol BIGINT,p_cod_permiso BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN INSERT INTO rol_permiso(cod_rol,cod_permiso) VALUES(p_cod_rol,p_cod_permiso) ON CONFLICT DO NOTHING; END; $$;
+CREATE OR REPLACE FUNCTION fn_revocar_permiso_rol(p_cod_rol BIGINT,p_cod_permiso BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN DELETE FROM rol_permiso WHERE cod_rol=p_cod_rol AND cod_permiso=p_cod_permiso; END; $$;
+CREATE OR REPLACE FUNCTION fn_reactivar_usuario(p_cod_usuario BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE usuario SET activo=TRUE,fecha_actualizacion=now() WHERE cod_usuario=p_cod_usuario; IF NOT FOUND THEN RAISE EXCEPTION 'Usuario no encontrado'; END IF; END; $$;
+
+CREATE OR REPLACE FUNCTION fn_actualizar_almacen(p_cod_almacen BIGINT,p_nombre TEXT,p_direccion TEXT,p_ciudad TEXT,p_provincia TEXT,p_activo BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE almacen SET nombre=trim(p_nombre),direccion=p_direccion,ciudad=p_ciudad,provincia=p_provincia,activo=p_activo WHERE cod_almacen=p_cod_almacen; IF NOT FOUND THEN RAISE EXCEPTION 'Almacén no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_almacen(p_cod_almacen BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE almacen SET activo=FALSE WHERE cod_almacen=p_cod_almacen; IF NOT FOUND THEN RAISE EXCEPTION 'Almacén no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_estado_lote(p_cod_lote BIGINT,p_estado VARCHAR)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN IF upper(p_estado) NOT IN ('ACTIVO','AGOTADO','BLOQUEADO','ANULADO') THEN RAISE EXCEPTION 'Estado de lote inválido'; END IF; UPDATE lote_inventario SET estado=upper(p_estado),fecha_actualizacion=now() WHERE cod_lote=p_cod_lote; IF NOT FOUND THEN RAISE EXCEPTION 'Lote no encontrado'; END IF; END; $$;
+
+CREATE OR REPLACE FUNCTION fn_crear_transportista(p_nombre TEXT,p_telefono TEXT DEFAULT NULL,p_email TEXT DEFAULT NULL)
+RETURNS BIGINT LANGUAGE plpgsql AS $$ DECLARE v_id BIGINT; BEGIN INSERT INTO transportista(nombre,telefono,email,activo) VALUES(trim(p_nombre),p_telefono,p_email,TRUE) RETURNING cod_transportista INTO v_id; RETURN v_id; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_transportista(p_cod BIGINT,p_nombre TEXT,p_telefono TEXT,p_email TEXT,p_activo BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE transportista SET nombre=trim(p_nombre),telefono=p_telefono,email=p_email,activo=p_activo WHERE cod_transportista=p_cod; IF NOT FOUND THEN RAISE EXCEPTION 'Transportista no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_crear_metodo_envio(p_nombre TEXT,p_dias_min INTEGER,p_dias_max INTEGER,p_costo NUMERIC,p_prime BOOLEAN DEFAULT FALSE)
+RETURNS BIGINT LANGUAGE plpgsql AS $$ DECLARE v_id BIGINT; BEGIN IF p_dias_min<0 OR p_dias_max<p_dias_min OR p_costo<0 THEN RAISE EXCEPTION 'Configuración de envío inválida'; END IF; INSERT INTO metodo_envio(nombre,dias_min,dias_max,costo_base,es_premium_gratis,activo) VALUES(trim(p_nombre),p_dias_min,p_dias_max,p_costo,p_prime,TRUE) RETURNING cod_metodo_envio INTO v_id; RETURN v_id; END; $$;
+CREATE OR REPLACE FUNCTION fn_crear_zona_entrega(p_ciudad TEXT,p_provincia TEXT,p_recargo NUMERIC DEFAULT 0)
+RETURNS BIGINT LANGUAGE plpgsql AS $$ DECLARE v_id BIGINT; BEGIN INSERT INTO zona_entrega(ciudad,provincia,recargo,activo) VALUES(trim(p_ciudad),trim(p_provincia),p_recargo,TRUE) RETURNING cod_zona INTO v_id; RETURN v_id; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_zona_entrega(p_cod BIGINT,p_ciudad TEXT,p_provincia TEXT,p_recargo NUMERIC,p_activo BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE zona_entrega SET ciudad=trim(p_ciudad),provincia=trim(p_provincia),recargo=p_recargo,activo=p_activo WHERE cod_zona=p_cod; IF NOT FOUND THEN RAISE EXCEPTION 'Zona no encontrada'; END IF; END; $$;
+
+CREATE OR REPLACE FUNCTION fn_actualizar_estado_ticket_soporte(p_cod_ticket BIGINT,p_estado VARCHAR)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+    IF upper(p_estado) NOT IN ('ABIERTO','EN_PROCESO','ESCALADO','CERRADO') THEN RAISE EXCEPTION 'Estado de ticket inválido'; END IF;
+    UPDATE soporte_ticket SET estado=upper(p_estado),fecha_actualizacion=now(),fecha_cierre=CASE WHEN upper(p_estado)='CERRADO' THEN now() ELSE NULL END WHERE cod_ticket=p_cod_ticket;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Ticket no encontrado'; END IF;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_actualizar_compra_recurrente(p_cod_compra BIGINT,p_nombre TEXT,p_frecuencia INTEGER,p_proxima DATE,p_activa BOOLEAN)
+RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN IF p_frecuencia<1 THEN RAISE EXCEPTION 'Frecuencia inválida'; END IF; UPDATE compra_recurrente SET nombre=trim(p_nombre),frecuencia_dias=p_frecuencia,proxima_ejecucion=p_proxima,activa=p_activa WHERE cod_compra_recurrente=p_cod_compra; IF NOT FOUND THEN RAISE EXCEPTION 'Compra recurrente no encontrada'; END IF; END; $$;
+
+CREATE OR REPLACE FUNCTION fn_actualizar_producto_completo(
+    p_cod_producto BIGINT,p_cod_categoria BIGINT,p_cod_marca BIGINT,p_sku TEXT,p_nombre TEXT,
+    p_descripcion TEXT,p_precio NUMERIC,p_peso NUMERIC,p_largo NUMERIC,p_ancho NUMERIC,p_alto NUMERIC
+) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+    IF NULLIF(trim(p_sku),'') IS NULL OR NULLIF(trim(p_nombre),'') IS NULL THEN RAISE EXCEPTION 'SKU y nombre son obligatorios'; END IF;
+    IF p_precio<=0 OR p_peso<0 OR p_largo<0 OR p_ancho<0 OR p_alto<0 THEN RAISE EXCEPTION 'Precio o dimensiones inválidos'; END IF;
+    IF EXISTS(SELECT 1 FROM producto WHERE lower(sku)=lower(trim(p_sku)) AND cod_producto<>p_cod_producto) THEN RAISE EXCEPTION 'El SKU ya está registrado'; END IF;
+    UPDATE producto SET cod_categoria=p_cod_categoria,cod_marca=p_cod_marca,sku=trim(p_sku),nombre=trim(p_nombre),
+        descripcion=COALESCE(p_descripcion,''),precio_actual=p_precio,peso_kg=p_peso,largo_cm=p_largo,
+        ancho_cm=p_ancho,alto_cm=p_alto,fecha_actualizacion=now()
+    WHERE cod_producto=p_cod_producto;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Producto no encontrado'; END IF;
+END; $$;
+
 CREATE OR REPLACE FUNCTION fn_auditar_cambios()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -853,6 +1026,80 @@ RETURNS INTEGER LANGUAGE sql STABLE AS $$
                       AND NOT EXISTS (SELECT 1 FROM lote_inventario l
                                       WHERE l.cod_producto=i.cod_producto AND l.cod_almacen=i.cod_almacen)),0)
     )::INTEGER;
+$$;
+
+-- Reseñas verificadas: solo una reseña por usuario y producto, creada
+-- después de que la compra conste como entregada. Toda reseña nueva queda
+-- pendiente hasta que un moderador cambie aprobado a TRUE.
+CREATE OR REPLACE FUNCTION fn_crear_resena_producto(
+    p_cod_usuario BIGINT,
+    p_cod_producto BIGINT,
+    p_calificacion SMALLINT,
+    p_titulo TEXT DEFAULT NULL,
+    p_comentario TEXT DEFAULT NULL
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_cod_resena BIGINT;
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM usuario
+        WHERE cod_usuario = p_cod_usuario AND activo
+    ) THEN
+        RAISE EXCEPTION 'El usuario no existe o está inactivo.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM producto WHERE cod_producto = p_cod_producto
+    ) THEN
+        RAISE EXCEPTION 'El producto no existe.';
+    END IF;
+
+    IF p_calificacion IS NULL OR p_calificacion NOT BETWEEN 1 AND 5 THEN
+        RAISE EXCEPTION 'La calificación debe estar entre 1 y 5.';
+    END IF;
+
+    IF length(trim(COALESCE(p_titulo, ''))) > 160 THEN
+        RAISE EXCEPTION 'El título no puede superar 160 caracteres.';
+    END IF;
+
+    IF length(trim(COALESCE(p_comentario, ''))) NOT BETWEEN 10 AND 2000 THEN
+        RAISE EXCEPTION 'La reseña debe tener entre 10 y 2000 caracteres.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pedido pe
+        JOIN pedido_detalle pd ON pd.cod_pedido = pe.cod_pedido
+        WHERE pe.cod_usuario = p_cod_usuario
+          AND pd.cod_producto = p_cod_producto
+          AND pe.cod_estado_pedido = 'ENTREGADO'
+    ) THEN
+        RAISE EXCEPTION 'Solo puedes reseñar productos de pedidos entregados.';
+    END IF;
+
+    INSERT INTO producto_resena(
+        cod_usuario, cod_producto, calificacion, titulo, comentario, aprobado
+    )
+    VALUES (
+        p_cod_usuario,
+        p_cod_producto,
+        p_calificacion,
+        NULLIF(trim(COALESCE(p_titulo, '')), ''),
+        trim(p_comentario),
+        FALSE
+    )
+    ON CONFLICT (cod_usuario, cod_producto) DO NOTHING
+    RETURNING cod_resena INTO v_cod_resena;
+
+    IF v_cod_resena IS NULL THEN
+        RAISE EXCEPTION 'Ya registraste una reseña para este producto.';
+    END IF;
+
+    RETURN v_cod_resena;
+END;
 $$;
 
 -- Redefinicion final: el descuento de cupon vive en las lineas y no se pierde
@@ -5099,4 +5346,213 @@ RETURNS INTEGER LANGUAGE sql STABLE AS $$
                       AND NOT EXISTS (SELECT 1 FROM lote_inventario l
                                       WHERE l.cod_producto=i.cod_producto AND l.cod_almacen=i.cod_almacen)),0)
     )::INTEGER;
+$$;
+
+-- Redefinición final y tolerante del procesador de tracking. Permite recuperar
+-- pedidos históricos cuyo estado ya avanzó mientras estado_envio quedó en
+-- CREADO, sin intentar regresar el pedido a una fase anterior.
+CREATE OR REPLACE FUNCTION fn_procesar_tracking_pendiente(
+    p_fecha_hasta TIMESTAMPTZ DEFAULT now()
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    r RECORD;
+    v_cod_pedido BIGINT;
+    v_estado_envio TEXT;
+    v_estado_pedido TEXT;
+    v_estado_objetivo TEXT;
+    v_rango_envio INTEGER;
+    v_rango_pedido INTEGER;
+    v_rango_objetivo INTEGER;
+    v_procesados INTEGER := 0;
+BEGIN
+    FOR r IN
+        SELECT *
+        FROM tracking_evento_programado
+        WHERE procesado = FALSE
+          AND fecha_programada <= p_fecha_hasta
+        ORDER BY fecha_programada, orden, cod_programacion
+        FOR UPDATE SKIP LOCKED
+    LOOP
+        v_cod_pedido := NULL;
+        v_estado_envio := NULL;
+        v_estado_pedido := NULL;
+        SELECT e.cod_pedido, COALESCE(e.estado_envio, e.estado), p.cod_estado_pedido
+        INTO v_cod_pedido, v_estado_envio, v_estado_pedido
+        FROM envio e
+        JOIN pedido p ON p.cod_pedido = e.cod_pedido
+        WHERE e.cod_envio = r.cod_envio;
+
+        -- Conserva el historial de la programación aunque el envío de una
+        -- carga antigua ya no exista; una fila huérfana no debe bloquear las demás.
+        IF NOT FOUND THEN
+            UPDATE tracking_evento_programado
+            SET procesado = TRUE, fecha_procesado = now(), fecha_actualizacion = now()
+            WHERE cod_programacion = r.cod_programacion;
+            v_procesados := v_procesados + 1;
+            CONTINUE;
+        END IF;
+
+        IF v_estado_pedido IN ('CANCELADO', 'DEVOLUCION_SOLICITADA', 'DEVUELTO', 'REEMBOLSADO') THEN
+            UPDATE tracking_evento_programado
+            SET procesado = TRUE, fecha_procesado = now(), fecha_actualizacion = now()
+            WHERE cod_programacion = r.cod_programacion;
+            v_procesados := v_procesados + 1;
+            CONTINUE;
+        END IF;
+
+        v_estado_objetivo := CASE r.orden
+            WHEN 2 THEN 'PREPARANDO'
+            WHEN 3 THEN 'LISTO_ENVIO'
+            WHEN 4 THEN 'ENVIADO'
+            WHEN 5 THEN 'EN_TRANSITO'
+            WHEN 6 THEN 'CENTRO_LOCAL'
+            WHEN 7 THEN 'EN_REPARTO'
+            WHEN 8 THEN 'ENTREGADO'
+            ELSE NULL
+        END;
+
+        UPDATE tracking_evento
+        SET orden = r.orden
+        WHERE cod_tracking_evento = (
+            SELECT te.cod_tracking_evento
+            FROM tracking_evento te
+            WHERE te.cod_envio = r.cod_envio
+              AND te.cod_tipo_evento = r.cod_tipo_evento
+              AND te.orden IS NULL
+            ORDER BY te.fecha_evento, te.cod_tracking_evento
+            LIMIT 1
+        )
+          AND NOT EXISTS (
+              SELECT 1 FROM tracking_evento te
+              WHERE te.cod_envio = r.cod_envio AND te.orden = r.orden
+          );
+
+        IF NOT FOUND AND NOT EXISTS (
+            SELECT 1 FROM tracking_evento te
+            WHERE te.cod_envio = r.cod_envio AND te.orden = r.orden
+        ) THEN
+            INSERT INTO tracking_evento(
+                cod_envio, cod_tipo_evento, descripcion, ubicacion,
+                visible_cliente, fecha_evento, orden
+            ) VALUES (
+                r.cod_envio, r.cod_tipo_evento, r.descripcion, r.ubicacion,
+                r.visible_cliente, r.fecha_programada, r.orden
+            );
+        END IF;
+
+        IF v_estado_objetivo IS NOT NULL THEN
+            v_rango_objetivo := CASE v_estado_objetivo
+                WHEN 'CREADO' THEN 0 WHEN 'PREPARANDO' THEN 2
+                WHEN 'LISTO_ENVIO' THEN 3 WHEN 'ENVIADO' THEN 4
+                WHEN 'EN_TRANSITO' THEN 5 WHEN 'CENTRO_LOCAL' THEN 6
+                WHEN 'EN_REPARTO' THEN 7 WHEN 'ENTREGADO' THEN 8 ELSE 0 END;
+            v_rango_envio := CASE v_estado_envio
+                WHEN 'CREADO' THEN 0 WHEN 'PREPARANDO' THEN 2
+                WHEN 'LISTO_ENVIO' THEN 3 WHEN 'ENVIADO' THEN 4
+                WHEN 'EN_TRANSITO' THEN 5 WHEN 'CENTRO_LOCAL' THEN 6
+                WHEN 'EN_REPARTO' THEN 7 WHEN 'ENTREGADO' THEN 8 ELSE 0 END;
+            v_rango_pedido := CASE v_estado_pedido
+                WHEN 'PENDIENTE_PAGO' THEN 0 WHEN 'PAGO_AUTORIZADO' THEN 1
+                WHEN 'PREPARANDO' THEN 2 WHEN 'ESPERANDO_PROVEEDOR' THEN 2
+                WHEN 'LISTO_ENVIO' THEN 3 WHEN 'ENVIADO' THEN 4
+                WHEN 'EN_TRANSITO' THEN 5 WHEN 'EN_REPARTO' THEN 7
+                WHEN 'ENTREGADO' THEN 8 ELSE 0 END;
+
+            IF v_rango_envio < v_rango_objetivo THEN
+                PERFORM fn_actualizar_envio_estado(r.cod_envio, v_estado_objetivo, r.descripcion);
+                v_estado_envio := v_estado_objetivo;
+            END IF;
+            IF v_estado_objetivo <> 'CENTRO_LOCAL' AND v_rango_pedido < v_rango_objetivo THEN
+                PERFORM fn_actualizar_estado_pedido(v_cod_pedido, v_estado_objetivo, r.descripcion);
+                v_estado_pedido := v_estado_objetivo;
+            END IF;
+        END IF;
+
+        UPDATE tracking_evento_programado
+        SET procesado = TRUE, fecha_procesado = now(), fecha_actualizacion = now()
+        WHERE cod_programacion = r.cod_programacion;
+        v_procesados := v_procesados + 1;
+    END LOOP;
+    RETURN v_procesados;
+END;
+$$;
+
+-- TECHTAIL: esta redefinición final mantiene la marca correcta después de
+-- ejecutar de principio a fin todas las funciones históricas del proyecto.
+CREATE OR REPLACE FUNCTION fn_crear_direccion_usuario(
+    p_cod_usuario BIGINT, p_alias TEXT, p_receptor TEXT, p_linea1 TEXT,
+    p_linea2 TEXT, p_ciudad TEXT, p_provincia TEXT, p_pais TEXT DEFAULT 'Ecuador',
+    p_codigo_postal TEXT DEFAULT NULL, p_telefono_contacto TEXT DEFAULT NULL,
+    p_es_predeterminada BOOLEAN DEFAULT FALSE
+) RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE
+    v_cod_direccion BIGINT;
+    v_ciudad TEXT := trim(COALESCE(p_ciudad,''));
+    v_provincia TEXT := trim(COALESCE(p_provincia,''));
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM usuario WHERE cod_usuario=p_cod_usuario AND activo IS TRUE) THEN
+        RAISE EXCEPTION 'Usuario no encontrado o inactivo';
+    END IF;
+    IF trim(COALESCE(p_linea1,''))='' THEN RAISE EXCEPTION 'La dirección principal es obligatoria'; END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM canton c JOIN provincia p ON p.cod_provincia=c.cod_provincia
+        WHERE lower(p.nombre)=lower(v_provincia) AND lower(c.nombre)=lower(v_ciudad)
+          AND p.activo IS TRUE AND c.activo IS TRUE
+    ) THEN RAISE EXCEPTION 'Provincia/cantón inválidos: %, %',v_provincia,v_ciudad; END IF;
+    IF p_es_predeterminada THEN
+        UPDATE direccion_usuario SET es_predeterminada=FALSE
+        WHERE cod_usuario=p_cod_usuario AND activo IS TRUE;
+    END IF;
+    INSERT INTO direccion_usuario(
+        cod_usuario,alias,receptor,linea1,linea2,ciudad,provincia,pais,
+        codigo_postal,telefono_contacto,es_predeterminada
+    ) VALUES (
+        p_cod_usuario,COALESCE(NULLIF(trim(p_alias),''),'Principal'),
+        COALESCE(NULLIF(trim(p_receptor),''),'Cliente TechTail'),trim(p_linea1),
+        NULLIF(trim(COALESCE(p_linea2,'')),''),v_ciudad,v_provincia,
+        COALESCE(NULLIF(trim(p_pais),''),'Ecuador'),NULLIF(trim(COALESCE(p_codigo_postal,'')),''),
+        NULLIF(trim(COALESCE(p_telefono_contacto,'')),''),p_es_predeterminada
+    ) RETURNING cod_direccion INTO v_cod_direccion;
+    RETURN v_cod_direccion;
+END;
+$$;
+
+-- TECHTAIL: validación final de publicación con ficha técnica PDF.
+CREATE OR REPLACE FUNCTION fn_validar_producto_publicable(p_cod_producto BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+    v_producto RECORD;
+    v_proveedores INTEGER;
+    v_stock_total INTEGER;
+    v_tiene_imagen BOOLEAN;
+    v_tiene_regla BOOLEAN;
+    v_ficha_url TEXT;
+BEGIN
+    SELECT * INTO v_producto FROM producto WHERE cod_producto=p_cod_producto;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Producto no encontrado: %',p_cod_producto; END IF;
+    IF v_producto.cod_categoria IS NULL THEN RAISE EXCEPTION 'El producto no tiene categoría'; END IF;
+    IF v_producto.cod_marca IS NULL THEN RAISE EXCEPTION 'El producto no tiene marca'; END IF;
+    IF NULLIF(trim(v_producto.sku),'') IS NULL THEN RAISE EXCEPTION 'El producto no tiene SKU'; END IF;
+    IF v_producto.precio_actual<=0 THEN RAISE EXCEPTION 'El producto % no tiene precio válido',p_cod_producto; END IF;
+    v_ficha_url := COALESCE(v_producto.metadata->'ficha_tecnica'->>'url','');
+    IF lower(split_part(v_ficha_url,'?',1)) NOT LIKE '%.pdf' THEN
+        RAISE EXCEPTION 'Producto % no puede publicarse: falta ficha técnica PDF',p_cod_producto;
+    END IF;
+    v_proveedores := fn_contar_proveedores_activos_producto(p_cod_producto);
+    IF v_proveedores<5 THEN
+        RAISE EXCEPTION 'Producto % no puede publicarse: requiere mínimo 5 proveedores activos, tiene %',p_cod_producto,v_proveedores;
+    END IF;
+    v_tiene_imagen := fn_producto_tiene_imagen_principal(p_cod_producto);
+    IF v_tiene_imagen IS FALSE THEN RAISE EXCEPTION 'Producto % no puede publicarse: falta imagen principal',p_cod_producto; END IF;
+    SELECT EXISTS(
+        SELECT 1 FROM regla_limite_compra r
+        WHERE r.activo IS TRUE AND (r.cod_producto=p_cod_producto OR (r.cod_producto IS NULL AND r.cod_categoria=v_producto.cod_categoria))
+    ) INTO v_tiene_regla;
+    IF v_tiene_regla IS FALSE THEN RAISE EXCEPTION 'Producto % no puede publicarse: falta regla de límite retail',p_cod_producto; END IF;
+    v_stock_total := fn_stock_disponible_producto(p_cod_producto)+fn_stock_proveedor_disponible_producto(p_cod_producto);
+    IF v_stock_total<=0 THEN RAISE EXCEPTION 'Producto % no puede publicarse: sin stock propio ni de proveedores',p_cod_producto; END IF;
+END;
 $$;

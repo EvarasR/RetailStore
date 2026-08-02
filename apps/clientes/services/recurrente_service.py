@@ -27,6 +27,15 @@ def preparar_carrito_compra_recurrente(cod_compra_recurrente):
     )
 
 
+def actualizar_compra_recurrente(cod_compra_recurrente, nombre, frecuencia_dias, proxima_ejecucion, activa=True):
+    return ejecutar_funcion_void(
+        "fn_actualizar_compra_recurrente",
+        [cod_compra_recurrente, nombre, frecuencia_dias, proxima_ejecucion, activa],
+        ["BIGINT", "TEXT", "INTEGER", "DATE", "BOOLEAN"],
+        usar_transaccion=True,
+    )
+
+
 def agregar_contenido_biblioteca(cod_usuario, cod_contenido, dias_acceso=None):
     return ejecutar_funcion_scalar(
         "fn_agregar_contenido_biblioteca",

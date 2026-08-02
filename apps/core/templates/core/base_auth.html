@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07162b">
+  <title>{% block title %}TechTail | Cuenta{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/retail-prime.css' %}?v=20260802">
+  <link rel="stylesheet" href="{% static 'retail/css/retail-prime-pages.css' %}?v=20260802">
+  <link rel="stylesheet" href="{% static 'retail/css/retail-prime-portals.css' %}?v=20260802">
+</head>
+<body class="rp-auth-page" data-page="login">
+  <main class="rp-auth-layout">
+    <section class="rp-auth-story">
+      <a class="rp-auth-logo" href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"></a>
+      <div class="rp-auth-story-content">
+        <p class="rp-kicker">Infraestructura que trabaja contigo</p>
+        <h1>{% block story_title %}Todo tu ecosistema tecnológico, en una sola cuenta.{% endblock %}</h1>
+        <p>{% block story_copy %}Compra equipos profesionales, sigue tus pedidos y administra tus beneficios con seguridad.{% endblock %}</p>
+        <div class="rp-auth-benefits">
+          <article><span>01</span><strong>Compra protegida</strong><small>TechTail Pay Secure y datos sensibles resguardados.</small></article>
+          <article><span>02</span><strong>Tracking claro</strong><small>Consulta cada evento de tus pedidos.</small></article>
+          <article><span>03</span><strong>Prime empresarial</strong><small>Beneficios sujetos a reglas reales.</small></article>
+          <article><span>04</span><strong>Soporte experto</strong><small>Ayuda para elegir soluciones compatibles.</small></article>
+        </div>
+      </div>
+      <img class="rp-auth-banner" src="{% static 'retail/img/banners/banner-redes.svg' %}" alt="Soluciones de red TechTail">
+      <p class="rp-auth-legal">Proyecto académico · Pagos y datos comerciales simulados</p>
+    </section>
+    <section class="rp-auth-form-side">
+      <a class="rp-auth-mobile-logo" href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"></a>
+      {% block form_content %}{% endblock %}
+    </section>
+  </main>
+  <script src="{% static 'retail/js/retail.js' %}"></script>
+</body>
+</html>

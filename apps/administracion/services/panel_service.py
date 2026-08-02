@@ -4,6 +4,8 @@ Las mutaciones del panel se mantienen en los servicios especializados y llaman
 funciones PostgreSQL. Este módulo evita que las vistas conozcan tablas o SQL.
 """
 
+import json
+
 from django.db.models import Count, Sum
 
 from apps.administracion.models import AlertaStock, Inventario, LoteInventario, ResumenVentaDiaria, SnapshotKpi
@@ -26,11 +28,17 @@ from apps.proveedores.models import OrdenAbastecimiento, Proveedor, ProveedorCon
 
 def listar_entidad(entidad, solo_activos=True):
     """Lista una entidad permitida por fn_listar_entidad_administrable."""
-    return ejecutar_funcion_scalar(
+    resultado = ejecutar_funcion_scalar(
         "fn_listar_entidad_administrable",
         [entidad, solo_activos],
         ["TEXT", "BOOLEAN"],
     ) or []
+    if isinstance(resultado, str):
+        try:
+            resultado = json.loads(resultado)
+        except json.JSONDecodeError:
+            return []
+    return resultado if isinstance(resultado, list) else []
 
 
 def resumen_panel():

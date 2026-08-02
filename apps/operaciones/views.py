@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.operaciones.models import CuentaSimulada, Envio, Factura, MetodoEnvio, MetodoPago, Notificacion, Pedido, SoporteTicket, TransaccionPago
+from apps.operaciones.models import CuentaSimulada, Envio, Factura, MetodoEnvio, MetodoPago, Notificacion, Pedido, SoporteTicket, SoporteTicketMensaje, TransaccionPago
 from apps.operaciones.services.notificacion_service import marcar_notificacion_leida
 from apps.operaciones.services.pago_service import (
     autorizar_pago_simulado,
@@ -304,6 +304,14 @@ def api_marcar_notificacion_leida(request, cod_notificacion):
 @require_GET
 def api_tickets_soporte(request):
     tickets = SoporteTicket.objects.filter(cod_usuario=request.user).order_by("-fecha_creacion")[:30]
+    mensajes = {}
+    for m in SoporteTicketMensaje.objects.filter(cod_ticket__cod_usuario=request.user, interno=False).select_related("cod_usuario").order_by("fecha_creacion"):
+        mensajes.setdefault(m.cod_ticket_id, []).append({
+            "cod_mensaje": m.cod_ticket_mensaje,
+            "autor": m.cod_usuario.get_full_name() if m.cod_usuario else "Equipo TechTail",
+            "mensaje": m.mensaje,
+            "fecha": _dt(m.fecha_creacion),
+        })
     return _json_ok(
         tickets=[
             {
@@ -313,6 +321,7 @@ def api_tickets_soporte(request):
                 "prioridad": t.prioridad,
                 "estado": t.estado,
                 "fecha": _dt(t.fecha_creacion),
+                "mensajes": mensajes.get(t.cod_ticket, []),
             }
             for t in tickets
         ]

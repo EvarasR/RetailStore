@@ -1,97 +1,15 @@
 {% load static %}
-<!doctype html>
-<html lang="es" data-theme="light">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Retail Prime | Checkout</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/favicon.svg' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
-</head>
-<body data-page="checkout" data-checkout-kind="pedido">
-<header class="rp-topbar">
-  <a class="rp-brand" href="/"><img class="rp-brand-logo" src="{% static 'retail/img/brand/retail-prime-logo.svg' %}" alt="Retail Prime"><span>Retail Prime</span></a>
-  <nav class="rp-actions">
-    <a class="rp-icon-btn" href="/">Volver a tienda</a>
-    <a class="rp-icon-btn" href="{% url 'core:perfil' %}">Mi cuenta</a>
-    <button class="rp-icon-btn" id="theme-toggle" type="button">☾</button>
-  </nav>
-</header>
-
+<!doctype html><html lang="es" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#07162b"><title>TechTail | Checkout</title><link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}"><link rel="stylesheet" href="{% static 'retail/css/retail.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-pages.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-portals.css' %}"></head><body class="rp-checkout-page" data-page="checkout" data-checkout-kind="pedido">
+<header class="rp-checkout-header"><a href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"></a><span>Checkout protegido</span><nav><a href="{% url 'clientes:carrito' %}">← Volver al carrito</a><a href="{% url 'core:perfil' %}">Mi cuenta</a><button id="theme-toggle" type="button" aria-label="Cambiar tema">◐</button></nav></header>
 <main class="rp-checkout-shell">
-  <section class="rp-checkout-head rp-card">
-    <div>
-      <p class="rp-kicker">TechTail Secure Checkout</p>
-      <h1>Checkout del pedido</h1>
-      <p class="rp-muted">Primero confirmas dirección y envío. El tracking solo se genera cuando el pago se captura correctamente.</p>
-    </div>
-    <ol class="rp-checkout-steps">
-      <li class="is-active" data-step-dot="1">Carrito</li>
-      <li data-step-dot="2">Dirección</li>
-      <li data-step-dot="3">Pago</li>
-      <li data-step-dot="4">Tracking</li>
-    </ol>
-  </section>
-
+  <section class="rp-checkout-intro"><div><p class="rp-kicker">TechTail Pay Secure</p><h1>Finaliza tu compra</h1><p>Dirección, envío y pago se validan con las reglas reales del pedido.</p></div><ol class="rp-checkout-progress"><li class="is-active"><span>1</span><b>Dirección</b></li><li><span>2</span><b>Envío</b></li><li><span>3</span><b>Pago</b></li><li><span>4</span><b>Revisión</b></li><li><span>5</span><b>Confirmación</b></li></ol></section>
   <section class="rp-checkout-grid">
     <div class="rp-checkout-main">
-      <article class="rp-card">
-        <p class="rp-kicker">Paso 1</p>
-        <h2>Resumen del carrito</h2>
-        <div id="checkout-cart" class="rp-list"></div>
-        <div class="rp-checkout-total">Total carrito: <strong>$<span id="checkout-cart-total">0.00</span></strong></div>
-        <p id="checkout-validation" class="rp-message"></p>
-      </article>
-
-      <article class="rp-card">
-        <p class="rp-kicker">Paso 2</p>
-        <h2>Dirección y envío</h2>
-        <label>Dirección de entrega</label>
-        <select id="checkout-address"></select>
-        <label>Método de envío</label>
-        <select id="checkout-shipping"></select>
-        <div id="checkout-prime-note" class="rp-prime-ribbon is-locked">Prime puede desbloquear envío elegible gratis.</div>
-        <button id="checkout-create-order" class="rp-primary" type="button">Confirmar pedido y continuar al pago</button>
-        <p id="checkout-order-message" class="rp-message"></p>
-      </article>
-
-      <article id="checkout-payment-section" class="rp-card rp-hidden">
-        <p class="rp-kicker">Paso 3</p>
-        <h2>Pasarela de pago</h2>
-        <div class="rp-gateway-head">
-          <div><span class="rp-chip">RetailPay Secure</span><h3 id="checkout-order-title">Pedido pendiente</h3><p class="rp-muted">Autorización + captura simulada. No uses tarjetas reales.</p></div>
-          <div class="rp-gateway-lock">🔒 Sesión segura simulada</div>
-        </div>
-        <label>Método guardado</label>
-        <select id="checkout-payment-method"></select>
-        <button id="checkout-toggle-new-card" class="rp-secondary" type="button">Usar nueva tarjeta simulada</button>
-        <div id="checkout-card-form" class="rp-payform rp-hidden">
-          {% include "clientes/partials/card_gateway.html" %}
-        </div>
-        <button id="checkout-pay" class="rp-primary" type="button">Pagar pedido</button>
-        <p id="checkout-pay-message" class="rp-message"></p>
-      </article>
-
-      <article id="checkout-result" class="rp-card rp-hidden">
-        <p class="rp-kicker">Paso 4</p>
-        <h2>Pago confirmado</h2>
-        <div id="checkout-result-box"></div>
-      </article>
+      <article class="rp-checkout-card"><header><span>1</span><div><h2>Revisa tus productos</h2><p>Precio y stock serán confirmados antes de crear el pedido.</p></div></header><div id="checkout-cart" class="rp-list"></div><div class="rp-checkout-total"><span>Subtotal del carrito</span><strong>$<span id="checkout-cart-total">0.00</span></strong></div><p id="checkout-validation" class="rp-message"></p></article>
+      <article class="rp-checkout-card"><header><span>2</span><div><h2>Entrega</h2><p>Selecciona una dirección y la velocidad de envío.</p></div></header><div class="rp-form-row"><label>Dirección de entrega<select id="checkout-address"></select></label><label>Método de envío<select id="checkout-shipping"></select></label></div><div id="checkout-prime-note" class="rp-prime-ribbon is-locked">✦ Prime puede desbloquear envío elegible sin costo.</div><button id="checkout-create-order" class="rp-primary" type="button">Confirmar pedido y continuar →</button><p id="checkout-order-message" class="rp-message"></p></article>
+      <article id="checkout-payment-section" class="rp-checkout-card rp-hidden"><header><span>3</span><div><h2>Pago protegido</h2><p id="checkout-order-title">Pedido pendiente</p></div></header><div class="rp-payment-security"><div><b>TECHTAIL PAY</b><strong>SECURE</strong></div><span>▣ Sesión segura simulada</span></div><label>Método guardado<select id="checkout-payment-method"></select></label><button id="checkout-toggle-new-card" class="rp-secondary" type="button">+ Usar nueva tarjeta simulada</button><div id="checkout-card-form" class="rp-payform rp-hidden">{% include "clientes/partials/card_gateway.html" %}</div><button id="checkout-pay" class="rp-primary" type="button">Autorizar y pagar pedido</button><p id="checkout-pay-message" class="rp-message"></p></article>
+      <article id="checkout-result" class="rp-checkout-card rp-hidden"><header><span>✓</span><div><h2>Compra confirmada</h2><p>Tu pedido ya puede iniciar el tracking.</p></div></header><div id="checkout-result-box"></div></article>
     </div>
-
-    <aside class="rp-checkout-side rp-card">
-      <p class="rp-kicker">Cuenta</p>
-      <h2>Simulación realista</h2>
-      <div id="checkout-account-box" class="rp-mini-list"></div>
-      <hr>
-      <p class="rp-muted">La tarjeta guardada tiene una cuenta simulada con saldo disponible, límite diario y estado. Si no alcanza el saldo, la pasarela rechaza el pago.</p>
-    </aside>
+    <aside class="rp-checkout-side"><article class="rp-checkout-card rp-sticky-summary"><p class="rp-kicker">Resumen seguro</p><h2>Tu cuenta y compra</h2><div id="checkout-account-box" class="rp-mini-list"></div><hr><ul class="rp-checkout-trust"><li><span>▣</span><div><strong>Datos protegidos</strong><small>No guardamos CVV ni número completo.</small></div></li><li><span>⌖</span><div><strong>Tracking real</strong><small>Se genera después de capturar el pago.</small></div></li><li><span>↻</span><div><strong>Validación DB-first</strong><small>Stock, total e impuestos vienen del backend.</small></div></li></ul><div class="rp-demo-warning"><strong>Entorno demostrativo</strong><p>Usa únicamente tarjetas de prueba.</p></div></article></aside>
   </section>
-</main>
-<div id="toast" class="rp-toast"></div>
-<script src="{% static 'retail/js/retail.js' %}"></script>
-<script src="{% static 'retail/js/checkout.js' %}"></script>
-</body>
-</html>
+</main><div id="toast" class="rp-toast" role="status" aria-live="polite"></div><script src="{% static 'retail/js/retail.js' %}"></script><script src="{% static 'retail/js/checkout.js' %}"></script></body></html>

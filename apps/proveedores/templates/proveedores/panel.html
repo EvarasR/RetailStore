@@ -1,27 +1,9 @@
 {% load static %}
-<!doctype html>
-<html lang="es" data-theme="light">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TechTail | Portal proveedor</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
-</head>
-<body data-page="proveedor">
-  <header class="rp-topbar">
-    <a class="rp-brand" href="/"><img class="rp-brand-logo" src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>Portal proveedor</span></a>
-    <nav class="rp-actions"><a class="rp-icon-btn" href="/">Tienda</a><form class="rp-logout-form" method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button class="rp-icon-btn" type="submit">Salir</button></form><button class="rp-icon-btn" id="theme-toggle" type="button">Modo</button></nav>
-  </header>
-  <main class="rp-shell">
-    <section class="rp-account-hero rp-card"><div><p class="rp-kicker">Abastecimiento</p><h1 id="supplier-name">Mi organización</h1><p class="rp-muted">Stock, productos asociados, órdenes y cumplimiento.</p></div><div id="supplier-summary" class="rp-mini-list"></div></section>
-    <section class="rp-account-tabs"><button class="rp-secondary" data-supplier-tab="productos">Productos y stock</button><button class="rp-secondary" data-supplier-tab="ordenes">Órdenes</button><button class="rp-secondary" data-supplier-tab="historial">Historial</button></section>
-    <section data-supplier-panel="productos" class="rp-card"><h2>Productos asociados</h2><div id="supplier-products" class="rp-table-wrap"></div></section>
-    <section data-supplier-panel="ordenes" class="rp-card rp-hidden"><h2>Órdenes de abastecimiento</h2><p class="rp-muted">La recepción física corresponde al almacén o administración.</p><div id="supplier-orders" class="rp-table-wrap"></div></section>
-    <section data-supplier-panel="historial" class="rp-card rp-hidden"><h2>Historial de entregas y cumplimiento</h2><div id="supplier-history" class="rp-list"></div></section>
-  </main>
-  <div id="toast" class="rp-toast"></div>
-  <script src="{% static 'retail/js/retail.js' %}"></script>
-</body>
-</html>
+<!doctype html><html lang="es" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#07162b"><title>TechTail | Portal proveedor</title><link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}"><link rel="stylesheet" href="{% static 'retail/css/retail.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-pages.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-portals.css' %}"></head><body class="rp-provider-page" data-page="proveedor">
+<header class="rp-provider-header"><a href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>PORTAL DE ABASTECIMIENTO</span></a><nav><a href="/">Ir a la tienda</a><form method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form><button id="theme-toggle" type="button">◐</button></nav></header>
+<div class="rp-provider-layout"><aside class="rp-provider-sidebar"><div class="rp-provider-avatar">TT</div><div><small>Cuenta proveedora</small><strong id="supplier-name">Mi organización</strong></div><nav><button class="is-active" data-supplier-tab="productos"><span>▦</span>Productos y stock</button><button data-supplier-tab="ordenes"><span>▤</span>Órdenes</button><button data-supplier-tab="historial"><span>◷</span>Historial</button><a href="mailto:abastecimiento@techtail.local"><span>?</span>Soporte de abastecimiento</a></nav><div class="rp-provider-safe"><span>▣</span><p><strong>Acceso segmentado</strong>Solo ves información asociada a tu proveedor.</p></div></aside>
+<main class="rp-provider-main"><section class="rp-provider-hero"><div><p class="rp-kicker">Portal de abastecimiento TechTail</p><h1>Una relación comercial más clara y ágil.</h1><p>Consulta tus productos asociados, stock reportado, órdenes e historial de cumplimiento.</p></div><img src="{% static 'retail/img/banners/banner-cableado.svg' %}" alt="Abastecimiento TechTail"></section><section id="supplier-summary" class="rp-provider-kpis"><div class="rp-kpi-skeleton"></div><div class="rp-kpi-skeleton"></div></section>
+<section data-supplier-panel="productos" class="rp-provider-panel"><header><div><p class="rp-kicker">Catálogo asociado</p><h2>Productos y disponibilidad</h2><span>Costos, stock, prioridad y tiempo de entrega de tu organización.</span></div><span class="rp-live-badge">● Datos en vivo</span></header><div id="supplier-products" class="rp-table-wrap"></div></section>
+<section data-supplier-panel="ordenes" class="rp-provider-panel rp-hidden"><header><div><p class="rp-kicker">Abastecimiento</p><h2>Órdenes pendientes e históricas</h2><span>La recepción física corresponde al almacén o al equipo administrativo.</span></div></header><div id="supplier-orders" class="rp-table-wrap"></div></section>
+<section data-supplier-panel="historial" class="rp-provider-panel rp-hidden"><header><div><p class="rp-kicker">Cumplimiento</p><h2>Historial de entregas</h2><span>Eventos y observaciones vinculados a tu operación.</span></div></header><div id="supplier-history" class="rp-list"></div></section>
+</main></div><div id="toast" class="rp-toast"></div><script src="{% static 'retail/js/retail.js' %}"></script><script src="{% static 'retail/js/retail-prime-ui.js' %}"></script></body></html>
