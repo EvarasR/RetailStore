@@ -319,6 +319,56 @@ EXECUTE FUNCTION fn_auditar_cambios();
 
 COMMIT;
 
+-- ============================================================
+-- FASE A: SINCRONIZACIÓN DE LOTES
+-- ============================================================
+BEGIN;
+
+CREATE OR REPLACE FUNCTION fn_trg_touch_lote_inventario()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    NEW.fecha_actualizacion := now();
+    RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_trg_touch_regla_precio()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    NEW.fecha_actualizacion := now();
+    RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_trg_sincronizar_lote_inventario()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE v_producto BIGINT; v_almacen BIGINT;
+BEGIN
+    v_producto := COALESCE(NEW.cod_producto, OLD.cod_producto);
+    v_almacen := COALESCE(NEW.cod_almacen, OLD.cod_almacen);
+    PERFORM fn_recalcular_inventario_desde_lotes(v_producto, v_almacen);
+    PERFORM fn_recalcular_precio_actual_producto(v_producto);
+    RETURN COALESCE(NEW, OLD);
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_touch_lote_inventario ON lote_inventario;
+CREATE TRIGGER trg_touch_lote_inventario
+BEFORE UPDATE ON lote_inventario
+FOR EACH ROW EXECUTE FUNCTION fn_trg_touch_lote_inventario();
+
+DROP TRIGGER IF EXISTS trg_touch_regla_precio ON regla_precio;
+CREATE TRIGGER trg_touch_regla_precio
+BEFORE UPDATE ON regla_precio
+FOR EACH ROW EXECUTE FUNCTION fn_trg_touch_regla_precio();
+
+DROP TRIGGER IF EXISTS trg_sincronizar_lote_inventario ON lote_inventario;
+CREATE TRIGGER trg_sincronizar_lote_inventario
+AFTER INSERT OR UPDATE OR DELETE ON lote_inventario
+FOR EACH ROW EXECUTE FUNCTION fn_trg_sincronizar_lote_inventario();
+
+COMMIT;
+
 
 -- ============================================================
 -- 10_triggers_complementarios_retail_prime.sql
@@ -518,4 +568,21 @@ AFTER INSERT OR UPDATE OR DELETE ON cola_email
 FOR EACH ROW
 EXECUTE FUNCTION fn_auditar_cambios();
 
+COMMIT;
+
+-- FASE C: la captura confirmada deja el tracking programado en la BD.
+BEGIN;
+CREATE OR REPLACE FUNCTION fn_trg_programar_tracking_pago()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    IF NEW.cod_estado_pago = 'CAPTURADO' AND (TG_OP = 'INSERT' OR OLD.cod_estado_pago IS DISTINCT FROM NEW.cod_estado_pago) THEN
+        PERFORM fn_programar_tracking_pedido(NEW.cod_pedido);
+    END IF;
+    RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS trg_programar_tracking_pago ON transaccion_pago;
+CREATE TRIGGER trg_programar_tracking_pago
+AFTER INSERT OR UPDATE OF cod_estado_pago ON transaccion_pago
+FOR EACH ROW EXECUTE FUNCTION fn_trg_programar_tracking_pago();
 COMMIT;

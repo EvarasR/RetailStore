@@ -41,11 +41,17 @@ def autorizar_pago_simulado(cod_pedido, cod_metodo_pago, idempotency_key):
 
 
 def capturar_pago_simulado(cod_transaccion):
+    """La captura, factura e idempotencia se validan en fn_capturar_pago_simulado."""
     return ejecutar_funcion_void(
         "fn_capturar_pago_simulado",
         [cod_transaccion],
         ["BIGINT"],
     )
+
+
+def capturar_pago_idempotente(cod_transaccion):
+    """Alias explicito del contrato SQL idempotente de captura."""
+    return capturar_pago_simulado(cod_transaccion)
 
 
 def generar_reembolso_simulado(cod_devolucion):

@@ -4,8 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Panel administrativo | Retail Prime</title>
+  <title>TechTail | Panel administrativo</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
 </head>
 <body data-page="admin">
 {% if sin_permiso %}
@@ -18,15 +20,21 @@
   </main>
 {% else %}
   <aside class="rp-admin-sidebar">
-    <a class="rp-brand" href="/"><span class="rp-brand-mark">RP</span><span>Admin</span></a>
+    <a class="rp-brand" href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>Admin Console</span></a>
     <button data-admin-section="dashboard">Dashboard</button>
     <button data-admin-section="productos">Productos</button>
+    <button data-admin-section="catalogo">Catálogo y precios</button>
     <button data-admin-section="pedidos">Pedidos</button>
     <button data-admin-section="inventario">Inventario</button>
     <button data-admin-section="proveedores">Proveedores</button>
+    <button data-admin-section="abastecimiento">Abastecimiento</button>
+    <button data-admin-section="marketing">Promociones</button>
+    <button data-admin-section="prime">Prime</button>
+    <button data-admin-section="pagos">Pagos y facturas</button>
+    <button data-admin-section="tracking">Tracking</button>
     <button data-admin-section="reportes">Reportes</button>
     <a href="/">Tienda</a>
-    <a href="{% url 'core:logout' %}">Salir</a>
+    <form class="rp-logout-form" method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button type="submit">Salir</button></form>
     <button id="theme-toggle" type="button">Modo</button>
   </aside>
 
@@ -55,6 +63,16 @@
       <div id="admin-products" class="rp-table-wrap"></div>
     </section>
 
+    <section class="rp-admin-section rp-hidden" data-admin-panel="catalogo">
+      <div class="rp-section-title"><div><p class="rp-kicker">Configuración</p><h2>Categorías, marcas y reglas de precio</h2></div></div>
+      <div class="rp-admin-grid">
+        <article class="rp-card"><h3>Categorías activas</h3><div id="admin-categories" class="rp-list"></div></article>
+        <article class="rp-card"><h3>Marcas activas</h3><div id="admin-brands" class="rp-list"></div></article>
+        <article class="rp-card"><h3>Reglas de precio</h3><div id="admin-price-rules" class="rp-list"></div></article>
+      </div>
+      <p class="rp-muted">Las altas, cambios, desactivaciones y el recálculo FIFO se realizan mediante las APIs administrativas protegidas.</p>
+    </section>
+
     <section class="rp-admin-section rp-hidden" data-admin-panel="pedidos">
       <div class="rp-section-title"><div><p class="rp-kicker">Operación</p><h2>Pedidos</h2></div><select id="admin-order-state"><option value="">Todos los estados</option></select></div>
       <div id="admin-orders" class="rp-table-wrap"></div>
@@ -63,11 +81,49 @@
     <section class="rp-admin-section rp-hidden" data-admin-panel="inventario">
       <div class="rp-section-title"><div><p class="rp-kicker">Stock</p><h2>Inventario</h2></div></div>
       <div id="admin-inventory" class="rp-table-wrap"></div>
+      <div class="rp-admin-grid">
+        <article class="rp-card"><h3>Lotes FIFO</h3><div id="admin-lots" class="rp-table-wrap"></div></article>
+        <article class="rp-card"><h3>Alertas de stock</h3><div id="admin-stock-alerts" class="rp-list"></div></article>
+      </div>
     </section>
 
     <section class="rp-admin-section rp-hidden" data-admin-panel="proveedores">
       <div class="rp-section-title"><div><p class="rp-kicker">Abastecimiento</p><h2>Proveedores</h2></div></div>
       <div id="admin-suppliers" class="rp-table-wrap"></div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="abastecimiento">
+      <div class="rp-section-title"><div><p class="rp-kicker">Reposición</p><h2>Órdenes de abastecimiento</h2></div></div>
+      <div id="admin-supply-orders" class="rp-table-wrap"></div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="marketing">
+      <div class="rp-section-title"><div><p class="rp-kicker">Comercial</p><h2>Promociones y cupones</h2></div></div>
+      <div class="rp-admin-grid">
+        <article class="rp-card"><h3>Promociones</h3><div id="admin-promotions" class="rp-list"></div></article>
+        <article class="rp-card"><h3>Cupones</h3><div id="admin-coupons" class="rp-list"></div></article>
+      </div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="prime">
+      <div class="rp-section-title"><div><p class="rp-kicker">Membresías</p><h2>Prime y beneficios</h2></div></div>
+      <div class="rp-admin-grid">
+        <article class="rp-card"><h3>Planes</h3><div id="admin-prime-plans" class="rp-list"></div></article>
+        <article class="rp-card"><h3>Membresías activas e históricas</h3><div id="admin-memberships" class="rp-list"></div></article>
+      </div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="pagos">
+      <div class="rp-section-title"><div><p class="rp-kicker">Cobros</p><h2>Pagos, autorizaciones, reembolsos y facturas</h2></div></div>
+      <div id="admin-payments" class="rp-table-wrap"></div>
+    </section>
+
+    <section class="rp-admin-section rp-hidden" data-admin-panel="tracking">
+      <div class="rp-section-title"><div><p class="rp-kicker">Logística</p><h2>Tracking persistente</h2><button class="rp-secondary" type="button" data-process-tracking>Procesar pendientes</button></div></div>
+      <div class="rp-admin-grid">
+        <article class="rp-card"><h3>Envíos</h3><div id="admin-shipments" class="rp-table-wrap"></div></article>
+        <article class="rp-card"><h3>Programaciones</h3><div id="admin-tracking-schedules" class="rp-table-wrap"></div></article>
+      </div>
     </section>
 
     <section class="rp-admin-section rp-hidden" data-admin-panel="reportes">

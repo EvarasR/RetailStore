@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+{% block title %}Retail Prime | Catálogo{% endblock %}
+{% block page %}catalogo{% endblock %}
+{% block content %}
+<main class="tt-page tt-catalog-page">
+  <nav class="tt-breadcrumb"><a href="{% url 'clientes:inicio' %}">Inicio</a><span>›</span><strong>Catálogo</strong></nav>
+  <header class="tt-catalog-heading"><div><p class="tt-eyebrow">Tecnología que escala contigo</p><h1>Catálogo técnico</h1><p>Encuentra componentes, infraestructura y soluciones listas para operar.</p></div><div id="tt-catalog-count" class="tt-result-count">Cargando productos…</div></header>
+  <div class="tt-catalog-layout">
+    <aside class="tt-filter-panel" aria-label="Filtros de catálogo">
+      <div class="tt-filter-head"><h2>Filtrar</h2><button type="button" class="tt-text-button" id="tt-clear-filters">Limpiar</button></div>
+      <label>Buscar<input id="tt-filter-search" type="search" value="{{ request.GET.q|default:'' }}" placeholder="Producto o SKU"></label>
+      <fieldset><legend>Categoría</legend><div id="tt-filter-categories" class="tt-check-list"></div></fieldset>
+      <fieldset><legend>Disponibilidad</legend><label class="tt-check"><input id="tt-in-stock" type="checkbox"> Solo disponibles</label></fieldset>
+      <fieldset><legend>Beneficios</legend><label class="tt-check"><input id="tt-prime-eligible" type="checkbox"> Prime elegible</label><span class="tt-filter-note">Se muestra al cotizar en checkout.</span></fieldset>
+    </aside>
+    <section class="tt-catalog-results">
+      <div class="tt-result-toolbar"><span id="tt-result-label">Productos técnicos</span><label>Ordenar<select id="tt-sort"><option value="destacados">Destacados</option><option value="precio_asc">Precio: menor a mayor</option><option value="precio_desc">Precio: mayor a menor</option><option value="nombre">Nombre</option></select></label></div>
+      <div id="tt-catalog-grid" class="tt-product-grid" aria-live="polite"></div>
+      <div class="tt-pagination"><button id="tt-prev-page" type="button">Anterior</button><span id="tt-page-label"></span><button id="tt-next-page" type="button">Siguiente</button></div>
+    </section>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TechTail | Portal proveedor</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
+</head>
+<body data-page="proveedor">
+  <header class="rp-topbar">
+    <a class="rp-brand" href="/"><img class="rp-brand-logo" src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>Portal proveedor</span></a>
+    <nav class="rp-actions"><a class="rp-icon-btn" href="/">Tienda</a><form class="rp-logout-form" method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button class="rp-icon-btn" type="submit">Salir</button></form><button class="rp-icon-btn" id="theme-toggle" type="button">Modo</button></nav>
+  </header>
+  <main class="rp-shell">
+    <section class="rp-account-hero rp-card"><div><p class="rp-kicker">Abastecimiento</p><h1 id="supplier-name">Mi organización</h1><p class="rp-muted">Stock, productos asociados, órdenes y cumplimiento.</p></div><div id="supplier-summary" class="rp-mini-list"></div></section>
+    <section class="rp-account-tabs"><button class="rp-secondary" data-supplier-tab="productos">Productos y stock</button><button class="rp-secondary" data-supplier-tab="ordenes">Órdenes</button><button class="rp-secondary" data-supplier-tab="historial">Historial</button></section>
+    <section data-supplier-panel="productos" class="rp-card"><h2>Productos asociados</h2><div id="supplier-products" class="rp-table-wrap"></div></section>
+    <section data-supplier-panel="ordenes" class="rp-card rp-hidden"><h2>Órdenes de abastecimiento</h2><p class="rp-muted">La recepción física corresponde al almacén o administración.</p><div id="supplier-orders" class="rp-table-wrap"></div></section>
+    <section data-supplier-panel="historial" class="rp-card rp-hidden"><h2>Historial de entregas y cumplimiento</h2><div id="supplier-history" class="rp-list"></div></section>
+  </main>
+  <div id="toast" class="rp-toast"></div>
+  <script src="{% static 'retail/js/retail.js' %}"></script>
+</body>
+</html>

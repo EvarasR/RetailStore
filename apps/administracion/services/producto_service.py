@@ -2,6 +2,7 @@ import json
 
 from apps.core.services.sql_service import (
     ejecutar_funcion_scalar,
+    ejecutar_funcion_tabla,
     ejecutar_funcion_void,
 )
 
@@ -197,11 +198,126 @@ def agregar_imagen_producto(
     )
 
 
+def actualizar_imagen_producto(cod_imagen, url_imagen, alt_text=None, orden=1, activo=True):
+    return ejecutar_funcion_void(
+        "fn_actualizar_imagen_producto",
+        [cod_imagen, url_imagen, alt_text, orden, activo],
+        ["BIGINT", "TEXT", "TEXT", "INTEGER", "BOOLEAN"],
+        usar_transaccion=True,
+    )
+
+
+def desactivar_imagen_producto(cod_imagen):
+    return ejecutar_funcion_void("fn_desactivar_imagen_producto", [cod_imagen], ["BIGINT"], usar_transaccion=True)
+
+
+def ordenar_imagen_producto(cod_imagen, orden, es_principal=False):
+    return ejecutar_funcion_void(
+        "fn_ordenar_imagen_producto", [cod_imagen, orden, es_principal], ["BIGINT", "INTEGER", "BOOLEAN"], usar_transaccion=True
+    )
+
+
+def crear_producto_atributo(nombre, tipo_dato="TEXT"):
+    return ejecutar_funcion_scalar("fn_crear_producto_atributo", [nombre, tipo_dato], ["TEXT", "VARCHAR"], usar_transaccion=True)
+
+
+def actualizar_producto_atributo(cod_atributo, nombre, tipo_dato, activo=True):
+    return ejecutar_funcion_void(
+        "fn_actualizar_producto_atributo", [cod_atributo, nombre, tipo_dato, activo], ["BIGINT", "TEXT", "VARCHAR", "BOOLEAN"], usar_transaccion=True
+    )
+
+
+def desactivar_producto_atributo(cod_atributo):
+    return ejecutar_funcion_void("fn_desactivar_producto_atributo", [cod_atributo], ["BIGINT"], usar_transaccion=True)
+
+
+def asignar_producto_atributo_valor(cod_producto, cod_atributo, valor):
+    return ejecutar_funcion_void(
+        "fn_asignar_producto_atributo_valor", [cod_producto, cod_atributo, valor], ["BIGINT", "BIGINT", "TEXT"], usar_transaccion=True
+    )
+
+
+def desasociar_producto_atributo_valor(cod_producto, cod_atributo):
+    return ejecutar_funcion_void(
+        "fn_desasociar_producto_atributo_valor", [cod_producto, cod_atributo], ["BIGINT", "BIGINT"], usar_transaccion=True
+    )
+
+
 def precio_producto_con_promocion(cod_producto):
     return ejecutar_funcion_scalar(
         "fn_precio_producto_con_promocion",
         [cod_producto],
         ["BIGINT"],
+    )
+
+
+def recalcular_precio_desde_producto(cod_producto):
+    """Actualiza en PostgreSQL el precio de exhibicion desde el lote FIFO."""
+    return ejecutar_funcion_void(
+        "fn_recalcular_precio_actual_producto", [cod_producto], ["BIGINT"], usar_transaccion=True
+    )
+
+
+def obtener_regla_precio_producto(cod_producto, fecha_referencia=None):
+    return ejecutar_funcion_tabla(
+        "fn_obtener_regla_precio_producto",
+        [cod_producto, fecha_referencia],
+        ["BIGINT", "TIMESTAMPTZ"],
+    )
+
+
+def calcular_pvp_lote(cod_producto, costo_unitario, fecha_referencia=None):
+    return ejecutar_funcion_scalar(
+        "fn_calcular_pvp_lote",
+        [cod_producto, costo_unitario, fecha_referencia],
+        ["BIGINT", "NUMERIC", "TIMESTAMPTZ"],
+    )
+
+
+def crear_regla_precio(
+    cod_producto,
+    cod_categoria,
+    margen_porcentaje,
+    costo_operativo_porcentaje=0,
+    costo_fijo_unitario=0,
+    porcentaje_impuesto=None,
+    prioridad=100,
+):
+    return ejecutar_funcion_scalar(
+        "fn_crear_regla_precio",
+        [
+            cod_producto, cod_categoria, margen_porcentaje,
+            costo_operativo_porcentaje, costo_fijo_unitario,
+            porcentaje_impuesto, prioridad,
+        ],
+        ["BIGINT", "BIGINT", "NUMERIC", "NUMERIC", "NUMERIC", "NUMERIC", "INTEGER"],
+        usar_transaccion=True,
+    )
+
+
+def actualizar_regla_precio(
+    cod_regla_precio,
+    margen_porcentaje,
+    costo_operativo_porcentaje,
+    costo_fijo_unitario,
+    porcentaje_impuesto,
+    prioridad,
+    activo,
+):
+    return ejecutar_funcion_void(
+        "fn_actualizar_regla_precio",
+        [
+            cod_regla_precio, margen_porcentaje, costo_operativo_porcentaje,
+            costo_fijo_unitario, porcentaje_impuesto, prioridad, activo,
+        ],
+        ["BIGINT", "NUMERIC", "NUMERIC", "NUMERIC", "NUMERIC", "INTEGER", "BOOLEAN"],
+        usar_transaccion=True,
+    )
+
+
+def desactivar_regla_precio(cod_regla_precio):
+    return ejecutar_funcion_void(
+        "fn_desactivar_regla_precio", [cod_regla_precio], ["BIGINT"], usar_transaccion=True
     )
 
 

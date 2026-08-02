@@ -43,6 +43,14 @@ def _is_admin(user):
 def _destino_por_rol(user):
     if _is_admin(user):
         return "administracion:panel"
+    # El portal proveedor sólo se habilita con la relación explícita vigente.
+    try:
+        from apps.proveedores.services.portal_service import es_usuario_proveedor, obtener_proveedor_usuario
+        if es_usuario_proveedor(user) and obtener_proveedor_usuario(user):
+            return "proveedores:panel"
+    except Exception:
+        # No se filtra detalle interno durante una falla de autorización.
+        pass
     return "clientes:inicio"
 
 
@@ -69,6 +77,7 @@ def _redirect_seguro_por_rol(request, user, next_url=None):
 
 
 @ensure_csrf_cookie
+@sensitive_post_parameters("password")
 def login_view(request):
     if request.user.is_authenticated:
         return _redirect_seguro_por_rol(request, request.user, request.GET.get("next"))
@@ -141,6 +150,8 @@ def registro_view(request):
     return render(request, "core/registro.html")
 
 
+@login_required(login_url="/login/")
+@require_POST
 def logout_view(request):
     logout(request)
     return redirect("clientes:inicio")
@@ -206,6 +217,7 @@ def api_perfil(request):
 
 
 @login_required(login_url="/login/")
+@sensitive_post_parameters("documento_identidad")
 @require_POST
 def api_actualizar_perfil(request):
     user = request.user

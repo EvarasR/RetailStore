@@ -15,10 +15,15 @@ class Pedido(models.Model):
     cod_usuario = models.ForeignKey('core.Usuario', models.DO_NOTHING, db_column='cod_usuario')
     cod_direccion_envio = models.ForeignKey('core.DireccionUsuario', models.DO_NOTHING, db_column='cod_direccion_envio')
     cod_estado_pedido = models.ForeignKey('core.EstadoPedido', models.DO_NOTHING, db_column='cod_estado_pedido')
+    cod_metodo_envio = models.ForeignKey('operaciones.MetodoEnvio', models.DO_NOTHING, db_column='cod_metodo_envio', blank=True, null=True)
+    cod_zona_entrega = models.ForeignKey('operaciones.ZonaEntrega', models.DO_NOTHING, db_column='cod_zona_entrega', blank=True, null=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     descuento = models.DecimalField(max_digits=12, decimal_places=2)
+    impuesto = models.DecimalField(max_digits=12, decimal_places=2)
+    tasa_impuesto = models.DecimalField(max_digits=8, decimal_places=4)
     costo_envio = models.DecimalField(max_digits=12, decimal_places=2)
     total = models.DecimalField(max_digits=12, decimal_places=2)
+    fecha_estimada_entrega = models.DateTimeField(blank=True, null=True)
     es_premium = models.BooleanField()
     requiere_abastecimiento = models.BooleanField()
     observacion = models.TextField(blank=True, null=True)
@@ -35,12 +40,35 @@ class PedidoDetalle(models.Model):
     cod_producto = models.ForeignKey('administracion.Producto', models.DO_NOTHING, db_column='cod_producto')
     cantidad = models.IntegerField()
     precio_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    precio_base_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    descuento_promocion_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    descuento_prime_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    descuento_cupon_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    precio_final_unitario = models.DecimalField(max_digits=12, decimal_places=2)
     subtotal_linea = models.DecimalField(max_digits=12, decimal_places=2)
 
     class Meta:
         managed = False
         db_table = 'pedido_detalle'
         unique_together = (('cod_pedido', 'cod_producto'),)
+
+
+class PedidoDetalleLote(models.Model):
+    cod_pedido_detalle_lote = models.BigAutoField(primary_key=True)
+    cod_pedido_detalle = models.ForeignKey('operaciones.PedidoDetalle', models.DO_NOTHING, db_column='cod_pedido_detalle')
+    cod_lote = models.ForeignKey('administracion.LoteInventario', models.DO_NOTHING, db_column='cod_lote')
+    cantidad = models.IntegerField()
+    costo_unitario_historico = models.DecimalField(max_digits=12, decimal_places=4)
+    pvp_unitario_historico = models.DecimalField(max_digits=12, decimal_places=2)
+    descuento_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    precio_final_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    subtotal_linea_lote = models.DecimalField(max_digits=12, decimal_places=2)
+    fecha_asignacion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'pedido_detalle_lote'
+        unique_together = (('cod_pedido_detalle', 'cod_lote'),)
 
 class PedidoEstadoHistorial(models.Model):
     cod_historial = models.BigAutoField(primary_key=True)
@@ -58,7 +86,10 @@ class Factura(models.Model):
     cod_pedido = models.OneToOneField('operaciones.Pedido', models.DO_NOTHING, db_column='cod_pedido')
     numero_factura = models.CharField(unique=True, max_length=40)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    descuento = models.DecimalField(max_digits=12, decimal_places=2)
     impuesto = models.DecimalField(max_digits=12, decimal_places=2)
+    tasa_impuesto = models.DecimalField(max_digits=8, decimal_places=4)
+    costo_envio = models.DecimalField(max_digits=12, decimal_places=2)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     fecha_emision = models.DateTimeField()
     estado = models.CharField(max_length=30)
@@ -219,6 +250,7 @@ class Envio(models.Model):
     cod_metodo_envio = models.ForeignKey('operaciones.MetodoEnvio', models.DO_NOTHING, db_column='cod_metodo_envio')
     numero_tracking = models.CharField(unique=True, max_length=60)
     estado = models.CharField(max_length=40)
+    estado_envio = models.CharField(max_length=40, blank=True, null=True)
     fecha_estimada_entrega = models.DateField(blank=True, null=True)
     fecha_entrega = models.DateTimeField(blank=True, null=True)
     fecha_creacion = models.DateTimeField()
@@ -235,10 +267,31 @@ class TrackingEvento(models.Model):
     ubicacion = models.CharField(max_length=160, blank=True, null=True)
     visible_cliente = models.BooleanField()
     fecha_evento = models.DateTimeField()
+    orden = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'tracking_evento'
+
+
+class TrackingEventoProgramado(models.Model):
+    cod_programacion = models.BigAutoField(primary_key=True)
+    cod_envio = models.ForeignKey('operaciones.Envio', models.DO_NOTHING, db_column='cod_envio')
+    cod_tipo_evento = models.ForeignKey('core.TipoEventoTracking', models.DO_NOTHING, db_column='cod_tipo_evento')
+    descripcion = models.TextField()
+    ubicacion = models.TextField(blank=True, null=True)
+    fecha_programada = models.DateTimeField()
+    procesado = models.BooleanField()
+    fecha_procesado = models.DateTimeField(blank=True, null=True)
+    orden = models.IntegerField()
+    visible_cliente = models.BooleanField()
+    fecha_creacion = models.DateTimeField()
+    fecha_actualizacion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'tracking_evento_programado'
+        unique_together = (('cod_envio', 'orden'),)
 
 class Notificacion(models.Model):
     cod_notificacion = models.BigAutoField(primary_key=True)

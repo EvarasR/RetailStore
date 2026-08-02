@@ -333,6 +333,9 @@ CREATE TABLE IF NOT EXISTS producto_imagen (
     fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Fase J: soporte para baja lógica y ordenación de imágenes/valores técnicos.
+ALTER TABLE producto_imagen ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT TRUE;
+
 CREATE UNIQUE INDEX IF NOT EXISTS uk_producto_imagen_principal
 ON producto_imagen(cod_producto)
 WHERE es_principal IS TRUE;
@@ -350,6 +353,8 @@ CREATE TABLE IF NOT EXISTS producto_atributo_valor (
     valor TEXT NOT NULL,
     PRIMARY KEY (cod_producto, cod_atributo)
 );
+
+ALTER TABLE producto_atributo_valor ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT TRUE;
 
 CREATE TABLE IF NOT EXISTS producto_relacionado (
     cod_producto BIGINT NOT NULL REFERENCES producto(cod_producto) ON DELETE CASCADE,
@@ -537,6 +542,22 @@ CREATE TABLE IF NOT EXISTS producto_proveedor (
 
 CREATE INDEX IF NOT EXISTS ix_producto_proveedor_producto ON producto_proveedor(cod_producto);
 CREATE INDEX IF NOT EXISTS ix_producto_proveedor_proveedor ON producto_proveedor(cod_proveedor);
+
+-- Relación explícita de acceso al portal proveedor. No se infiere desde email
+-- ni desde JSON de perfil: una cuenta puede estar asociada a un proveedor.
+CREATE TABLE IF NOT EXISTS usuario_proveedor (
+    cod_usuario_proveedor BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    cod_usuario BIGINT NOT NULL REFERENCES usuario(cod_usuario) ON DELETE RESTRICT,
+    cod_proveedor BIGINT NOT NULL REFERENCES proveedor(cod_proveedor) ON DELETE RESTRICT,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    fecha_actualizacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uk_usuario_proveedor UNIQUE (cod_usuario, cod_proveedor)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_usuario_proveedor_activo
+ON usuario_proveedor(cod_usuario)
+WHERE activo IS TRUE;
 
 CREATE TABLE IF NOT EXISTS proveedor_stock (
     cod_proveedor_stock BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -1119,6 +1140,174 @@ CREATE TABLE IF NOT EXISTS biblioteca_usuario (
     fecha_expiracion DATE,
     CONSTRAINT uk_biblioteca_usuario_contenido UNIQUE (cod_usuario, cod_contenido)
 );
+
+-- ============================================================
+-- FASE A: PRECIO POR LOTE, FIFO Y REPOSICIÓN
+-- ============================================================
+CREATE TABLE IF NOT EXISTS regla_precio (
+    cod_regla_precio BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    cod_producto BIGINT REFERENCES producto(cod_producto) ON DELETE CASCADE,
+    cod_categoria BIGINT REFERENCES categoria(cod_categoria) ON DELETE CASCADE,
+    margen_porcentaje NUMERIC(8,4) NOT NULL DEFAULT 0,
+    costo_operativo_porcentaje NUMERIC(8,4) NOT NULL DEFAULT 0,
+    costo_fijo_unitario NUMERIC(12,4) NOT NULL DEFAULT 0,
+    porcentaje_impuesto NUMERIC(8,4),
+    prioridad INTEGER NOT NULL DEFAULT 100,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_inicio TIMESTAMPTZ,
+    fecha_fin TIMESTAMPTZ,
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    fecha_actualizacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_regla_precio_objetivo CHECK (num_nonnulls(cod_producto, cod_categoria) <= 1),
+    CONSTRAINT chk_regla_precio_importes CHECK (
+        margen_porcentaje >= 0 AND costo_operativo_porcentaje >= 0
+        AND costo_fijo_unitario >= 0 AND (porcentaje_impuesto IS NULL OR porcentaje_impuesto >= 0)
+    ),
+    CONSTRAINT chk_regla_precio_fechas CHECK (fecha_fin IS NULL OR fecha_inicio IS NULL OR fecha_fin > fecha_inicio)
+);
+
+-- La regla global no tiene producto ni categoría. Los índices parciales
+-- evitan dos reglas activas ambiguas con igual prioridad y mismo objetivo.
+CREATE UNIQUE INDEX IF NOT EXISTS uk_regla_precio_producto_prioridad_activa
+ON regla_precio(cod_producto, prioridad)
+WHERE activo IS TRUE AND cod_producto IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS uk_regla_precio_categoria_prioridad_activa
+ON regla_precio(cod_categoria, prioridad)
+WHERE activo IS TRUE AND cod_categoria IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS uk_regla_precio_global_prioridad_activa
+ON regla_precio(prioridad)
+WHERE activo IS TRUE AND cod_producto IS NULL AND cod_categoria IS NULL;
+
+CREATE TABLE IF NOT EXISTS lote_inventario (
+    cod_lote BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    numero_lote VARCHAR(80) NOT NULL UNIQUE,
+    cod_producto BIGINT NOT NULL REFERENCES producto(cod_producto) ON DELETE RESTRICT,
+    cod_almacen BIGINT NOT NULL REFERENCES almacen(cod_almacen) ON DELETE RESTRICT,
+    cod_proveedor BIGINT REFERENCES proveedor(cod_proveedor) ON DELETE SET NULL,
+    cod_orden_abastecimiento_detalle BIGINT REFERENCES orden_abastecimiento_detalle(cod_orden_abastecimiento_detalle) ON DELETE SET NULL,
+    cantidad_recibida INTEGER NOT NULL,
+    cantidad_disponible INTEGER NOT NULL,
+    cantidad_reservada INTEGER NOT NULL DEFAULT 0,
+    costo_unitario NUMERIC(12,4) NOT NULL,
+    margen_porcentaje_aplicado NUMERIC(8,4) NOT NULL DEFAULT 0,
+    costo_operativo_aplicado NUMERIC(8,4) NOT NULL DEFAULT 0,
+    porcentaje_impuesto_aplicado NUMERIC(8,4) NOT NULL DEFAULT 0,
+    pvp_unitario NUMERIC(12,2) NOT NULL,
+    fecha_recepcion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    fecha_vencimiento TIMESTAMPTZ,
+    estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    fecha_actualizacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_lote_cantidades CHECK (
+        cantidad_recibida >= 0 AND cantidad_disponible >= 0 AND cantidad_reservada >= 0
+        AND cantidad_disponible <= cantidad_recibida AND cantidad_reservada <= cantidad_disponible
+    ),
+    CONSTRAINT chk_lote_costo_pvp CHECK (costo_unitario > 0 AND pvp_unitario > 0),
+    CONSTRAINT chk_lote_estado CHECK (estado IN ('ACTIVO','AGOTADO','BLOQUEADO','ANULADO')),
+    CONSTRAINT chk_lote_vencimiento CHECK (fecha_vencimiento IS NULL OR fecha_vencimiento >= fecha_recepcion)
+);
+CREATE INDEX IF NOT EXISTS ix_lote_inventario_fifo
+ON lote_inventario(cod_producto, cod_almacen, estado, fecha_recepcion, cod_lote);
+
+CREATE TABLE IF NOT EXISTS pedido_detalle_lote (
+    cod_pedido_detalle_lote BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    cod_pedido_detalle BIGINT NOT NULL REFERENCES pedido_detalle(cod_pedido_detalle) ON DELETE RESTRICT,
+    cod_lote BIGINT NOT NULL REFERENCES lote_inventario(cod_lote) ON DELETE RESTRICT,
+    cantidad INTEGER NOT NULL CHECK (cantidad > 0),
+    costo_unitario_historico NUMERIC(12,4) NOT NULL CHECK (costo_unitario_historico > 0),
+    pvp_unitario_historico NUMERIC(12,2) NOT NULL CHECK (pvp_unitario_historico > 0),
+    descuento_unitario NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (descuento_unitario >= 0),
+    precio_final_unitario NUMERIC(12,2) NOT NULL CHECK (precio_final_unitario > 0),
+    subtotal_linea_lote NUMERIC(12,2) GENERATED ALWAYS AS (ROUND(cantidad * precio_final_unitario, 2)) STORED,
+    fecha_asignacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uk_pedido_detalle_lote UNIQUE (cod_pedido_detalle, cod_lote)
+);
+
+ALTER TABLE reserva_inventario
+    ADD COLUMN IF NOT EXISTS cod_lote BIGINT,
+    ADD COLUMN IF NOT EXISTS cod_pedido_detalle BIGINT,
+    ADD COLUMN IF NOT EXISTS estado_reserva VARCHAR(30) NOT NULL DEFAULT 'ACTIVA',
+    ADD COLUMN IF NOT EXISTS fecha_expiracion TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '30 minutes');
+ALTER TABLE reserva_inventario
+    ADD CONSTRAINT fk_reserva_inventario_lote FOREIGN KEY (cod_lote) REFERENCES lote_inventario(cod_lote) ON DELETE RESTRICT,
+    ADD CONSTRAINT fk_reserva_inventario_pedido_detalle FOREIGN KEY (cod_pedido_detalle) REFERENCES pedido_detalle(cod_pedido_detalle) ON DELETE SET NULL,
+    ADD CONSTRAINT chk_reserva_inventario_estado_reserva CHECK (estado_reserva IN ('ACTIVA','CONSUMIDA','LIBERADA','EXPIRADA'));
+CREATE INDEX IF NOT EXISTS ix_reserva_inventario_lote_estado ON reserva_inventario(cod_lote, estado_reserva);
+CREATE INDEX IF NOT EXISTS ix_reserva_inventario_pedido_estado ON reserva_inventario(cod_pedido, estado_reserva);
+
+ALTER TABLE orden_abastecimiento
+    ADD COLUMN IF NOT EXISTS cod_almacen BIGINT,
+    ADD CONSTRAINT fk_orden_abastecimiento_almacen FOREIGN KEY (cod_almacen) REFERENCES almacen(cod_almacen) ON DELETE RESTRICT;
+CREATE INDEX IF NOT EXISTS ix_orden_abastecimiento_abierta_reposicion
+ON orden_abastecimiento(cod_almacen, cod_proveedor, estado)
+WHERE estado IN ('GENERADA','ENVIADA','ACEPTADA');
+CREATE INDEX IF NOT EXISTS ix_orden_abastecimiento_detalle_producto
+ON orden_abastecimiento_detalle(cod_producto, cod_orden_abastecimiento);
+
+-- ============================================================
+-- FASE B: PRECIO FINAL, ENVÍO, IMPUESTO, FACTURA Y PAGOS
+-- ============================================================
+ALTER TABLE pedido
+    ADD COLUMN IF NOT EXISTS cod_metodo_envio BIGINT,
+    ADD COLUMN IF NOT EXISTS cod_zona_entrega BIGINT,
+    ADD COLUMN IF NOT EXISTS impuesto NUMERIC(12,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS tasa_impuesto NUMERIC(8,4) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS fecha_estimada_entrega TIMESTAMPTZ;
+ALTER TABLE pedido
+    ADD CONSTRAINT fk_pedido_metodo_envio FOREIGN KEY (cod_metodo_envio) REFERENCES metodo_envio(cod_metodo_envio) ON DELETE RESTRICT,
+    ADD CONSTRAINT fk_pedido_zona_entrega FOREIGN KEY (cod_zona_entrega) REFERENCES zona_entrega(cod_zona) ON DELETE RESTRICT,
+    ADD CONSTRAINT chk_pedido_impuesto CHECK (impuesto >= 0 AND tasa_impuesto >= 0);
+
+ALTER TABLE pedido_detalle
+    ADD COLUMN IF NOT EXISTS precio_base_unitario NUMERIC(12,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS descuento_promocion_unitario NUMERIC(12,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS descuento_prime_unitario NUMERIC(12,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS descuento_cupon_unitario NUMERIC(12,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS precio_final_unitario NUMERIC(12,2) NOT NULL DEFAULT 0;
+ALTER TABLE pedido_detalle
+    ADD CONSTRAINT chk_pedido_detalle_descuentos CHECK (
+        precio_base_unitario >= 0 AND descuento_promocion_unitario >= 0
+        AND descuento_prime_unitario >= 0 AND descuento_cupon_unitario >= 0
+        AND precio_final_unitario >= 0
+    );
+
+ALTER TABLE factura
+    ADD COLUMN IF NOT EXISTS descuento NUMERIC(12,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS tasa_impuesto NUMERIC(8,4) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS costo_envio NUMERIC(12,2) NOT NULL DEFAULT 0;
+ALTER TABLE factura
+    ADD CONSTRAINT chk_factura_importes_fase_b CHECK (descuento >= 0 AND impuesto >= 0 AND tasa_impuesto >= 0 AND costo_envio >= 0 AND total >= 0);
+
+CREATE INDEX IF NOT EXISTS ix_pedido_metodo_zona ON pedido(cod_metodo_envio, cod_zona_entrega);
+
+-- ============================================================
+-- FASE C: TRACKING PERSISTENTE Y MANTENIMIENTO
+-- ============================================================
+CREATE TABLE IF NOT EXISTS tracking_evento_programado (
+    cod_programacion BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    cod_envio BIGINT NOT NULL REFERENCES envio(cod_envio) ON DELETE RESTRICT,
+    cod_tipo_evento VARCHAR(40) NOT NULL REFERENCES tipo_evento_tracking(cod_tipo_evento) ON DELETE RESTRICT,
+    descripcion TEXT NOT NULL,
+    ubicacion TEXT,
+    fecha_programada TIMESTAMPTZ NOT NULL,
+    procesado BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_procesado TIMESTAMPTZ,
+    orden INTEGER NOT NULL,
+    visible_cliente BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    fecha_actualizacion TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uk_tracking_programado_envio_orden UNIQUE (cod_envio, orden),
+    CONSTRAINT chk_tracking_programado_orden CHECK (orden > 0),
+    CONSTRAINT chk_tracking_programado_procesado CHECK ((procesado IS FALSE AND fecha_procesado IS NULL) OR (procesado IS TRUE AND fecha_procesado IS NOT NULL))
+);
+ALTER TABLE tracking_evento ADD COLUMN IF NOT EXISTS orden INTEGER;
+ALTER TABLE envio ADD COLUMN IF NOT EXISTS estado_envio VARCHAR(40);
+ALTER TABLE envio ADD CONSTRAINT chk_envio_estado_fase_c CHECK (estado_envio IS NULL OR estado_envio IN ('CREADO','PREPARANDO','LISTO_ENVIO','ENVIADO','EN_TRANSITO','CENTRO_LOCAL','EN_REPARTO','ENTREGADO','CANCELADO'));
+CREATE INDEX IF NOT EXISTS ix_tracking_programado_pendiente ON tracking_evento_programado(procesado, fecha_programada);
+CREATE INDEX IF NOT EXISTS ix_tracking_programado_envio_orden ON tracking_evento_programado(cod_envio, orden);
+CREATE INDEX IF NOT EXISTS ix_reserva_estado_expiracion ON reserva_inventario(estado_reserva, fecha_expiracion);
+CREATE INDEX IF NOT EXISTS ix_pedido_impago_vencido ON pedido(cod_estado_pedido, fecha_creacion) WHERE cod_estado_pedido IN ('PENDIENTE_PAGO','PAGO_AUTORIZADO');
+CREATE INDEX IF NOT EXISTS ix_carrito_abandono ON carrito(estado, fecha_actualizacion) WHERE estado='ACTIVO';
 
 -- Claves foráneas diferidas por orden de creación de tablas base.
 ALTER TABLE reserva_inventario

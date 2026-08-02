@@ -28,6 +28,20 @@ class Proveedor(models.Model):
         managed = False
         db_table = 'proveedor'
 
+
+class UsuarioProveedor(models.Model):
+    cod_usuario_proveedor = models.BigAutoField(primary_key=True)
+    cod_usuario = models.ForeignKey('core.Usuario', models.DO_NOTHING, db_column='cod_usuario')
+    cod_proveedor = models.ForeignKey('proveedores.Proveedor', models.DO_NOTHING, db_column='cod_proveedor')
+    activo = models.BooleanField()
+    fecha_creacion = models.DateTimeField()
+    fecha_actualizacion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'usuario_proveedor'
+        unique_together = (('cod_usuario', 'cod_proveedor'),)
+
 class ProveedorContacto(models.Model):
     # Un proveedor puede tener varios contactos; PostgreSQL solo permite un contacto principal por índice parcial.
     cod_contacto = models.BigAutoField(primary_key=True)
@@ -75,6 +89,7 @@ class ProveedorStock(models.Model):
 class OrdenAbastecimiento(models.Model):
     cod_orden_abastecimiento = models.BigAutoField(primary_key=True)
     cod_proveedor = models.ForeignKey('proveedores.Proveedor', models.DO_NOTHING, db_column='cod_proveedor')
+    cod_almacen = models.ForeignKey('administracion.Almacen', models.DO_NOTHING, db_column='cod_almacen', blank=True, null=True)
     cod_pedido = models.ForeignKey('operaciones.Pedido', models.DO_NOTHING, db_column='cod_pedido', blank=True, null=True)
     estado = models.CharField(max_length=30)
     total_estimado = models.DecimalField(max_digits=12, decimal_places=2)

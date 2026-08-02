@@ -98,3 +98,31 @@ def validar_checkout_carrito(cod_usuario):
         [cod_usuario],
         ["BIGINT"],
     )
+
+
+def validar_carrito_para_checkout(cod_usuario):
+    """Validacion DB-first de limites, disponibilidad y total estimado."""
+    return validar_checkout_carrito(cod_usuario)
+
+
+def cotizar_producto_por_lotes(cod_usuario, cod_producto, cantidad):
+    return ejecutar_funcion_scalar(
+        "fn_cotizar_producto_por_lotes",
+        [cod_usuario, cod_producto, cantidad],
+        ["BIGINT", "BIGINT", "INTEGER"],
+    )
+
+
+def calcular_precio_final_item(
+    cod_usuario,
+    cod_producto,
+    cantidad,
+    precio_base=None,
+    codigo_cupon=None,
+):
+    """Devuelve el precio real calculado por PostgreSQL para una linea."""
+    return ejecutar_funcion_scalar(
+        "fn_calcular_precio_final_item",
+        [cod_usuario, cod_producto, cantidad, precio_base, codigo_cupon],
+        ["BIGINT", "BIGINT", "INTEGER", "NUMERIC", "TEXT"],
+    )

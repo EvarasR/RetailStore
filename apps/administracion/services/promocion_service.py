@@ -74,3 +74,33 @@ def asociar_promocion_producto(cod_promocion, cod_producto):
         [cod_promocion, cod_producto],
         ["BIGINT", "BIGINT"],
     )
+
+
+def actualizar_cupon(cod_cupon, nombre, valor, activo=True):
+    return ejecutar_funcion_void(
+        "fn_actualizar_cupon",
+        [cod_cupon, nombre, valor, activo],
+        ["BIGINT", "TEXT", "NUMERIC", "BOOLEAN"],
+        usar_transaccion=True,
+    )
+
+
+def desactivar_cupon(cod_cupon):
+    return ejecutar_funcion_void(
+        "fn_desactivar_cupon", [cod_cupon], ["BIGINT"], usar_transaccion=True
+    )
+
+
+def actualizar_promocion(cod_promocion, nombre, valor, activo=True):
+    return ejecutar_funcion_void(
+        "fn_actualizar_promocion",
+        [cod_promocion, nombre, valor, activo],
+        ["BIGINT", "TEXT", "NUMERIC", "BOOLEAN"],
+        usar_transaccion=True,
+    )
+
+
+def desactivar_promocion(cod_promocion):
+    return ejecutar_funcion_void(
+        "fn_desactivar_promocion", [cod_promocion], ["BIGINT"], usar_transaccion=True
+    )

@@ -1,0 +1,6 @@
+{% extends 'core/base.html' %}
+{% block title %}Mis pedidos | TechTail{% endblock %}
+{% block page %}pedidos{% endblock %}
+{% block content %}
+<main class="tt-page"><nav class="tt-breadcrumb"><a href="{% url 'clientes:inicio' %}">Inicio</a><span>›</span><strong>Mis pedidos</strong></nav><header class="tt-section-heading"><div><p class="tt-eyebrow">Postventa</p><h1>Pedidos y tracking</h1><p>Consulta el estado, factura y eventos persistentes de cada compra.</p></div></header><div id="tt-orders-page" class="tt-orders-list"></div></main>
+{% endblock %}

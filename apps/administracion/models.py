@@ -63,6 +63,7 @@ class ProductoImagen(models.Model):
     alt_text = models.CharField(max_length=180, blank=True, null=True)
     es_principal = models.BooleanField()
     orden = models.IntegerField()
+    activo = models.BooleanField()
     fecha_creacion = models.DateTimeField()
 
     class Meta:
@@ -84,6 +85,7 @@ class ProductoAtributoValor(models.Model):
     cod_producto = models.ForeignKey('administracion.Producto', models.DO_NOTHING, db_column='cod_producto')
     cod_atributo = models.ForeignKey('administracion.ProductoAtributo', models.DO_NOTHING, db_column='cod_atributo')
     valor = models.TextField()
+    activo = models.BooleanField()
 
     class Meta:
         managed = False
@@ -142,6 +144,26 @@ class HistorialPrecioProducto(models.Model):
         managed = False
         db_table = 'historial_precio_producto'
 
+
+class ReglaPrecio(models.Model):
+    cod_regla_precio = models.BigAutoField(primary_key=True)
+    cod_producto = models.ForeignKey('administracion.Producto', models.DO_NOTHING, db_column='cod_producto', blank=True, null=True)
+    cod_categoria = models.ForeignKey('administracion.Categoria', models.DO_NOTHING, db_column='cod_categoria', blank=True, null=True)
+    margen_porcentaje = models.DecimalField(max_digits=8, decimal_places=4)
+    costo_operativo_porcentaje = models.DecimalField(max_digits=8, decimal_places=4)
+    costo_fijo_unitario = models.DecimalField(max_digits=12, decimal_places=4)
+    porcentaje_impuesto = models.DecimalField(max_digits=8, decimal_places=4, blank=True, null=True)
+    prioridad = models.IntegerField()
+    activo = models.BooleanField()
+    fecha_inicio = models.DateTimeField(blank=True, null=True)
+    fecha_fin = models.DateTimeField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField()
+    fecha_actualizacion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'regla_precio'
+
 class Almacen(models.Model):
     cod_almacen = models.BigAutoField(primary_key=True)
     nombre = models.CharField(unique=True, max_length=120)
@@ -169,6 +191,32 @@ class Inventario(models.Model):
         db_table = 'inventario'
         unique_together = (('cod_producto', 'cod_almacen'),)
 
+
+class LoteInventario(models.Model):
+    cod_lote = models.BigAutoField(primary_key=True)
+    numero_lote = models.CharField(unique=True, max_length=80)
+    cod_producto = models.ForeignKey('administracion.Producto', models.DO_NOTHING, db_column='cod_producto')
+    cod_almacen = models.ForeignKey('administracion.Almacen', models.DO_NOTHING, db_column='cod_almacen')
+    cod_proveedor = models.ForeignKey('proveedores.Proveedor', models.DO_NOTHING, db_column='cod_proveedor', blank=True, null=True)
+    cod_orden_abastecimiento_detalle = models.ForeignKey('proveedores.OrdenAbastecimientoDetalle', models.DO_NOTHING, db_column='cod_orden_abastecimiento_detalle', blank=True, null=True)
+    cantidad_recibida = models.IntegerField()
+    cantidad_disponible = models.IntegerField()
+    cantidad_reservada = models.IntegerField()
+    costo_unitario = models.DecimalField(max_digits=12, decimal_places=4)
+    margen_porcentaje_aplicado = models.DecimalField(max_digits=8, decimal_places=4)
+    costo_operativo_aplicado = models.DecimalField(max_digits=8, decimal_places=4)
+    porcentaje_impuesto_aplicado = models.DecimalField(max_digits=8, decimal_places=4)
+    pvp_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    fecha_recepcion = models.DateTimeField()
+    fecha_vencimiento = models.DateTimeField(blank=True, null=True)
+    estado = models.CharField(max_length=20)
+    fecha_creacion = models.DateTimeField()
+    fecha_actualizacion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'lote_inventario'
+
 class MovimientoInventario(models.Model):
     cod_movimiento = models.BigAutoField(primary_key=True)
     cod_producto = models.ForeignKey('administracion.Producto', models.DO_NOTHING, db_column='cod_producto')
@@ -192,9 +240,13 @@ class ReservaInventario(models.Model):
     cod_almacen = models.ForeignKey('administracion.Almacen', models.DO_NOTHING, db_column='cod_almacen')
     cod_usuario = models.ForeignKey('core.Usuario', models.DO_NOTHING, db_column='cod_usuario')
     cod_pedido = models.ForeignKey('operaciones.Pedido', models.DO_NOTHING, db_column='cod_pedido', blank=True, null=True)
+    cod_lote = models.ForeignKey('administracion.LoteInventario', models.DO_NOTHING, db_column='cod_lote', blank=True, null=True)
+    cod_pedido_detalle = models.ForeignKey('operaciones.PedidoDetalle', models.DO_NOTHING, db_column='cod_pedido_detalle', blank=True, null=True)
     cantidad = models.IntegerField()
     estado = models.CharField(max_length=30)
+    estado_reserva = models.CharField(max_length=30)
     expira_en = models.DateTimeField()
+    fecha_expiracion = models.DateTimeField()
     fecha_creacion = models.DateTimeField()
 
     class Meta:

@@ -10,7 +10,14 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.administracion.models import Categoria, Producto, ProductoImagen, ProductoResena
+from apps.administracion.models import (
+    Categoria,
+    Producto,
+    ProductoAtributoValor,
+    ProductoImagen,
+    ProductoRelacionado,
+    ProductoResena,
+)
 from apps.administracion.services.producto_service import (
     precio_producto_con_promocion,
     registrar_busqueda,
@@ -30,16 +37,25 @@ from apps.clientes.models import (
 from apps.clientes.services.carrito_service import (
     actualizar_cantidad_carrito,
     agregar_producto_carrito,
+    calcular_precio_final_item,
+    cotizar_producto_por_lotes,
     eliminar_producto_carrito,
     obtener_o_crear_carrito_activo,
     total_carrito,
     validar_checkout_carrito,
 )
-from apps.clientes.services.checkout_service import cancelar_pedido, crear_pedido_desde_carrito
+from apps.clientes.services.checkout_service import (
+    aplicar_cupon_pedido,
+    cancelar_pedido,
+    crear_pedido_desde_carrito,
+    solicitar_devolucion_total,
+)
 from apps.clientes.services.membresia_service import activar_membresia_usuario
+from apps.clientes.services.producto_service import registrar_pregunta_producto
 from apps.clientes.services.wishlist_service import agregar_a_wishlist, quitar_de_wishlist
 from apps.core.models import DireccionUsuario
-from apps.operaciones.models import Envio, MetodoEnvio, Pedido, PedidoDetalle, TrackingEvento
+from apps.operaciones.models import Envio, MetodoEnvio, Pedido, PedidoDetalle, ZonaEntrega
+from apps.operaciones.services.tracking_service import consultar_tracking_persistente
 
 
 def _money(value):
@@ -107,9 +123,9 @@ def _prime_preview():
 
 
 def _imagen_producto(cod_producto):
-    img = ProductoImagen.objects.filter(cod_producto_id=cod_producto, es_principal=True).first()
+    img = ProductoImagen.objects.filter(cod_producto_id=cod_producto, activo=True, es_principal=True).first()
     if not img:
-        img = ProductoImagen.objects.filter(cod_producto_id=cod_producto).order_by("orden").first()
+        img = ProductoImagen.objects.filter(cod_producto_id=cod_producto, activo=True).order_by("orden").first()
     return img.url_imagen if img else ""
 
 
@@ -168,6 +184,31 @@ def _producto_json(producto, incluir_detalle=False, user=None):
 @ensure_csrf_cookie
 def inicio_view(request):
     return render(request, "clientes/inicio.html")
+
+
+@ensure_csrf_cookie
+def catalogo_view(request):
+    """Página pública: los precios y stock reales continúan viniendo de APIs/services."""
+    return render(request, "clientes/catalogo.html")
+
+
+@ensure_csrf_cookie
+def producto_detalle_view(request, cod_producto):
+    # Solo comprobamos que exista/publicado; la ficha comercial se carga mediante la API existente.
+    get_object_or_404(Producto, cod_producto=cod_producto, cod_estado_producto_id="PUBLICADO")
+    return render(request, "clientes/producto_detalle.html", {"cod_producto": cod_producto})
+
+
+@login_required(login_url="/login/")
+@ensure_csrf_cookie
+def carrito_view(request):
+    return render(request, "clientes/carrito.html")
+
+
+@login_required(login_url="/login/")
+@ensure_csrf_cookie
+def pedidos_view(request):
+    return render(request, "clientes/pedidos.html")
 
 
 @login_required(login_url="/login/")
@@ -272,6 +313,30 @@ def api_producto_detalle(request, cod_producto):
         }
         for r in resenas
     ]
+    data["imagenes"] = [
+        {
+            "url": imagen.url_imagen,
+            "alt": imagen.alt_text or producto.nombre,
+            "principal": imagen.es_principal,
+            "orden": imagen.orden,
+        }
+        for imagen in ProductoImagen.objects.filter(cod_producto=producto, activo=True).order_by("-es_principal", "orden")
+    ]
+    data["atributos"] = [
+        {"nombre": atributo.cod_atributo.nombre, "valor": atributo.valor}
+        for atributo in ProductoAtributoValor.objects.select_related("cod_atributo").filter(cod_producto=producto, activo=True, cod_atributo__activo=True).order_by("cod_atributo__nombre")
+    ]
+    data["relacionados"] = [
+        {
+            "cod_producto": relacion.cod_producto_relacionado.cod_producto,
+            "nombre": relacion.cod_producto_relacionado.nombre,
+            "precio_desde": _money(relacion.cod_producto_relacionado.precio_actual),
+            "imagen": _imagen_producto(relacion.cod_producto_relacionado.cod_producto),
+            "tipo": relacion.tipo_relacion,
+        }
+        for relacion in ProductoRelacionado.objects.select_related("cod_producto_relacionado")
+        .filter(cod_producto=producto, cod_producto_relacionado__cod_estado_producto_id="PUBLICADO")[:8]
+    ]
     return _json_ok(producto=data)
 
 
@@ -297,12 +362,61 @@ def api_preguntar_producto(request, cod_producto):
     pregunta = (request.POST.get("pregunta") or "").strip()
     if len(pregunta) < 5:
         return _json_error("Escribe una pregunta más clara.")
-    from apps.core.services.sql_service import ejecutar_funcion_scalar
     try:
-        cod = ejecutar_funcion_scalar("fn_registrar_pregunta_producto", [request.user.cod_usuario, cod_producto, pregunta], ["BIGINT", "BIGINT", "TEXT"], usar_transaccion=True)
+        cod = registrar_pregunta_producto(request.user.cod_usuario, cod_producto, pregunta)
         return _json_ok(mensaje="Pregunta registrada.", cod_pregunta=cod)
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_GET
+def api_cotizar_producto_lotes(request, cod_producto):
+    try:
+        cantidad = int(request.GET.get("cantidad") or 1)
+        if cantidad <= 0:
+            return _json_error("La cantidad debe ser mayor a cero.")
+
+        cotizacion = _normalizar_checkout_resultado(
+            cotizar_producto_por_lotes(request.user.cod_usuario, cod_producto, cantidad)
+        )
+        cantidad_cubierta = int(cotizacion.get("cantidad_cubierta") or 0)
+        precio_final = None
+        if cantidad_cubierta:
+            subtotal_lotes = Decimal(str(cotizacion.get("subtotal_total") or 0))
+            precio_base = subtotal_lotes / cantidad_cubierta
+            precio_final = _normalizar_checkout_resultado(
+                calcular_precio_final_item(
+                    request.user.cod_usuario,
+                    cod_producto,
+                    cantidad_cubierta,
+                    precio_base,
+                    request.GET.get("codigo_cupon") or None,
+                )
+            )
+
+        mensajes = []
+        if cotizacion.get("cantidad_faltante"):
+            mensajes.append("Parte de la cantidad requiere cobertura de proveedor.")
+        if not cantidad_cubierta:
+            mensajes.append("No existe stock propio disponible para la cotización.")
+
+        return _json_ok(
+            cantidad_solicitada=cotizacion.get("cantidad_solicitada", cantidad),
+            cantidad_cubierta=cantidad_cubierta,
+            cantidad_faltante=cotizacion.get("cantidad_faltante", 0),
+            lotes=cotizacion.get("lotes", []),
+            subtotal_lotes=_money(cotizacion.get("subtotal_total")),
+            precio_final=precio_final,
+            total_estimado=_money((precio_final or {}).get("subtotal", cotizacion.get("subtotal_total"))),
+            requiere_proveedor=bool(cotizacion.get("requiere_proveedor")),
+            tiempo_estimado_dias=cotizacion.get("tiempo_estimado_dias"),
+            mensajes=mensajes,
+        )
+    except ValueError:
+        return _json_error("Datos de cotización inválidos.")
+    except Exception as exc:
+        return _json_error(_safe_error(exc, "No se pudo cotizar el producto."), status=500)
 
 
 @login_required(login_url="/login/")
@@ -316,22 +430,43 @@ def api_carrito(request):
         .order_by("-fecha_creacion")
     )
     total = total_carrito(cod_carrito)
+    items = []
+    for detalle in detalles:
+        cotizacion = None
+        try:
+            cotizacion = _normalizar_checkout_resultado(
+                calcular_precio_final_item(
+                    request.user.cod_usuario,
+                    detalle.cod_producto_id,
+                    detalle.cantidad,
+                    detalle.precio_unitario_snapshot,
+                )
+            )
+        except Exception:
+            cotizacion = None
+        items.append({
+            "cod_producto": detalle.cod_producto.cod_producto,
+            "nombre": detalle.cod_producto.nombre,
+            "marca": detalle.cod_producto.cod_marca.nombre,
+            "imagen": _imagen_producto(detalle.cod_producto.cod_producto),
+            "cantidad": detalle.cantidad,
+            "precio_unitario": _money(detalle.precio_unitario_snapshot),
+            "subtotal": _money(detalle.precio_unitario_snapshot * detalle.cantidad),
+            "cotizacion": cotizacion,
+        })
     return _json_ok(
         cod_carrito=cod_carrito,
         total=_money(total),
         cantidad_items=sum(d.cantidad for d in detalles),
-        items=[
-            {
-                "cod_producto": d.cod_producto.cod_producto,
-                "nombre": d.cod_producto.nombre,
-                "marca": d.cod_producto.cod_marca.nombre,
-                "imagen": _imagen_producto(d.cod_producto.cod_producto),
-                "cantidad": d.cantidad,
-                "precio_unitario": _money(d.precio_unitario_snapshot),
-                "subtotal": _money(d.precio_unitario_snapshot * d.cantidad),
-            }
-            for d in detalles
-        ],
+        items=items,
+        desglose={
+            "subtotal_carrito": _money(total),
+            "descuento": None,
+            "impuesto": None,
+            "costo_envio": None,
+            "total_estimado": _money(total),
+            "mensaje": "El precio final, impuesto y envío se recalculan en PostgreSQL al seleccionar dirección y método de envío.",
+        },
     )
 
 
@@ -389,14 +524,31 @@ def api_checkout_crear_pedido(request):
         cod_direccion = int(request.POST.get("cod_direccion_envio"))
         cod_metodo_envio_raw = request.POST.get("cod_metodo_envio") or None
         cod_metodo_envio = int(cod_metodo_envio_raw) if cod_metodo_envio_raw else None
+        cod_zona_raw = request.POST.get("cod_zona_entrega") or None
+        cod_zona_entrega = int(cod_zona_raw) if cod_zona_raw else None
 
-        direccion_ok = DireccionUsuario.objects.filter(
+        direccion = DireccionUsuario.objects.filter(
             cod_direccion=cod_direccion,
             cod_usuario=request.user,
             activo=True,
-        ).exists()
-        if not direccion_ok:
+        ).first()
+        if not direccion:
             return _json_error("Dirección de envío inválida.", status=403)
+
+        if cod_metodo_envio and not MetodoEnvio.objects.filter(
+            cod_metodo_envio=cod_metodo_envio, activo=True
+        ).exists():
+            return _json_error("Metodo de envio invalido.", status=400)
+
+        zona = ZonaEntrega.objects.filter(
+            ciudad=direccion.ciudad,
+            provincia=direccion.provincia,
+            activo=True,
+        ).first()
+        if not zona:
+            return _json_error("No existe una zona de entrega activa para la direccion indicada.", status=409)
+        if cod_zona_entrega and zona.cod_zona != cod_zona_entrega:
+            return _json_error("La zona de entrega no corresponde a la direccion indicada.", status=400)
 
         validacion = _normalizar_checkout_resultado(validar_checkout_carrito(request.user.cod_usuario))
         if not validacion.get("valido", False):
@@ -407,11 +559,48 @@ def api_checkout_crear_pedido(request):
             )
 
         cod_pedido = crear_pedido_desde_carrito(request.user.cod_usuario, cod_direccion, cod_metodo_envio)
-        return _json_ok(mensaje="Pedido creado. Continúa con el pago.", cod_pedido=cod_pedido)
+        pedido = Pedido.objects.filter(cod_pedido=cod_pedido, cod_usuario=request.user).first()
+        if not pedido:
+            return _json_error("No se pudo leer el pedido generado.", status=500)
+        return _json_ok(
+            mensaje="Pedido creado. Continua con el pago.",
+            cod_pedido=pedido.cod_pedido,
+            estado=pedido.cod_estado_pedido_id,
+            subtotal=_money(pedido.subtotal),
+            descuento=_money(pedido.descuento),
+            impuesto=_money(pedido.impuesto),
+            costo_envio=_money(pedido.costo_envio),
+            total=_money(pedido.total),
+        )
     except ValueError:
         return _json_error("Datos de checkout inválidos.", status=400)
     except Exception as exc:
         return _json_error(_safe_error(exc, "No se pudo crear el pedido."), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_aplicar_cupon_pedido(request, cod_pedido):
+    codigo_cupon = (request.POST.get("codigo_cupon") or "").strip()
+    if not codigo_cupon:
+        return _json_error("Debes indicar un cupón.")
+
+    pedido = get_object_or_404(Pedido, cod_pedido=cod_pedido, cod_usuario=request.user)
+    try:
+        descuento_aplicado = aplicar_cupon_pedido(pedido.cod_pedido, codigo_cupon)
+        pedido.refresh_from_db()
+        return _json_ok(
+            mensaje="Cupón aplicado.",
+            cod_pedido=pedido.cod_pedido,
+            descuento_aplicado=_money(descuento_aplicado),
+            subtotal=_money(pedido.subtotal),
+            descuento=_money(pedido.descuento),
+            impuesto=_money(pedido.impuesto),
+            costo_envio=_money(pedido.costo_envio),
+            total=_money(pedido.total),
+        )
+    except Exception as exc:
+        return _json_error(_safe_error(exc, "No se pudo aplicar el cupón."), status=409)
 
 
 @login_required(login_url="/login/")
@@ -463,7 +652,7 @@ def api_pedido_detalle(request, cod_pedido):
 
 @login_required(login_url="/login/")
 @require_GET
-def api_tracking_pedido(request, cod_pedido):
+def _api_tracking_pedido_simulado_legacy(request, cod_pedido):
     pedido = get_object_or_404(Pedido, cod_pedido=cod_pedido, cod_usuario=request.user)
     envio = Envio.objects.filter(cod_pedido=pedido).first()
     eventos_db = []
@@ -533,6 +722,53 @@ def api_tracking_pedido(request, cod_pedido):
     )
 
 @login_required(login_url="/login/")
+@require_GET
+def api_tracking_pedido(request, cod_pedido):
+    pedido = get_object_or_404(Pedido, cod_pedido=cod_pedido, cod_usuario=request.user)
+    envio = Envio.objects.filter(cod_pedido=pedido).first()
+    eventos = consultar_tracking_persistente(pedido.cod_pedido)
+
+    progreso_por_estado = {
+        "CREADO": 0,
+        "PREPARANDO": 15,
+        "LISTO_ENVIO": 30,
+        "ENVIADO": 45,
+        "EN_TRANSITO": 60,
+        "CENTRO_LOCAL": 75,
+        "EN_REPARTO": 90,
+        "ENTREGADO": 100,
+    }
+    estado_envio = (
+        (envio.estado_envio or envio.estado) if envio else pedido.cod_estado_pedido_id
+    )
+
+    return _json_ok(
+        envio={
+            "numero_tracking": envio.numero_tracking if envio else None,
+            "estado": estado_envio,
+            "fecha_estimada_entrega": _dt(envio.fecha_estimada_entrega) if envio else None,
+            "fecha_entrega": _dt(envio.fecha_entrega) if envio else None,
+            "progreso": progreso_por_estado.get(estado_envio, 0),
+        },
+        eventos=[
+            {
+                "cod_tracking_evento": evento["cod_tracking_evento"],
+                "tipo": evento["cod_tipo_evento_id"],
+                "nombre": evento["cod_tipo_evento__nombre"],
+                "descripcion": evento["descripcion"],
+                "ubicacion": evento["ubicacion"],
+                "visible_cliente": evento["visible_cliente"],
+                "fecha": _dt(evento["fecha_evento"]),
+                "orden": evento["orden"],
+                "origen": "BD",
+                "completado": True,
+            }
+            for evento in eventos
+        ],
+    )
+
+
+@login_required(login_url="/login/")
 @require_POST
 def api_cancelar_pedido(request, cod_pedido):
     pedido = get_object_or_404(Pedido, cod_pedido=cod_pedido, cod_usuario=request.user)
@@ -541,6 +777,22 @@ def api_cancelar_pedido(request, cod_pedido):
         return _json_ok(mensaje="Pedido cancelado.")
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_solicitar_devolucion_pedido(request, cod_pedido):
+    pedido = get_object_or_404(Pedido, cod_pedido=cod_pedido, cod_usuario=request.user)
+    motivo = (request.POST.get("motivo") or "Devolución solicitada por cliente").strip()
+    if len(motivo) < 3:
+        return _json_error("Indica un motivo de devolución.")
+    try:
+        cod_devolucion = solicitar_devolucion_total(
+            pedido.cod_pedido, motivo, request.POST.get("descripcion") or None
+        )
+        return _json_ok(cod_devolucion=cod_devolucion, mensaje="Solicitud de devolución registrada.")
+    except Exception as exc:
+        return _json_error(_safe_error(exc, "No se pudo solicitar la devolución."), status=409)
 
 
 @login_required(login_url="/login/")

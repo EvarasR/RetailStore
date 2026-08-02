@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 286 72" role="img" aria-label="TechTail">
+  <defs><linearGradient id="g" x1="9" y1="11" x2="57" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#32dfc8"/><stop offset="1" stop-color="#ffc04d"/></linearGradient></defs>
+  <rect x="3" y="4" width="64" height="64" rx="18" fill="#173252"/>
+  <path d="M16 42c8.8 0 10.4-14 20-14 5.8 0 9 3.2 14 8" fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M19 49h28" stroke="#e9fffb" stroke-width="4" stroke-linecap="round"/><circle cx="16" cy="42" r="4" fill="#ffc04d"/><circle cx="51" cy="36" r="4" fill="#32dfc8"/>
+  <text x="82" y="39" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="800" letter-spacing="-.8">TechTail</text>
+  <text x="84" y="56" fill="#a9c3d9" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" letter-spacing="2.15">TECNOLOGÍA CONECTADA</text>
+</svg>

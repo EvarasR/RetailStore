@@ -2,128 +2,80 @@
 <!doctype html>
 <html lang="es" data-theme="light">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mi cuenta | Retail Prime</title>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TechTail | Mi cuenta</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/account-redesign.css' %}">
 </head>
 <body data-page="perfil">
-<header class="rp-topbar">
-  <a class="rp-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
-  <nav class="rp-actions">
-    <a class="rp-icon-btn" href="/">Tienda</a>
+<header class="tt-profile-header">
+  <a class="tt-profile-brand" href="/"><img src="{% static 'retail/img/brand/techtail-mark.svg' %}" alt="TechTail"><span><strong>TechTail</strong><small>Centro de cuenta</small></span></a>
+  <nav class="tt-profile-header-links">
+    <a href="/">Ir a la tienda</a>
+    <a href="{% url 'clientes:pedidos' %}">Mis pedidos</a>
     {% if user.is_staff %}<a class="rp-icon-btn" href="{% url 'administracion:panel' %}">Panel</a>{% endif %}
-    <a class="rp-icon-btn" href="{% url 'core:logout' %}">Salir</a>
-    <button class="rp-icon-btn" id="theme-toggle" type="button">☾</button>
+    <form class="rp-logout-form" method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form>
+    <button id="theme-toggle" type="button" aria-label="Cambiar tema">◐</button>
   </nav>
 </header>
-<main class="rp-shell">
-  <section class="rp-account-hero rp-card">
+<main class="tt-account">
+  <section class="tt-account-hero">
     <div>
-      <p class="rp-kicker">Centro de cuenta</p>
-      <h1>Mi cuenta Retail Prime</h1>
-      <p class="rp-muted">Gestiona perfil, direcciones, métodos de pago, facturación y suscripción Prime desde un solo lugar.</p>
+      <p class="tt-account-kicker">Centro de cuenta</p>
+      <h1>Todo lo tuyo, bien organizado.</h1>
+      <p>Actualiza tu perfil, prepara tus direcciones y métodos de pago, consulta comprobantes y descubre los beneficios de TechTail Prime.</p>
     </div>
-    <div id="account-summary" class="rp-mini-list"></div>
+    <div id="account-summary" class="tt-account-id" aria-live="polite"><img src="{% static 'retail/img/brand/techtail-mark.svg' %}" alt=""><div><strong>Cargando cuenta</strong><span>Un momento…</span></div></div>
   </section>
 
-  <section class="rp-account-tabs">
-    <button class="rp-secondary" data-profile-tab="perfil">Perfil</button>
-    <button class="rp-secondary" data-profile-tab="direcciones">Direcciones</button>
-    <button class="rp-secondary" data-profile-tab="pagos">Métodos de pago</button>
-    <button class="rp-secondary" data-profile-tab="facturacion">Facturación</button>
-    <button class="rp-secondary" data-profile-tab="prime">Prime</button>
-  </section>
+  <section class="tt-account-layout">
+    <nav class="tt-profile-nav" aria-label="Secciones de mi cuenta">
+      <button class="is-active" data-profile-tab="perfil" type="button">◈ Mi perfil</button>
+      <button data-profile-tab="direcciones" type="button">⌖ Direcciones</button>
+      <button data-profile-tab="pagos" type="button">▣ Métodos de pago</button>
+      <button data-profile-tab="facturacion" type="button">▤ Facturas</button>
+      <button data-profile-tab="prime" type="button">✦ TechTail Prime</button>
+      <button data-profile-tab="pedidos" type="button">◷ Pedidos y tracking</button>
+      <button data-profile-tab="favoritos" type="button">♡ Favoritos</button>
+      <a href="mailto:soporte@techtail.local">? Soporte</a>
+    </nav>
 
-  <section class="rp-profile-grid" data-profile-panel="perfil">
-    <div class="rp-card">
-      <p class="rp-kicker">Cuenta</p>
-      <h2>Datos personales</h2>
-      <form id="profile-form" class="rp-form">
-        {% csrf_token %}
-        <label>Nombres</label><input name="nombres" id="profile-nombres">
-        <label>Apellidos</label><input name="apellidos" id="profile-apellidos">
-        <label>Teléfono</label><input name="telefono" id="profile-telefono">
-        <label>Documento</label><input name="documento_identidad" id="profile-documento">
-        <button class="rp-primary" type="submit">Guardar cambios</button>
-      </form>
-    </div>
-    <div class="rp-card">
-      <p class="rp-kicker">Seguridad</p>
-      <h2>Estado de la cuenta</h2>
-      <div id="profile-status" class="rp-mini-list"></div>
-    </div>
-  </section>
-
-  <section class="rp-profile-grid rp-hidden" data-profile-panel="direcciones">
-    <div class="rp-card">
-      <p class="rp-kicker">Entrega</p>
-      <h2>Mis direcciones</h2>
-      <div id="address-list" class="rp-list"></div>
-    </div>
-    <div class="rp-card">
-      <p class="rp-kicker">Nueva dirección</p>
-      <h2>Agregar dirección</h2>
-      <form id="address-form" class="rp-form rp-compact-form">
-        {% csrf_token %}
-        <input name="alias" placeholder="Alias: Casa, oficina...">
-        <input name="receptor" placeholder="Persona que recibe">
-        <input name="linea1" placeholder="Dirección principal" required>
-        <input name="linea2" placeholder="Referencia">
-        <div class="rp-form-row">
-          <select name="cod_provincia" id="address-provincia" required><option value="">Provincia</option></select>
-          <select name="cod_canton" id="address-canton" required><option value="">Cantón / ciudad</option></select>
+    <div>
+      <section class="tt-account-panel is-active" data-profile-panel="perfil">
+        <div class="tt-account-split">
+          <article class="tt-account-card">
+            <p class="tt-account-kicker">Datos personales</p><h2>Tu información</h2>
+            <p>Esta información se usa para personalizar tu experiencia y tus pedidos.</p>
+            <form id="profile-form" class="rp-form rp-form-grid">
+              {% csrf_token %}
+              <label>Nombres<input name="nombres" id="profile-nombres" autocomplete="given-name"></label>
+              <label>Apellidos<input name="apellidos" id="profile-apellidos" autocomplete="family-name"></label>
+              <label>Teléfono<input name="telefono" id="profile-telefono" autocomplete="tel"></label>
+              <label>Documento<input name="documento_identidad" id="profile-documento"></label>
+              <button class="rp-primary" type="submit">Guardar cambios</button>
+            </form>
+          </article>
+          <aside class="tt-account-card"><p class="tt-account-kicker">Seguridad</p><h2>Estado de la cuenta</h2><div id="profile-status" class="tt-account-status"></div></aside>
         </div>
-        <input name="pais" placeholder="País" value="Ecuador" readonly>
-        <input name="codigo_postal" placeholder="Código postal opcional">
-        <input name="telefono_contacto" placeholder="Teléfono contacto">
-        <label class="rp-check"><input name="es_predeterminada" type="checkbox"> Usar como dirección predeterminada</label>
-        <button class="rp-secondary" type="submit">Agregar dirección</button>
-      </form>
-    </div>
-  </section>
+        <div class="tt-account-card"><p class="tt-account-kicker">Accesos rápidos</p><div class="tt-account-quick"><a href="{% url 'clientes:carrito' %}">Carrito<small>Revisa tus productos preparados.</small></a><a href="{% url 'clientes:pedidos' %}">Mis pedidos<small>Factura, devolución y seguimiento.</small></a><a href="{% url 'clientes:catalogo' %}">Explorar catálogo<small>Encuentra tecnología para tu proyecto.</small></a></div></div>
+      </section>
 
-  <section class="rp-profile-grid rp-hidden" data-profile-panel="pagos">
-    <div class="rp-card">
-      <p class="rp-kicker">Billetera simulada</p>
-      <h2>Métodos de pago</h2>
-      <div id="payment-list" class="rp-list"></div>
-    </div>
-    <div class="rp-card">
-      <p class="rp-kicker">Pasarela</p>
-      <h2>Agregar tarjeta simulada</h2>
-      <form id="profile-payment-form" class="rp-form" autocomplete="off">
-        {% csrf_token %}
-        <label>Titular</label><input name="titular" placeholder="Nombre como aparece en la tarjeta">
-        <label>Número de tarjeta</label><input name="numero_tarjeta" inputmode="numeric" maxlength="19" placeholder="4111111111111111">
-        <div class="rp-form-row">
-          <input name="exp_mes" inputmode="numeric" maxlength="2" placeholder="MM">
-          <input name="exp_anio" inputmode="numeric" maxlength="4" placeholder="AAAA">
-          <input name="cvv" inputmode="numeric" maxlength="4" placeholder="CVV">
-        </div>
-        <div class="rp-form-row">
-          <input name="saldo_disponible" inputmode="decimal" value="1000" placeholder="Saldo simulado">
-          <input name="limite_diario" inputmode="decimal" value="1000" placeholder="Límite diario">
-        </div>
-        <button class="rp-primary" type="submit">Guardar tarjeta</button>
-        <p class="rp-muted">No se guarda CVV ni número completo. La BD almacena marca, BIN, últimos 4 y token simulado.</p>
-      </form>
-    </div>
-  </section>
+      <section class="tt-account-panel" data-profile-panel="direcciones">
+        <div class="tt-account-split"><article class="tt-account-card"><p class="tt-account-kicker">Entrega</p><h2>Direcciones guardadas</h2><div id="address-list" class="rp-list"></div></article>
+        <article class="tt-account-card"><p class="tt-account-kicker">Nueva dirección</p><h2>¿Dónde entregamos?</h2><form id="address-form" class="rp-form" >{% csrf_token %}<input name="alias" placeholder="Alias: Casa, oficina…"><input name="receptor" placeholder="Persona que recibe"><input name="linea1" placeholder="Dirección principal" required><input name="linea2" placeholder="Referencia"><div class="rp-form-row"><select name="cod_provincia" id="address-provincia" required><option value="">Provincia</option></select><select name="cod_canton" id="address-canton" required><option value="">Cantón / ciudad</option></select></div><input name="pais" value="Ecuador" readonly><input name="codigo_postal" placeholder="Código postal (opcional)"><input name="telefono_contacto" placeholder="Teléfono de contacto"><label class="rp-check"><input name="es_predeterminada" type="checkbox"> Usar como dirección predeterminada</label><button class="rp-primary" type="submit">Guardar dirección</button></form></article></div>
+      </section>
 
-  <section class="rp-card rp-hidden" data-profile-panel="facturacion">
-    <p class="rp-kicker">Comprobantes</p>
-    <h2>Facturación y pedidos pagados</h2>
-    <div id="invoice-list" class="rp-list"></div>
-  </section>
+      <section class="tt-account-panel" data-profile-panel="pagos"><div class="tt-account-split"><article class="tt-account-card"><p class="tt-account-kicker">Billetera simulada</p><h2>Métodos protegidos</h2><div id="payment-list" class="rp-list"></div></article><article class="tt-account-card"><p class="tt-account-kicker">TechTail Pay Secure</p><h2>Agregar tarjeta simulada</h2><form id="profile-payment-form" class="rp-form" autocomplete="off">{% csrf_token %}<label>Titular<input name="titular" placeholder="Nombre como aparece en la tarjeta"></label><label>Número de tarjeta<input name="numero_tarjeta" inputmode="numeric" maxlength="19" placeholder="4111111111111111"></label><div class="rp-form-row"><input name="exp_mes" inputmode="numeric" maxlength="2" placeholder="MM"><input name="exp_anio" inputmode="numeric" maxlength="4" placeholder="AAAA"><input name="cvv" inputmode="numeric" maxlength="4" placeholder="CVV"></div><div class="rp-form-row"><input name="saldo_disponible" inputmode="decimal" value="1000" placeholder="Saldo simulado"><input name="limite_diario" inputmode="decimal" value="1000" placeholder="Límite diario"></div><button class="rp-primary" type="submit">Guardar tarjeta</button><p class="rp-muted">Por seguridad, no se guarda el CVV ni el número completo.</p></form></article></div></section>
 
-  <section class="rp-card rp-hidden" data-profile-panel="prime">
-    <p class="rp-kicker">Suscripción</p>
-    <h2>Retail Prime</h2>
-    <div id="profile-membership-box"></div>
+      <section class="tt-account-panel" data-profile-panel="facturacion"><article class="tt-account-card"><p class="tt-account-kicker">Comprobantes</p><h2>Facturas y pedidos pagados</h2><div id="invoice-list" class="rp-list"></div></article></section>
+      <section class="tt-account-panel" data-profile-panel="prime"><article class="tt-account-card"><p class="tt-account-kicker">Membresía</p><h2>TechTail Prime</h2><div id="profile-membership-box"></div></article></section>
+      <section class="tt-account-panel" data-profile-panel="pedidos"><article class="tt-account-card"><p class="tt-account-kicker">Compras</p><h2>Pedidos y seguimiento</h2><p>Consulta el estado, la factura y los eventos de tracking de todas tus compras en un solo lugar.</p><a class="rp-primary" href="{% url 'clientes:pedidos' %}">Ver mis pedidos</a></article></section>
+      <section class="tt-account-panel" data-profile-panel="favoritos"><article class="tt-account-card"><p class="tt-account-kicker">Lista personal</p><h2>Favoritos</h2><div class="tt-account-empty">Tu lista se mostrará aquí cuando agregues productos a favoritos. Mientras tanto, explora el catálogo técnico.</div><p><a class="rp-secondary" href="{% url 'clientes:catalogo' %}">Ver catálogo</a></p></article></section>
+    </div>
   </section>
 </main>
-<div id="toast" class="rp-toast"></div>
-<script src="{% static 'retail/js/retail.js' %}"></script>
-</body>
-</html>
+<div id="toast" class="rp-toast"></div><script src="{% static 'retail/js/retail.js' %}"></script>
+</body></html>

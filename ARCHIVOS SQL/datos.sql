@@ -1141,3 +1141,133 @@ SELECT fn_segmentar_clientes();
 SELECT fn_generar_snapshot_kpis();
 
 COMMIT;
+
+
+-- ============================================================
+-- CONSOLIDADO FASES A-D: RETAIL TÉCNICO, LOTES, PRIME Y TRACKING
+-- Se agrega al seed histórico; no elimina escenarios ni catálogos existentes.
+-- ============================================================
+BEGIN;
+
+-- Parámetros y estado requeridos por las fases B y C.
+INSERT INTO parametro_sistema(clave, valor, descripcion) VALUES
+('IVA_PORCENTAJE', '15', 'Tasa de impuesto configurable'),
+('CHECKOUT_RESERVA_MINUTOS', '30', 'Minutos de reserva temporal'),
+('MIN_PROVEEDORES_PRODUCTO_PUBLICADO', '5', 'Mínimo de proveedores activos')
+ON CONFLICT (clave) DO UPDATE
+SET valor = EXCLUDED.valor, descripcion = EXCLUDED.descripcion, fecha_actualizacion = now();
+
+INSERT INTO estado_pago(cod_estado_pago, nombre)
+VALUES ('ANULADO', 'Autorización anulada')
+ON CONFLICT (cod_estado_pago) DO NOTHING;
+
+-- Catálogo estrictamente técnico adicional. No elimina los datos históricos.
+INSERT INTO categoria(nombre, slug, descripcion) VALUES
+('Redes y conectividad', 'redes', 'Switches, routers y conectividad'),
+('Seguridad de red', 'seguridad-red', 'Firewalls y protección de red'),
+('Cableado estructurado', 'cableado', 'Cableado, patch panels y conectores'),
+('Servidores y cómputo empresarial', 'servidores', 'Infraestructura de cómputo'),
+('Almacenamiento', 'almacenamiento', 'NAS, SSD y almacenamiento empresarial'),
+('Energía y UPS', 'energia-ups', 'Protección eléctrica'),
+('Videovigilancia IP', 'videovigilancia-ip', 'Cámaras IP y NVR'),
+('Racks y organización', 'racks', 'Racks y organización técnica'),
+('Herramientas de red', 'herramientas-red', 'Herramientas de instalación')
+ON CONFLICT (slug) DO UPDATE
+SET nombre = EXCLUDED.nombre, descripcion = EXCLUDED.descripcion;
+
+INSERT INTO marca(nombre, descripcion) VALUES
+('Cisco', 'Redes'), ('Ubiquiti', 'Redes'), ('MikroTik', 'Redes'),
+('TP-Link', 'Redes'), ('Fortinet', 'Seguridad'), ('Hikvision', 'Videovigilancia'),
+('Dahua', 'Videovigilancia'), ('APC', 'UPS'), ('Dell', 'Servidores'),
+('Panduit', 'Cableado'), ('Synology', 'NAS'), ('QNAP', 'NAS')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Reglas de precio de Fase A: categoría técnica y global de respaldo.
+INSERT INTO regla_precio(cod_categoria, margen_porcentaje, costo_operativo_porcentaje, costo_fijo_unitario, prioridad)
+SELECT cod_categoria, 35, 5, 0.10, 50
+FROM categoria WHERE slug = 'computacion'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO regla_precio(margen_porcentaje, costo_operativo_porcentaje, costo_fijo_unitario, prioridad)
+VALUES (30, 5, 0.10, 100)
+ON CONFLICT DO NOTHING;
+
+-- Beneficios Prime explícitos de Fase B.
+INSERT INTO beneficio_membresia(cod_plan, codigo, nombre, valor, descripcion)
+SELECT cod_plan, 'DESCUENTO_PORCENTAJE', 'Descuento Prime 5%', 5,
+       'Descuento aplicable sin alterar stock, límites ni validación de pago'
+FROM plan_membresia WHERE nombre = 'Prime Mensual'
+ON CONFLICT (cod_plan, codigo) DO UPDATE SET valor = EXCLUDED.valor, activo = TRUE;
+
+-- Caso obligatorio Fase A: teclado, dos lotes FIFO 30 + 10.
+DO $$
+DECLARE
+    v_producto BIGINT;
+    v_almacen BIGINT;
+    v_proveedor BIGINT;
+    v_usuario BIGINT;
+BEGIN
+    SELECT cod_producto INTO v_producto
+    FROM producto
+    WHERE sku = 'COM-GEN-TECLADO'
+    LIMIT 1;
+
+    SELECT cod_almacen INTO v_almacen
+    FROM almacen
+    ORDER BY cod_almacen
+    LIMIT 1;
+
+    SELECT pp.cod_proveedor INTO v_proveedor
+    FROM producto_proveedor pp
+    WHERE pp.cod_producto = v_producto AND pp.activo IS TRUE
+    ORDER BY pp.prioridad, pp.cod_proveedor
+    LIMIT 1;
+
+    IF v_producto IS NULL OR v_almacen IS NULL THEN
+        RAISE EXCEPTION 'Falta el producto o almacén para el caso FIFO de teclado';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM lote_inventario WHERE numero_lote = 'TEC-KEY-A-30-C2') THEN
+        PERFORM fn_crear_lote_inventario(
+            v_producto, v_almacen, 30, 2.0000, 'TEC-KEY-A-30-C2',
+            v_proveedor, NULL, now() - interval '4 days', NULL
+        );
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM lote_inventario WHERE numero_lote = 'TEC-KEY-B-10-C3') THEN
+        PERFORM fn_crear_lote_inventario(
+            v_producto, v_almacen, 10, 3.0000, 'TEC-KEY-B-10-C3',
+            v_proveedor, NULL, now() - interval '3 days', NULL
+        );
+    END IF;
+
+    INSERT INTO regla_limite_compra(
+        cod_producto, limite_por_pedido, limite_por_dia, limite_por_mes, requiere_revision
+    )
+    SELECT v_producto, 50, 50, 200, FALSE
+    WHERE NOT EXISTS (
+        SELECT 1 FROM regla_limite_compra WHERE cod_producto = v_producto
+    );
+
+    SELECT cod_usuario INTO v_usuario
+    FROM usuario
+    WHERE email = 'ana.cliente@example.com'
+    LIMIT 1;
+
+    IF v_usuario IS NOT NULL THEN
+        PERFORM fn_cotizar_producto_por_lotes(v_usuario, v_producto, 40);
+    END IF;
+END;
+$$;
+
+-- Mantenimiento C: deja evidencia sin borrar ningún carrito.
+SELECT fn_registrar_carritos_abandonados(1440);
+
+COMMIT;
+
+BEGIN;
+SELECT fn_asociar_usuario_proveedor(
+    (SELECT cod_usuario FROM usuario WHERE email = 'proveedores@retailprime.local'),
+    (SELECT cod_proveedor FROM proveedor WHERE activo ORDER BY cod_proveedor LIMIT 1)
+);
+COMMIT;

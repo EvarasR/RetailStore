@@ -4,14 +4,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ingresar | Retail Prime</title>
+  <title>Ingresar | TechTail</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
 </head>
 <body data-page="login">
   <main class="rp-auth-shell">
     <form class="rp-auth-card" method="post">
       {% csrf_token %}
-      <a class="rp-brand rp-auth-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
+      <a class="rp-brand rp-auth-brand" href="/"><img class="rp-brand-logo" src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>TechTail</span></a>
       <h1>Ingresar</h1>
       <p class="rp-muted">Usa tu cuenta cliente o administrativa.</p>
       {% if messages %}

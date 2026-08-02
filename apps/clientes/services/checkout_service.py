@@ -43,6 +43,39 @@ def recalcular_total_pedido(cod_pedido):
     )
 
 
+def cotizar_producto_por_lotes(cod_usuario, cod_producto, cantidad):
+    return ejecutar_funcion_scalar(
+        "fn_cotizar_producto_por_lotes",
+        [cod_usuario, cod_producto, cantidad],
+        ["BIGINT", "BIGINT", "INTEGER"],
+    )
+
+
+def calcular_precio_final_item(cod_usuario, cod_producto, cantidad, precio_base=None, codigo_cupon=None):
+    return ejecutar_funcion_scalar(
+        "fn_calcular_precio_final_item",
+        [cod_usuario, cod_producto, cantidad, precio_base, codigo_cupon],
+        ["BIGINT", "BIGINT", "INTEGER", "NUMERIC", "TEXT"],
+    )
+
+
+def calcular_costo_envio(cod_usuario, cod_metodo_envio, cod_zona_entrega, subtotal):
+    return ejecutar_funcion_scalar(
+        "fn_calcular_costo_envio",
+        [cod_usuario, cod_metodo_envio, cod_zona_entrega, subtotal],
+        ["BIGINT", "BIGINT", "BIGINT", "NUMERIC"],
+    )
+
+
+def aplicar_cupon_pedido(cod_pedido, codigo_cupon):
+    return ejecutar_funcion_scalar(
+        "fn_aplicar_cupon_pedido",
+        [cod_pedido, codigo_cupon],
+        ["BIGINT", "TEXT"],
+        usar_transaccion=True,
+    )
+
+
 def solicitar_devolucion_total(cod_pedido, motivo, descripcion=None):
     return ejecutar_funcion_scalar(
         "fn_solicitar_devolucion_total",

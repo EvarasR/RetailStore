@@ -197,6 +197,67 @@ AS $$
     WHERE cod_producto = p_cod_producto;
 $$;
 
+-- ============================================================
+-- FASE B: CÁLCULO ÚNICO DE PRECIO FINAL Y PAGO CONSISTENTE
+-- ============================================================
+CREATE OR REPLACE FUNCTION fn_obtener_tasa_impuesto()
+RETURNS NUMERIC LANGUAGE sql STABLE AS $$
+ SELECT COALESCE((SELECT CASE WHEN valor ~ '^[0-9]+([.][0-9]+)?$' THEN valor::NUMERIC ELSE 0 END FROM parametro_sistema WHERE clave='IVA_PORCENTAJE'),0);
+$$;
+CREATE OR REPLACE FUNCTION fn_calcular_descuento_promocion(p_cod_producto BIGINT,p_precio_base NUMERIC,p_fecha TIMESTAMPTZ DEFAULT now())
+RETURNS JSONB LANGUAGE plpgsql STABLE AS $$
+DECLARE r RECORD; v_desc NUMERIC:=0; v_cod BIGINT;
+BEGIN
+ FOR r IN SELECT pr.cod_promocion,pr.tipo_descuento,pr.valor,pr.acumulable FROM promocion pr JOIN promocion_producto pp ON pp.cod_promocion=pr.cod_promocion
+          WHERE pp.cod_producto=p_cod_producto AND pr.activo AND p_fecha BETWEEN pr.fecha_inicio AND pr.fecha_fin ORDER BY pr.acumulable,pr.valor DESC LOOP
+   v_desc:=LEAST(p_precio_base,CASE WHEN r.tipo_descuento='PORCENTAJE' THEN ROUND(p_precio_base*r.valor/100,2) ELSE r.valor END); v_cod:=r.cod_promocion;
+   EXIT WHEN r.acumulable IS FALSE;
+ END LOOP;
+ RETURN jsonb_build_object('cod_promocion',v_cod,'descuento',COALESCE(v_desc,0),'aplicada',v_cod IS NOT NULL);
+END; $$;
+CREATE OR REPLACE FUNCTION fn_calcular_descuento_prime(p_cod_usuario BIGINT,p_precio_base NUMERIC)
+RETURNS JSONB LANGUAGE plpgsql STABLE AS $$
+DECLARE v_cod_beneficio BIGINT; v_codigo VARCHAR(80); v_valor NUMERIC; v_desc NUMERIC:=0;
+BEGIN
+ SELECT b.cod_beneficio,b.codigo,b.valor INTO v_cod_beneficio,v_codigo,v_valor FROM membresia_usuario mu JOIN beneficio_membresia b ON b.cod_plan=mu.cod_plan
+ WHERE mu.cod_usuario=$1 AND mu.cod_estado_membresia='ACTIVA' AND mu.fecha_fin>=current_date AND b.activo
+   AND b.codigo IN ('DESCUENTO_PRIME','DESCUENTO_PORCENTAJE') ORDER BY b.valor DESC LIMIT 1;
+ IF v_cod_beneficio IS NOT NULL THEN v_desc:=LEAST(p_precio_base,CASE WHEN v_codigo='DESCUENTO_PORCENTAJE' THEN ROUND(p_precio_base*COALESCE(v_valor,0)/100,2) ELSE COALESCE(v_valor,0) END); END IF;
+ RETURN jsonb_build_object('cod_beneficio',v_cod_beneficio,'descuento',v_desc,'aplicado',v_cod_beneficio IS NOT NULL);
+END; $$;
+CREATE OR REPLACE FUNCTION fn_calcular_precio_final_item(p_cod_usuario BIGINT,p_cod_producto BIGINT,p_cantidad INTEGER,p_precio_base NUMERIC DEFAULT NULL,p_codigo_cupon TEXT DEFAULT NULL)
+RETURNS JSONB LANGUAGE plpgsql STABLE AS $$
+DECLARE v_base NUMERIC; v_prom JSONB; v_prime JSONB; v_cupon NUMERIC:=0; v_final NUMERIC;
+BEGIN
+ IF p_cantidad<=0 THEN RAISE EXCEPTION 'Cantidad inválida'; END IF;
+ SELECT COALESCE(p_precio_base,l.pvp_unitario,p.precio_actual) INTO v_base FROM producto p LEFT JOIN LATERAL
+   (SELECT pvp_unitario FROM lote_inventario WHERE cod_producto=p.cod_producto AND estado='ACTIVO' AND cantidad_disponible>cantidad_reservada ORDER BY fecha_recepcion,cod_lote LIMIT 1) l ON TRUE WHERE p.cod_producto=$2;
+ IF v_base IS NULL THEN RAISE EXCEPTION 'Producto no encontrado'; END IF;
+ v_prom:=fn_calcular_descuento_promocion(p_cod_producto,v_base); v_prime:=fn_calcular_descuento_prime(p_cod_usuario,v_base-(v_prom->>'descuento')::NUMERIC);
+ IF p_codigo_cupon IS NOT NULL THEN v_cupon:=ROUND(fn_calcular_descuento_cupon(p_codigo_cupon,p_cod_usuario,(v_base-(v_prom->>'descuento')::NUMERIC-(v_prime->>'descuento')::NUMERIC)*p_cantidad)/p_cantidad,2); END IF;
+ v_final:=GREATEST(v_base-(v_prom->>'descuento')::NUMERIC-(v_prime->>'descuento')::NUMERIC-v_cupon,0);
+ RETURN jsonb_build_object('precio_base',v_base,'pvp_lote',v_base,'promocion_aplicada',v_prom,'descuento_promocion',(v_prom->>'descuento')::NUMERIC,'prime_aplicado',v_prime,'descuento_prime',(v_prime->>'descuento')::NUMERIC,'cupon_aplicado',p_codigo_cupon,'descuento_cupon',v_cupon,'precio_final_unitario',v_final,'subtotal',ROUND(v_final*p_cantidad,2),'explicacion','base - promoción - Prime - cupón');
+END; $$;
+CREATE OR REPLACE FUNCTION fn_calcular_costo_envio(p_cod_usuario BIGINT,p_cod_metodo_envio BIGINT,p_cod_zona_entrega BIGINT,p_subtotal NUMERIC)
+RETURNS JSONB LANGUAGE plpgsql STABLE AS $$
+DECLARE m RECORD; z NUMERIC:=0; v_cod_beneficio BIGINT; v NUMERIC;
+BEGIN
+ SELECT * INTO m FROM metodo_envio WHERE cod_metodo_envio=p_cod_metodo_envio AND activo; IF NOT FOUND THEN RAISE EXCEPTION 'Método de envío inválido'; END IF;
+ SELECT COALESCE(recargo,0) INTO z FROM zona_entrega WHERE cod_zona=p_cod_zona_entrega AND activo; z:=COALESCE(z,0);
+ SELECT bm.cod_beneficio INTO v_cod_beneficio FROM membresia_usuario mu JOIN beneficio_membresia bm ON bm.cod_plan=mu.cod_plan WHERE mu.cod_usuario=p_cod_usuario AND mu.cod_estado_membresia='ACTIVA' AND mu.fecha_fin>=current_date AND bm.codigo='ENVIO_GRATIS' AND bm.activo LIMIT 1;
+ v:=CASE WHEN v_cod_beneficio IS NOT NULL AND m.es_premium_gratis THEN 0 ELSE m.costo_base+z END;
+ RETURN jsonb_build_object('costo_envio',v,'costo_base',m.costo_base,'recargo_zona',z,'cod_beneficio',v_cod_beneficio,'prime_aplicado',v_cod_beneficio IS NOT NULL AND m.es_premium_gratis);
+END; $$;
+CREATE OR REPLACE FUNCTION fn_registrar_uso_beneficio(p_cod_usuario BIGINT,p_cod_beneficio BIGINT,p_cod_pedido BIGINT,p_valor NUMERIC)
+RETURNS BIGINT LANGUAGE plpgsql AS $$ DECLARE v BIGINT; BEGIN IF p_cod_beneficio IS NULL OR p_valor<=0 THEN RETURN NULL; END IF; INSERT INTO uso_beneficio(cod_usuario,cod_beneficio,cod_pedido,valor_aplicado) VALUES(p_cod_usuario,p_cod_beneficio,p_cod_pedido,p_valor) RETURNING cod_uso_beneficio INTO v; RETURN v; END; $$;
+CREATE OR REPLACE FUNCTION fn_validar_transicion_pedido(p_actual VARCHAR,p_nuevo VARCHAR)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN
+ IF p_actual=p_nuevo THEN RETURN; END IF;
+ IF NOT ((p_actual='PENDIENTE_PAGO' AND p_nuevo IN ('PAGO_AUTORIZADO','CANCELADO')) OR (p_actual='PAGO_AUTORIZADO' AND p_nuevo IN ('PREPARANDO','ESPERANDO_PROVEEDOR','CANCELADO')) OR (p_actual IN ('PREPARANDO','ESPERANDO_PROVEEDOR') AND p_nuevo IN ('LISTO_ENVIO','CANCELADO')) OR (p_actual='LISTO_ENVIO' AND p_nuevo='ENVIADO') OR (p_actual='ENVIADO' AND p_nuevo='EN_TRANSITO') OR (p_actual='EN_TRANSITO' AND p_nuevo='EN_REPARTO') OR (p_actual='EN_REPARTO' AND p_nuevo='ENTREGADO') OR (p_actual='ENTREGADO' AND p_nuevo='DEVOLUCION_SOLICITADA') OR (p_actual='DEVOLUCION_SOLICITADA' AND p_nuevo='DEVUELTO') OR (p_actual='DEVUELTO' AND p_nuevo='REEMBOLSADO')) THEN RAISE EXCEPTION 'Transición de pedido inválida: % -> %',p_actual,p_nuevo; END IF;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_anular_autorizaciones_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE transaccion_pago SET cod_estado_pago='ANULADO',mensaje='Autorización anulada por cancelación',fecha_actualizacion=now() WHERE cod_pedido=p_cod_pedido AND cod_estado_pago='AUTORIZADO'; END; $$;
+
 CREATE OR REPLACE FUNCTION fn_stock_proveedor_disponible_producto(p_cod_producto BIGINT)
 RETURNS INTEGER
 LANGUAGE sql
@@ -410,6 +471,617 @@ BEGIN
 END;
 $$;
 
+
+COMMIT;
+
+-- ============================================================
+-- FASE A: LOTES, FIFO, RESERVAS Y REPOSICIÓN PREVENTIVA
+-- Las redefiniciones al final preservan los contratos ya consumidos por Django.
+-- ============================================================
+BEGIN;
+
+CREATE OR REPLACE FUNCTION fn_obtener_regla_precio_producto(
+    p_cod_producto BIGINT,
+    p_fecha_referencia TIMESTAMPTZ DEFAULT now()
+)
+RETURNS TABLE (
+    cod_regla_precio BIGINT, margen_porcentaje NUMERIC, costo_operativo_porcentaje NUMERIC,
+    costo_fijo_unitario NUMERIC, porcentaje_impuesto NUMERIC, prioridad INTEGER,
+    nivel_aplicacion TEXT
+)
+LANGUAGE sql STABLE AS $$
+    WITH producto_objetivo AS (
+        SELECT cod_categoria FROM producto WHERE cod_producto = p_cod_producto
+    ), candidatas AS (
+        SELECT r.*, 1 AS nivel, 'PRODUCTO'::TEXT AS etiqueta FROM regla_precio r
+        WHERE r.cod_producto = p_cod_producto
+        UNION ALL
+        SELECT r.*, 2, 'CATEGORIA'::TEXT FROM regla_precio r JOIN producto_objetivo p ON p.cod_categoria = r.cod_categoria
+        WHERE r.cod_producto IS NULL
+        UNION ALL
+        SELECT r.*, 3, 'GLOBAL'::TEXT FROM regla_precio r
+        WHERE r.cod_producto IS NULL AND r.cod_categoria IS NULL
+    )
+    SELECT cod_regla_precio, margen_porcentaje, costo_operativo_porcentaje,
+           costo_fijo_unitario, porcentaje_impuesto, prioridad, etiqueta
+    FROM candidatas
+    WHERE activo IS TRUE
+      AND (fecha_inicio IS NULL OR fecha_inicio <= p_fecha_referencia)
+      AND (fecha_fin IS NULL OR fecha_fin >= p_fecha_referencia)
+    ORDER BY nivel, prioridad, cod_regla_precio
+    LIMIT 1;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_calcular_pvp_lote(
+    p_cod_producto BIGINT,
+    p_costo_unitario NUMERIC,
+    p_fecha_referencia TIMESTAMPTZ DEFAULT now()
+)
+RETURNS JSONB
+LANGUAGE plpgsql STABLE AS $$
+DECLARE r RECORD; v_impuesto NUMERIC := 0; v_base NUMERIC; v_pvp NUMERIC;
+BEGIN
+    IF p_costo_unitario IS NULL OR p_costo_unitario <= 0 THEN RAISE EXCEPTION 'Costo unitario inválido'; END IF;
+    SELECT * INTO r FROM fn_obtener_regla_precio_producto(p_cod_producto, p_fecha_referencia);
+    IF NOT FOUND THEN
+        SELECT NULL::BIGINT AS cod_regla_precio,
+               0::NUMERIC AS margen_porcentaje,
+               0::NUMERIC AS costo_operativo_porcentaje,
+               0::NUMERIC AS costo_fijo_unitario,
+               NULL::NUMERIC AS porcentaje_impuesto,
+               NULL::INTEGER AS prioridad,
+               NULL::TEXT AS nivel_aplicacion
+        INTO r;
+    END IF;
+    IF r.cod_regla_precio IS NULL THEN
+        r.margen_porcentaje := 0; r.costo_operativo_porcentaje := 0; r.costo_fijo_unitario := 0; r.porcentaje_impuesto := NULL;
+    END IF;
+    SELECT CASE WHEN valor ~ '^[0-9]+([.][0-9]+)?$' THEN valor::NUMERIC ELSE 0 END
+      INTO v_impuesto FROM parametro_sistema WHERE clave = 'IVA_PORCENTAJE';
+    v_impuesto := COALESCE(r.porcentaje_impuesto, v_impuesto, 0);
+    v_base := p_costo_unitario * (1 + COALESCE(r.margen_porcentaje,0) / 100 + COALESCE(r.costo_operativo_porcentaje,0) / 100)
+              + COALESCE(r.costo_fijo_unitario,0);
+    v_pvp := ROUND(v_base * (1 + v_impuesto / 100), 2);
+    RETURN jsonb_build_object('cod_regla_precio', r.cod_regla_precio, 'margen_porcentaje', COALESCE(r.margen_porcentaje,0),
+        'costo_operativo_porcentaje', COALESCE(r.costo_operativo_porcentaje,0), 'costo_fijo_unitario', COALESCE(r.costo_fijo_unitario,0),
+        'porcentaje_impuesto', v_impuesto, 'precio_sin_impuesto', ROUND(v_base,2), 'pvp_unitario', v_pvp);
+END;
+$$;
+
+-- El cupon se distribuye en las lineas antes de recalcular el pedido; asi el
+-- recalculo SQL conserva exactamente el descuento que se cobra y factura.
+CREATE OR REPLACE FUNCTION fn_aplicar_cupon_pedido(
+    p_cod_pedido BIGINT,
+    p_codigo_cupon TEXT
+)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_pedido RECORD;
+    v_cod_cupon BIGINT;
+    v_base_cupon NUMERIC;
+    v_descuento_solicitado NUMERIC;
+    v_descuento_aplicado NUMERIC;
+BEGIN
+    SELECT * INTO v_pedido
+    FROM pedido
+    WHERE cod_pedido = $1
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Pedido no encontrado';
+    END IF;
+
+    IF v_pedido.cod_estado_pedido <> 'PENDIENTE_PAGO' THEN
+        RAISE EXCEPTION 'El cupon solo se puede aplicar a un pedido pendiente de pago';
+    END IF;
+
+    SELECT c.cod_cupon INTO v_cod_cupon
+    FROM cupon c
+    WHERE c.codigo = upper(trim($2));
+
+    IF v_cod_cupon IS NULL THEN
+        RAISE EXCEPTION 'Cupon no encontrado';
+    END IF;
+
+    -- La operacion es repetible para el mismo pedido: se sustituye el cupon
+    -- previo antes de calcular y distribuir el nuevo descuento.
+    UPDATE pedido_detalle
+    SET descuento_cupon_unitario = 0,
+        precio_final_unitario = GREATEST(precio_base_unitario
+            - descuento_promocion_unitario - descuento_prime_unitario, 0),
+        precio_unitario = GREATEST(precio_base_unitario
+            - descuento_promocion_unitario - descuento_prime_unitario, 0)
+    WHERE cod_pedido = $1;
+
+    SELECT COALESCE(SUM(cantidad * precio_final_unitario), 0)
+    INTO v_base_cupon
+    FROM pedido_detalle
+    WHERE cod_pedido = $1;
+
+    v_descuento_solicitado := fn_calcular_descuento_cupon($2, v_pedido.cod_usuario, v_base_cupon);
+
+    IF v_base_cupon > 0 AND v_descuento_solicitado > 0 THEN
+        UPDATE pedido_detalle pd
+        SET descuento_cupon_unitario = LEAST(
+                GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario - pd.descuento_prime_unitario, 0),
+                ROUND(v_descuento_solicitado
+                    * (pd.cantidad * GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario - pd.descuento_prime_unitario, 0))
+                    / v_base_cupon / pd.cantidad, 2)
+            ),
+            precio_final_unitario = GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario
+                - pd.descuento_prime_unitario - LEAST(
+                    GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario - pd.descuento_prime_unitario, 0),
+                    ROUND(v_descuento_solicitado
+                        * (pd.cantidad * GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario - pd.descuento_prime_unitario, 0))
+                        / v_base_cupon / pd.cantidad, 2)
+                ), 0),
+            precio_unitario = GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario
+                - pd.descuento_prime_unitario - LEAST(
+                    GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario - pd.descuento_prime_unitario, 0),
+                    ROUND(v_descuento_solicitado
+                        * (pd.cantidad * GREATEST(pd.precio_base_unitario - pd.descuento_promocion_unitario - pd.descuento_prime_unitario, 0))
+                        / v_base_cupon / pd.cantidad, 2)
+                ), 0)
+        WHERE pd.cod_pedido = $1;
+    END IF;
+
+    PERFORM fn_recalcular_total_pedido($1);
+
+    SELECT descuento INTO v_descuento_aplicado
+    FROM pedido
+    WHERE cod_pedido = $1;
+
+    INSERT INTO cupon_uso(cod_cupon, cod_usuario, cod_pedido, valor_aplicado)
+    VALUES(v_cod_cupon, v_pedido.cod_usuario, $1, v_descuento_aplicado)
+    ON CONFLICT (cod_cupon, cod_pedido) DO UPDATE
+    SET valor_aplicado = EXCLUDED.valor_aplicado;
+
+    RETURN v_descuento_aplicado;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_recalcular_inventario_desde_lotes(
+    p_cod_producto BIGINT DEFAULT NULL, p_cod_almacen BIGINT DEFAULT NULL
+) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO inventario(cod_producto, cod_almacen, stock_total, stock_reservado, stock_minimo)
+    SELECT cod_producto, cod_almacen, SUM(cantidad_disponible)::INTEGER, SUM(cantidad_reservada)::INTEGER, 0
+    FROM lote_inventario
+    WHERE (p_cod_producto IS NULL OR cod_producto = p_cod_producto)
+      AND (p_cod_almacen IS NULL OR cod_almacen = p_cod_almacen)
+    GROUP BY cod_producto, cod_almacen
+    ON CONFLICT (cod_producto, cod_almacen) DO UPDATE
+       SET stock_total = EXCLUDED.stock_total, stock_reservado = EXCLUDED.stock_reservado, fecha_actualizacion = now();
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_recalcular_precio_actual_producto(p_cod_producto BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE v_pvp NUMERIC;
+BEGIN
+    SELECT pvp_unitario INTO v_pvp FROM lote_inventario
+    WHERE cod_producto = p_cod_producto AND estado = 'ACTIVO' AND cantidad_disponible > cantidad_reservada
+    ORDER BY fecha_recepcion, cod_lote LIMIT 1;
+    IF v_pvp IS NOT NULL THEN
+        UPDATE producto SET precio_actual = v_pvp, fecha_actualizacion = now() WHERE cod_producto = p_cod_producto;
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_crear_lote_inventario(
+    p_cod_producto BIGINT, p_cod_almacen BIGINT, p_cantidad_recibida INTEGER, p_costo_unitario NUMERIC,
+    p_numero_lote TEXT DEFAULT NULL, p_cod_proveedor BIGINT DEFAULT NULL,
+    p_cod_orden_abastecimiento_detalle BIGINT DEFAULT NULL, p_fecha_recepcion TIMESTAMPTZ DEFAULT now(),
+    p_fecha_vencimiento TIMESTAMPTZ DEFAULT NULL
+) RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE v_precio JSONB; v_cod_lote BIGINT; v_numero TEXT;
+BEGIN
+    IF p_cantidad_recibida <= 0 OR p_costo_unitario <= 0 THEN RAISE EXCEPTION 'Cantidad y costo del lote deben ser positivos'; END IF;
+    PERFORM 1 FROM producto WHERE cod_producto = p_cod_producto; IF NOT FOUND THEN RAISE EXCEPTION 'Producto no encontrado'; END IF;
+    PERFORM 1 FROM almacen WHERE cod_almacen = p_cod_almacen AND activo IS TRUE; IF NOT FOUND THEN RAISE EXCEPTION 'Almacén no encontrado o inactivo'; END IF;
+    v_precio := fn_calcular_pvp_lote(p_cod_producto, p_costo_unitario, p_fecha_recepcion);
+    v_numero := COALESCE(NULLIF(trim(p_numero_lote), ''), 'LOT-' || to_char(p_fecha_recepcion, 'YYYYMMDDHH24MISS') || '-' || upper(substr(replace(gen_random_uuid()::TEXT,'-',''),1,10)));
+    INSERT INTO lote_inventario(numero_lote,cod_producto,cod_almacen,cod_proveedor,cod_orden_abastecimiento_detalle,
+        cantidad_recibida,cantidad_disponible,cantidad_reservada,costo_unitario,margen_porcentaje_aplicado,
+        costo_operativo_aplicado,porcentaje_impuesto_aplicado,pvp_unitario,fecha_recepcion,fecha_vencimiento)
+    VALUES(v_numero,p_cod_producto,p_cod_almacen,p_cod_proveedor,p_cod_orden_abastecimiento_detalle,p_cantidad_recibida,p_cantidad_recibida,0,p_costo_unitario,
+        (v_precio->>'margen_porcentaje')::NUMERIC,(v_precio->>'costo_operativo_porcentaje')::NUMERIC,
+        (v_precio->>'porcentaje_impuesto')::NUMERIC,(v_precio->>'pvp_unitario')::NUMERIC,p_fecha_recepcion,p_fecha_vencimiento)
+    RETURNING cod_lote INTO v_cod_lote;
+    PERFORM fn_recalcular_inventario_desde_lotes(p_cod_producto,p_cod_almacen);
+    PERFORM fn_recalcular_precio_actual_producto(p_cod_producto);
+    RETURN v_cod_lote;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_cotizar_producto_por_lotes(p_cod_usuario BIGINT, p_cod_producto BIGINT, p_cantidad INTEGER)
+RETURNS JSONB LANGUAGE plpgsql STABLE AS $$
+DECLARE v_cubierta INTEGER := 0; v_restante INTEGER := p_cantidad; v_subtotal NUMERIC := 0; v_lotes JSONB := '[]'::JSONB; r RECORD; v_tomar INTEGER; v_tiempo INTEGER;
+BEGIN
+    IF p_cantidad <= 0 THEN RAISE EXCEPTION 'Cantidad inválida'; END IF;
+    PERFORM fn_validar_limite_retail(p_cod_usuario,p_cod_producto,p_cantidad);
+    FOR r IN SELECT cod_lote,numero_lote,cantidad_disponible,cantidad_reservada,costo_unitario,pvp_unitario,fecha_recepcion
+             FROM lote_inventario WHERE cod_producto=p_cod_producto AND estado='ACTIVO' AND cantidad_disponible>cantidad_reservada
+             ORDER BY fecha_recepcion,cod_lote LOOP
+        EXIT WHEN v_restante <= 0;
+        v_tomar := LEAST(v_restante,r.cantidad_disponible-r.cantidad_reservada);
+        v_cubierta := v_cubierta + v_tomar; v_restante := v_restante-v_tomar;
+        v_subtotal := v_subtotal + v_tomar*r.pvp_unitario;
+        v_lotes := v_lotes || jsonb_build_array(jsonb_build_object('cod_lote',r.cod_lote,'numero_lote',r.numero_lote,'cantidad',v_tomar,
+          'costo_unitario',r.costo_unitario,'pvp_unitario',r.pvp_unitario,'precio_final_preliminar',r.pvp_unitario));
+    END LOOP;
+    SELECT MIN(pp.tiempo_entrega_dias) INTO v_tiempo FROM producto_proveedor pp JOIN proveedor p ON p.cod_proveedor=pp.cod_proveedor
+      JOIN proveedor_stock ps ON ps.cod_producto_proveedor=pp.cod_producto_proveedor
+      WHERE pp.cod_producto=p_cod_producto AND pp.activo AND p.activo AND ps.cantidad_disponible>0;
+    RETURN jsonb_build_object('cantidad_solicitada',p_cantidad,'cantidad_cubierta',v_cubierta,'cantidad_faltante',v_restante,'lotes',v_lotes,
+      'subtotal_total',ROUND(v_subtotal,2),'precio_promedio_informativo',CASE WHEN v_cubierta=0 THEN NULL ELSE ROUND(v_subtotal/v_cubierta,2) END,
+      'requiere_proveedor',v_restante>0,'tiempo_estimado_dias',CASE WHEN v_restante>0 THEN v_tiempo ELSE 0 END);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_reservar_stock_por_lotes(
+    p_cod_usuario BIGINT, p_cod_producto BIGINT, p_cantidad INTEGER,
+    p_cod_pedido BIGINT DEFAULT NULL, p_cod_pedido_detalle BIGINT DEFAULT NULL
+) RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE r RECORD; v_restante INTEGER:=p_cantidad; v_tomar INTEGER; v_minutos INTEGER:=30; v_detalle BIGINT:=p_cod_pedido_detalle;
+BEGIN
+    IF p_cantidad<=0 THEN RAISE EXCEPTION 'Cantidad a reservar inválida'; END IF;
+    IF v_detalle IS NULL AND p_cod_pedido IS NOT NULL THEN SELECT cod_pedido_detalle INTO v_detalle FROM pedido_detalle WHERE cod_pedido=p_cod_pedido AND cod_producto=p_cod_producto; END IF;
+    SELECT CASE WHEN valor ~ '^[0-9]+$' THEN valor::INTEGER ELSE 30 END INTO v_minutos FROM parametro_sistema WHERE clave='CHECKOUT_RESERVA_MINUTOS';
+    v_minutos:=COALESCE(v_minutos,30);
+    FOR r IN SELECT * FROM lote_inventario WHERE cod_producto=p_cod_producto AND estado='ACTIVO' AND cantidad_disponible>cantidad_reservada
+             ORDER BY fecha_recepcion,cod_lote FOR UPDATE LOOP
+        EXIT WHEN v_restante=0; v_tomar:=LEAST(v_restante,r.cantidad_disponible-r.cantidad_reservada);
+        UPDATE lote_inventario SET cantidad_reservada=cantidad_reservada+v_tomar,fecha_actualizacion=now() WHERE cod_lote=r.cod_lote;
+        INSERT INTO reserva_inventario(cod_producto,cod_almacen,cod_usuario,cod_pedido,cod_lote,cod_pedido_detalle,cantidad,estado,estado_reserva,expira_en,fecha_expiracion)
+        VALUES(p_cod_producto,r.cod_almacen,p_cod_usuario,p_cod_pedido,r.cod_lote,v_detalle,v_tomar,'ACTIVA','ACTIVA',now()+make_interval(mins=>v_minutos),now()+make_interval(mins=>v_minutos));
+        v_restante:=v_restante-v_tomar;
+    END LOOP;
+    PERFORM fn_recalcular_inventario_desde_lotes(p_cod_producto,NULL);
+    IF v_restante>0 THEN PERFORM fn_recalcular_reposicion_producto(p_cod_producto); END IF;
+    RETURN v_restante;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_liberar_reservas_lote_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE r RECORD;
+BEGIN
+    FOR r IN SELECT * FROM reserva_inventario WHERE cod_pedido=p_cod_pedido AND estado_reserva='ACTIVA' FOR UPDATE LOOP
+        IF r.cod_lote IS NOT NULL THEN
+            UPDATE lote_inventario SET cantidad_reservada=GREATEST(cantidad_reservada-r.cantidad,0),fecha_actualizacion=now() WHERE cod_lote=r.cod_lote;
+        END IF;
+        UPDATE reserva_inventario SET estado='LIBERADA',estado_reserva='LIBERADA' WHERE cod_reserva=r.cod_reserva;
+    END LOOP;
+    PERFORM fn_recalcular_inventario_desde_lotes(NULL,NULL);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_consumir_reservas_lote_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE r RECORD; v_detalle BIGINT; v_inv RECORD;
+BEGIN
+    FOR r IN SELECT * FROM reserva_inventario WHERE cod_pedido=p_cod_pedido AND estado_reserva='ACTIVA' FOR UPDATE LOOP
+        IF r.cod_lote IS NULL THEN RAISE EXCEPTION 'Reserva % sin lote; no se puede consumir con FIFO',r.cod_reserva; END IF;
+        SELECT cod_pedido_detalle INTO v_detalle FROM pedido_detalle WHERE cod_pedido=p_cod_pedido AND cod_producto=r.cod_producto;
+        v_detalle:=COALESCE(r.cod_pedido_detalle,v_detalle);
+        IF v_detalle IS NULL THEN RAISE EXCEPTION 'No existe detalle de pedido para reserva %',r.cod_reserva; END IF;
+        UPDATE lote_inventario SET cantidad_reservada=cantidad_reservada-r.cantidad,cantidad_disponible=cantidad_disponible-r.cantidad,
+            estado=CASE WHEN cantidad_disponible-r.cantidad=0 THEN 'AGOTADO' ELSE 'ACTIVO' END,fecha_actualizacion=now()
+        WHERE cod_lote=r.cod_lote AND cantidad_reservada>=r.cantidad AND cantidad_disponible>=r.cantidad;
+        IF NOT FOUND THEN RAISE EXCEPTION 'Lote % sin saldo reservado suficiente',r.cod_lote; END IF;
+        INSERT INTO pedido_detalle_lote(cod_pedido_detalle,cod_lote,cantidad,costo_unitario_historico,pvp_unitario_historico,descuento_unitario,precio_final_unitario)
+        SELECT v_detalle,l.cod_lote,r.cantidad,l.costo_unitario,l.pvp_unitario,0,l.pvp_unitario FROM lote_inventario l WHERE l.cod_lote=r.cod_lote
+        ON CONFLICT (cod_pedido_detalle,cod_lote) DO UPDATE SET cantidad=pedido_detalle_lote.cantidad+EXCLUDED.cantidad;
+        UPDATE reserva_inventario SET estado='CONSUMIDA',estado_reserva='CONSUMIDA',cod_pedido_detalle=v_detalle WHERE cod_reserva=r.cod_reserva;
+    END LOOP;
+    PERFORM fn_recalcular_inventario_desde_lotes(NULL,NULL);
+    FOR v_inv IN SELECT DISTINCT cod_producto FROM pedido_detalle WHERE cod_pedido=p_cod_pedido LOOP
+        PERFORM fn_recalcular_precio_actual_producto(v_inv.cod_producto);
+        PERFORM fn_recalcular_reposicion_producto(v_inv.cod_producto);
+    END LOOP;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_stock_proyectado_producto_almacen(p_cod_producto BIGINT, p_cod_almacen BIGINT)
+RETURNS INTEGER LANGUAGE sql STABLE AS $$
+    SELECT COALESCE((SELECT SUM(cantidad_disponible-cantidad_reservada) FROM lote_inventario
+                     WHERE cod_producto=p_cod_producto AND cod_almacen=p_cod_almacen AND estado='ACTIVO'),0)::INTEGER
+         + COALESCE((SELECT SUM(oad.cantidad) FROM orden_abastecimiento_detalle oad
+                     JOIN orden_abastecimiento oa ON oa.cod_orden_abastecimiento=oad.cod_orden_abastecimiento
+                     WHERE oad.cod_producto=p_cod_producto AND oa.cod_almacen=p_cod_almacen
+                       AND oa.estado IN ('GENERADA','ENVIADA','ACEPTADA')),0)::INTEGER;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_cantidad_pendiente_abastecimiento(p_cod_producto BIGINT, p_cod_almacen BIGINT DEFAULT NULL)
+RETURNS INTEGER LANGUAGE sql STABLE AS $$
+    SELECT COALESCE(SUM(oad.cantidad),0)::INTEGER FROM orden_abastecimiento_detalle oad
+    JOIN orden_abastecimiento oa ON oa.cod_orden_abastecimiento=oad.cod_orden_abastecimiento
+    WHERE oad.cod_producto=p_cod_producto AND (p_cod_almacen IS NULL OR oa.cod_almacen=p_cod_almacen)
+      AND oa.estado IN ('GENERADA','ENVIADA','ACEPTADA');
+$$;
+
+CREATE OR REPLACE FUNCTION fn_generar_reposicion_automatica(p_cod_producto BIGINT, p_cod_almacen BIGINT)
+RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE v_inv RECORD; v_faltante INTEGER; v_tomar INTEGER; v_orden BIGINT; r RECORD; v_generado INTEGER:=0;
+BEGIN
+    SELECT * INTO v_inv FROM inventario WHERE cod_producto=p_cod_producto AND cod_almacen=p_cod_almacen FOR UPDATE;
+    IF NOT FOUND OR v_inv.stock_maximo IS NULL THEN RETURN 0; END IF;
+    IF fn_stock_proyectado_producto_almacen(p_cod_producto,p_cod_almacen)>v_inv.stock_minimo THEN RETURN 0; END IF;
+    v_faltante:=GREATEST(v_inv.stock_maximo-fn_stock_proyectado_producto_almacen(p_cod_producto,p_cod_almacen),0);
+    FOR r IN SELECT pp.cod_proveedor,pp.costo_unitario,ps.cod_proveedor_stock,ps.cantidad_disponible
+             FROM producto_proveedor pp JOIN proveedor pr ON pr.cod_proveedor=pp.cod_proveedor
+             JOIN proveedor_stock ps ON ps.cod_producto_proveedor=pp.cod_producto_proveedor
+             WHERE pp.cod_producto=p_cod_producto AND pp.activo AND pr.activo AND ps.cantidad_disponible>0
+             ORDER BY pp.prioridad,pp.costo_unitario,pp.tiempo_entrega_dias,pr.calificacion DESC FOR UPDATE OF ps LOOP
+        EXIT WHEN v_faltante=0; v_tomar:=LEAST(v_faltante,r.cantidad_disponible);
+        SELECT oa.cod_orden_abastecimiento INTO v_orden FROM orden_abastecimiento oa
+        WHERE oa.cod_almacen=p_cod_almacen AND oa.cod_proveedor=r.cod_proveedor AND oa.estado IN ('GENERADA','ENVIADA','ACEPTADA')
+        ORDER BY oa.cod_orden_abastecimiento LIMIT 1 FOR UPDATE;
+        IF v_orden IS NULL THEN INSERT INTO orden_abastecimiento(cod_proveedor,cod_almacen,estado,total_estimado) VALUES(r.cod_proveedor,p_cod_almacen,'GENERADA',0) RETURNING cod_orden_abastecimiento INTO v_orden; END IF;
+        IF EXISTS(SELECT 1 FROM orden_abastecimiento_detalle WHERE cod_orden_abastecimiento=v_orden AND cod_producto=p_cod_producto) THEN
+          UPDATE orden_abastecimiento_detalle SET cantidad=cantidad+v_tomar WHERE cod_orden_abastecimiento=v_orden AND cod_producto=p_cod_producto;
+        ELSE INSERT INTO orden_abastecimiento_detalle(cod_orden_abastecimiento,cod_producto,cantidad,costo_unitario) VALUES(v_orden,p_cod_producto,v_tomar,r.costo_unitario); END IF;
+        UPDATE proveedor_stock SET cantidad_disponible=cantidad_disponible-v_tomar,fecha_actualizacion=now() WHERE cod_proveedor_stock=r.cod_proveedor_stock;
+        UPDATE orden_abastecimiento SET total_estimado=(SELECT COALESCE(SUM(subtotal),0) FROM orden_abastecimiento_detalle WHERE cod_orden_abastecimiento=v_orden),fecha_actualizacion=now() WHERE cod_orden_abastecimiento=v_orden;
+        v_faltante:=v_faltante-v_tomar; v_generado:=v_generado+v_tomar;
+    END LOOP;
+    IF v_faltante>0 THEN INSERT INTO alerta_stock(cod_producto,cod_almacen,tipo_alerta,mensaje) VALUES(p_cod_producto,p_cod_almacen,'SIN_STOCK','Reposición preventiva sin cobertura para '||v_faltante||' unidades'); END IF;
+    RETURN v_generado;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_recalcular_reposicion_producto(p_cod_producto BIGINT)
+RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE r RECORD; v_total INTEGER:=0;
+BEGIN
+    FOR r IN SELECT cod_almacen FROM inventario WHERE cod_producto=p_cod_producto LOOP v_total:=v_total+fn_generar_reposicion_automatica(p_cod_producto,r.cod_almacen); END LOOP;
+    RETURN v_total;
+END;
+$$;
+
+-- Wrappers con firmas históricas de Django.
+CREATE OR REPLACE FUNCTION fn_stock_disponible_producto(p_cod_producto BIGINT)
+RETURNS INTEGER LANGUAGE sql STABLE AS $$
+    SELECT (
+        COALESCE((SELECT SUM(cantidad_disponible-cantidad_reservada) FROM lote_inventario
+                  WHERE cod_producto=p_cod_producto AND estado='ACTIVO'),0)
+        + COALESCE((SELECT SUM(i.stock_total-i.stock_reservado) FROM inventario i
+                    WHERE i.cod_producto=p_cod_producto
+                      AND NOT EXISTS (SELECT 1 FROM lote_inventario l
+                                      WHERE l.cod_producto=i.cod_producto AND l.cod_almacen=i.cod_almacen)),0)
+    )::INTEGER;
+$$;
+
+-- Redefinicion final: el descuento de cupon vive en las lineas y no se pierde
+-- cuando fn_recalcular_total_pedido recalcula el encabezado.
+CREATE OR REPLACE FUNCTION fn_aplicar_cupon_pedido(
+    p_cod_pedido BIGINT,
+    p_codigo_cupon TEXT
+)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_pedido RECORD;
+    v_cod_cupon BIGINT;
+    v_base NUMERIC;
+    v_descuento NUMERIC;
+BEGIN
+    SELECT * INTO v_pedido FROM pedido WHERE cod_pedido = $1 FOR UPDATE;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Pedido no encontrado'; END IF;
+    IF v_pedido.cod_estado_pedido <> 'PENDIENTE_PAGO' THEN
+        RAISE EXCEPTION 'El cupon solo se puede aplicar a un pedido pendiente de pago';
+    END IF;
+
+    SELECT c.cod_cupon INTO v_cod_cupon
+    FROM cupon c WHERE c.codigo = upper(trim($2));
+    IF v_cod_cupon IS NULL THEN RAISE EXCEPTION 'Cupon no encontrado'; END IF;
+
+    UPDATE pedido_detalle
+    SET descuento_cupon_unitario = 0,
+        precio_final_unitario = GREATEST(precio_base_unitario - descuento_promocion_unitario - descuento_prime_unitario, 0),
+        precio_unitario = GREATEST(precio_base_unitario - descuento_promocion_unitario - descuento_prime_unitario, 0)
+    WHERE cod_pedido = $1;
+
+    SELECT COALESCE(SUM(cantidad * precio_final_unitario), 0)
+    INTO v_base FROM pedido_detalle WHERE cod_pedido = $1;
+    v_descuento := fn_calcular_descuento_cupon($2, v_pedido.cod_usuario, v_base);
+
+    IF v_base > 0 AND v_descuento > 0 THEN
+        UPDATE pedido_detalle pd
+        SET descuento_cupon_unitario = LEAST(
+                pd.precio_final_unitario,
+                ROUND(v_descuento * pd.precio_final_unitario / v_base, 2)
+            ),
+            precio_final_unitario = GREATEST(
+                pd.precio_final_unitario - LEAST(pd.precio_final_unitario,
+                    ROUND(v_descuento * pd.precio_final_unitario / v_base, 2)), 0),
+            precio_unitario = GREATEST(
+                pd.precio_final_unitario - LEAST(pd.precio_final_unitario,
+                    ROUND(v_descuento * pd.precio_final_unitario / v_base, 2)), 0)
+        WHERE pd.cod_pedido = $1;
+    END IF;
+
+    PERFORM fn_recalcular_total_pedido($1);
+    SELECT descuento INTO v_descuento FROM pedido WHERE cod_pedido = $1;
+
+    INSERT INTO cupon_uso(cod_cupon, cod_usuario, cod_pedido, valor_aplicado)
+    VALUES(v_cod_cupon, v_pedido.cod_usuario, $1, v_descuento)
+    ON CONFLICT (cod_cupon, cod_pedido) DO UPDATE
+    SET valor_aplicado = EXCLUDED.valor_aplicado;
+
+    RETURN v_descuento;
+END;
+$$;
+
+-- Correcciones finales de ejecucion: no usar un alias de tabla como variable PL/pgSQL.
+CREATE OR REPLACE FUNCTION fn_calcular_costo_envio(
+    p_cod_usuario BIGINT,
+    p_cod_metodo_envio BIGINT,
+    p_cod_zona_entrega BIGINT,
+    p_subtotal NUMERIC
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+AS $$
+DECLARE
+    v_metodo RECORD;
+    v_recargo NUMERIC := 0;
+    v_cod_beneficio BIGINT;
+    v_costo NUMERIC;
+BEGIN
+    SELECT me.* INTO v_metodo
+    FROM metodo_envio me
+    WHERE me.cod_metodo_envio = $2 AND me.activo IS TRUE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Metodo de envio invalido';
+    END IF;
+
+    SELECT COALESCE(ze.recargo, 0) INTO v_recargo
+    FROM zona_entrega ze
+    WHERE ze.cod_zona = $3 AND ze.activo IS TRUE;
+
+    v_recargo := COALESCE(v_recargo, 0);
+
+    SELECT bm.cod_beneficio INTO v_cod_beneficio
+    FROM membresia_usuario mu
+    JOIN beneficio_membresia bm ON bm.cod_plan = mu.cod_plan
+    WHERE mu.cod_usuario = $1
+      AND mu.cod_estado_membresia = 'ACTIVA'
+      AND mu.fecha_fin >= current_date
+      AND bm.codigo = 'ENVIO_GRATIS'
+      AND bm.activo IS TRUE
+    LIMIT 1;
+
+    v_costo := CASE
+        WHEN v_cod_beneficio IS NOT NULL AND v_metodo.es_premium_gratis THEN 0
+        ELSE v_metodo.costo_base + v_recargo
+    END;
+
+    RETURN jsonb_build_object(
+        'costo_envio', v_costo,
+        'costo_base', v_metodo.costo_base,
+        'recargo_zona', v_recargo,
+        'cod_beneficio', v_cod_beneficio,
+        'prime_aplicado', v_cod_beneficio IS NOT NULL AND v_metodo.es_premium_gratis
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_calcular_pvp_lote(
+    p_cod_producto BIGINT,
+    p_costo_unitario NUMERIC,
+    p_fecha_referencia TIMESTAMPTZ DEFAULT now()
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+AS $$
+DECLARE
+    v_cod_regla_precio BIGINT;
+    v_margen_porcentaje NUMERIC := 0;
+    v_costo_operativo_porcentaje NUMERIC := 0;
+    v_costo_fijo_unitario NUMERIC := 0;
+    v_porcentaje_impuesto NUMERIC;
+    v_impuesto NUMERIC := 0;
+    v_base NUMERIC;
+    v_pvp NUMERIC;
+BEGIN
+    IF p_costo_unitario IS NULL OR p_costo_unitario <= 0 THEN
+        RAISE EXCEPTION 'Costo unitario invalido';
+    END IF;
+
+    SELECT cod_regla_precio, margen_porcentaje, costo_operativo_porcentaje,
+           costo_fijo_unitario, porcentaje_impuesto
+    INTO v_cod_regla_precio, v_margen_porcentaje, v_costo_operativo_porcentaje,
+         v_costo_fijo_unitario, v_porcentaje_impuesto
+    FROM fn_obtener_regla_precio_producto($1, $3);
+
+    SELECT CASE WHEN ps.valor ~ '^[0-9]+([.][0-9]+)?$' THEN ps.valor::NUMERIC ELSE 0 END
+    INTO v_impuesto
+    FROM parametro_sistema ps
+    WHERE ps.clave = 'IVA_PORCENTAJE';
+
+    v_impuesto := COALESCE(v_porcentaje_impuesto, v_impuesto, 0);
+    v_base := $2 * (1 + COALESCE(v_margen_porcentaje, 0) / 100
+                      + COALESCE(v_costo_operativo_porcentaje, 0) / 100)
+              + COALESCE(v_costo_fijo_unitario, 0);
+    v_pvp := ROUND(v_base * (1 + v_impuesto / 100), 2);
+
+    RETURN jsonb_build_object(
+        'cod_regla_precio', v_cod_regla_precio,
+        'margen_porcentaje', COALESCE(v_margen_porcentaje, 0),
+        'costo_operativo_porcentaje', COALESCE(v_costo_operativo_porcentaje, 0),
+        'costo_fijo_unitario', COALESCE(v_costo_fijo_unitario, 0),
+        'porcentaje_impuesto', v_impuesto,
+        'precio_sin_impuesto', ROUND(v_base, 2),
+        'pvp_unitario', v_pvp
+    );
+END;
+$$;
+
+-- FASE B: contratos existentes, redefinidos al final del archivo.
+CREATE OR REPLACE FUNCTION fn_recalcular_total_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE v_sub NUMERIC; v_desc NUMERIC; v_tasa NUMERIC; v_envio NUMERIC;
+BEGIN
+ SELECT COALESCE(SUM(cantidad*precio_base_unitario),0),COALESCE(SUM(cantidad*(descuento_promocion_unitario+descuento_prime_unitario+descuento_cupon_unitario)),0)
+ INTO v_sub,v_desc FROM pedido_detalle WHERE cod_pedido=p_cod_pedido;
+ SELECT tasa_impuesto,costo_envio INTO v_tasa,v_envio FROM pedido WHERE cod_pedido=p_cod_pedido FOR UPDATE;
+ UPDATE pedido SET subtotal=v_sub,descuento=LEAST(v_desc,v_sub),impuesto=ROUND(GREATEST(v_sub-v_desc,0)*COALESCE(v_tasa,0)/100,2),total=ROUND(GREATEST(v_sub-v_desc,0)+ROUND(GREATEST(v_sub-v_desc,0)*COALESCE(v_tasa,0)/100,2)+COALESCE(v_envio,0),2),fecha_actualizacion=now() WHERE cod_pedido=p_cod_pedido;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_estado_pedido(p_cod_pedido BIGINT,p_cod_estado_pedido VARCHAR,p_comentario TEXT DEFAULT NULL)
+RETURNS VOID LANGUAGE plpgsql AS $$ DECLARE v TEXT; BEGIN SELECT cod_estado_pedido INTO v FROM pedido WHERE cod_pedido=p_cod_pedido FOR UPDATE; IF NOT FOUND THEN RAISE EXCEPTION 'Pedido no encontrado: %',p_cod_pedido; END IF; PERFORM fn_validar_transicion_pedido(v,p_cod_estado_pedido); UPDATE pedido SET cod_estado_pedido=p_cod_estado_pedido,observacion=COALESCE(p_comentario,observacion),fecha_actualizacion=now() WHERE cod_pedido=p_cod_pedido; END; $$;
+CREATE OR REPLACE FUNCTION fn_capturar_pago_simulado(p_cod_transaccion BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE t RECORD; c RECORD; v_estado TEXT;
+BEGIN
+ SELECT tp.*,p.cod_estado_pedido,p.total,p.subtotal,p.descuento,p.impuesto,p.tasa_impuesto,p.costo_envio,p.requiere_abastecimiento INTO t FROM transaccion_pago tp JOIN pedido p ON p.cod_pedido=tp.cod_pedido WHERE tp.cod_transaccion=p_cod_transaccion FOR UPDATE OF tp,p;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Transacción no encontrada: %',p_cod_transaccion; END IF;
+ IF t.cod_estado_pago='CAPTURADO' THEN RETURN; END IF;
+ IF t.cod_estado_pedido='CANCELADO' THEN RAISE EXCEPTION 'No se puede capturar un pedido cancelado'; END IF;
+ IF t.cod_estado_pago<>'AUTORIZADO' OR t.monto<>t.total THEN RAISE EXCEPTION 'Transacción no autorizada o monto inconsistente'; END IF;
+ SELECT * INTO c FROM cuenta_simulada WHERE cod_metodo_pago=t.cod_metodo_pago FOR UPDATE; IF c.saldo_disponible<t.monto THEN RAISE EXCEPTION 'Saldo insuficiente al capturar'; END IF;
+ UPDATE cuenta_simulada SET saldo_disponible=saldo_disponible-t.monto,monto_usado_hoy=monto_usado_hoy+t.monto,fecha_uso=current_date WHERE cod_cuenta=c.cod_cuenta;
+ UPDATE transaccion_pago SET cod_estado_pago='CAPTURADO',mensaje='Pago capturado correctamente',fecha_actualizacion=now() WHERE cod_transaccion=p_cod_transaccion;
+ PERFORM fn_consumir_reservas_pedido(t.cod_pedido); PERFORM fn_actualizar_estado_pedido(t.cod_pedido,CASE WHEN t.requiere_abastecimiento THEN 'ESPERANDO_PROVEEDOR' ELSE 'PREPARANDO' END,'Pago capturado');
+ INSERT INTO factura(cod_pedido,numero_factura,subtotal,descuento,impuesto,tasa_impuesto,costo_envio,total) VALUES(t.cod_pedido,fn_generar_numero_factura(),t.subtotal,t.descuento,t.impuesto,t.tasa_impuesto,t.costo_envio,t.total) ON CONFLICT(cod_pedido) DO NOTHING;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_cancelar_pedido(p_cod_pedido BIGINT,p_motivo TEXT DEFAULT 'Cancelación solicitada')
+RETURNS VOID LANGUAGE plpgsql AS $$ DECLARE v TEXT; BEGIN SELECT cod_estado_pedido INTO v FROM pedido WHERE cod_pedido=p_cod_pedido FOR UPDATE; IF NOT FOUND THEN RAISE EXCEPTION 'Pedido no encontrado'; END IF; IF v IN ('ENTREGADO','DEVUELTO','REEMBOLSADO','CANCELADO') THEN RAISE EXCEPTION 'No se puede cancelar pedido en estado %',v; END IF; PERFORM fn_liberar_reservas_pedido(p_cod_pedido); PERFORM fn_anular_autorizaciones_pedido(p_cod_pedido); PERFORM fn_actualizar_estado_pedido(p_cod_pedido,'CANCELADO',p_motivo); END; $$;
+CREATE OR REPLACE FUNCTION fn_reservar_stock(p_cod_usuario BIGINT,p_cod_producto BIGINT,p_cantidad INTEGER,p_cod_pedido BIGINT DEFAULT NULL)
+RETURNS INTEGER LANGUAGE plpgsql AS $$ BEGIN RETURN fn_reservar_stock_por_lotes(p_cod_usuario,p_cod_producto,p_cantidad,p_cod_pedido,NULL); END; $$;
+CREATE OR REPLACE FUNCTION fn_consumir_reservas_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN PERFORM fn_consumir_reservas_lote_pedido(p_cod_pedido); END; $$;
+CREATE OR REPLACE FUNCTION fn_liberar_reservas_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN PERFORM fn_liberar_reservas_lote_pedido(p_cod_pedido); END; $$;
+CREATE OR REPLACE FUNCTION fn_expirar_reservas_vencidas()
+RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE r RECORD; v_total INTEGER:=0;
+BEGIN
+ FOR r IN SELECT * FROM reserva_inventario WHERE estado_reserva='ACTIVA' AND fecha_expiracion<now() FOR UPDATE LOOP
+   IF r.cod_lote IS NOT NULL THEN UPDATE lote_inventario SET cantidad_reservada=GREATEST(cantidad_reservada-r.cantidad,0),fecha_actualizacion=now() WHERE cod_lote=r.cod_lote; END IF;
+   UPDATE reserva_inventario SET estado='EXPIRADA',estado_reserva='EXPIRADA' WHERE cod_reserva=r.cod_reserva; v_total:=v_total+1;
+ END LOOP; PERFORM fn_recalcular_inventario_desde_lotes(NULL,NULL); RETURN v_total;
+END; $$;
+
+CREATE OR REPLACE FUNCTION fn_recibir_orden_abastecimiento(p_cod_orden_abastecimiento BIGINT,p_cod_almacen BIGINT,p_observacion TEXT DEFAULT 'Recepción de orden de abastecimiento')
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE r RECORD; v_proveedor BIGINT; v_estado TEXT;
+BEGIN
+ SELECT cod_proveedor,estado INTO v_proveedor,v_estado FROM orden_abastecimiento WHERE cod_orden_abastecimiento=p_cod_orden_abastecimiento FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Orden de abastecimiento no encontrada: %',p_cod_orden_abastecimiento; END IF;
+ IF v_estado='RECIBIDA' THEN RETURN; END IF; IF v_estado='CANCELADA' THEN RAISE EXCEPTION 'No se puede recibir una orden cancelada'; END IF;
+ FOR r IN SELECT * FROM orden_abastecimiento_detalle WHERE cod_orden_abastecimiento=p_cod_orden_abastecimiento LOOP
+   PERFORM fn_crear_lote_inventario(r.cod_producto,p_cod_almacen,r.cantidad,r.costo_unitario,'OC-'||p_cod_orden_abastecimiento||'-DET-'||r.cod_orden_abastecimiento_detalle,v_proveedor,r.cod_orden_abastecimiento_detalle,now(),NULL);
+ END LOOP;
+ UPDATE orden_abastecimiento SET estado='RECIBIDA',cod_almacen=p_cod_almacen,fecha_actualizacion=now() WHERE cod_orden_abastecimiento=p_cod_orden_abastecimiento;
+END; $$;
 
 COMMIT;
 -- ============================================================
@@ -2339,7 +3011,7 @@ BEGIN
       );
 
     INSERT INTO factura(cod_pedido, numero_factura, subtotal, impuesto, total)
-    SELECT cod_pedido, fn_generar_numero_factura(), subtotal, ROUND(subtotal * 0.12, 2), total
+    SELECT cod_pedido, fn_generar_numero_factura(), subtotal, ROUND(subtotal * fn_obtener_tasa_impuesto() / 100, 2), total
     FROM pedido
     WHERE cod_pedido = v_tx.cod_pedido
     ON CONFLICT (cod_pedido) DO NOTHING;
@@ -3622,6 +4294,61 @@ BEGIN
 END;
 $$;
 
+-- Version vigente del cupon: persiste el descuento en detalle antes del recálculo.
+CREATE OR REPLACE FUNCTION fn_aplicar_cupon_pedido(
+    p_cod_pedido BIGINT,
+    p_codigo_cupon TEXT
+)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_pedido RECORD;
+    v_cod_cupon BIGINT;
+    v_base NUMERIC;
+    v_descuento NUMERIC;
+BEGIN
+    SELECT * INTO v_pedido FROM pedido WHERE cod_pedido = $1 FOR UPDATE;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Pedido no encontrado'; END IF;
+    IF v_pedido.cod_estado_pedido <> 'PENDIENTE_PAGO' THEN
+        RAISE EXCEPTION 'El cupon solo se puede aplicar a un pedido pendiente de pago';
+    END IF;
+
+    SELECT c.cod_cupon INTO v_cod_cupon
+    FROM cupon c WHERE c.codigo = upper(trim($2));
+    IF v_cod_cupon IS NULL THEN RAISE EXCEPTION 'Cupon no encontrado'; END IF;
+
+    UPDATE pedido_detalle
+    SET descuento_cupon_unitario = 0,
+        precio_final_unitario = GREATEST(precio_base_unitario - descuento_promocion_unitario - descuento_prime_unitario, 0),
+        precio_unitario = GREATEST(precio_base_unitario - descuento_promocion_unitario - descuento_prime_unitario, 0)
+    WHERE cod_pedido = $1;
+
+    SELECT COALESCE(SUM(cantidad * precio_final_unitario), 0)
+    INTO v_base FROM pedido_detalle WHERE cod_pedido = $1;
+    v_descuento := fn_calcular_descuento_cupon($2, v_pedido.cod_usuario, v_base);
+
+    IF v_base > 0 AND v_descuento > 0 THEN
+        UPDATE pedido_detalle pd
+        SET descuento_cupon_unitario = LEAST(pd.precio_final_unitario,
+                ROUND(v_descuento * pd.precio_final_unitario / v_base, 2)),
+            precio_final_unitario = GREATEST(pd.precio_final_unitario - LEAST(pd.precio_final_unitario,
+                ROUND(v_descuento * pd.precio_final_unitario / v_base, 2)), 0),
+            precio_unitario = GREATEST(pd.precio_final_unitario - LEAST(pd.precio_final_unitario,
+                ROUND(v_descuento * pd.precio_final_unitario / v_base, 2)), 0)
+        WHERE pd.cod_pedido = $1;
+    END IF;
+
+    PERFORM fn_recalcular_total_pedido($1);
+    SELECT descuento INTO v_descuento FROM pedido WHERE cod_pedido = $1;
+
+    INSERT INTO cupon_uso(cod_cupon, cod_usuario, cod_pedido, valor_aplicado)
+    VALUES(v_cod_cupon, v_pedido.cod_usuario, $1, v_descuento)
+    ON CONFLICT (cod_cupon, cod_pedido) DO UPDATE SET valor_aplicado = EXCLUDED.valor_aplicado;
+    RETURN v_descuento;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION fn_crear_promocion(
     p_codigo TEXT,
     p_nombre TEXT,
@@ -4186,3 +4913,190 @@ JOIN usuario u ON u.cod_usuario = bu.cod_usuario
 JOIN contenido_digital cd ON cd.cod_contenido = bu.cod_contenido;
 
 COMMIT;
+
+-- FASE A: las siguientes firmas se redeclaran al final para que las
+-- implementaciones FIFO prevalezcan sobre las versiones heredadas anteriores.
+BEGIN;
+CREATE OR REPLACE FUNCTION fn_stock_disponible_producto(p_cod_producto BIGINT)
+RETURNS INTEGER LANGUAGE sql STABLE AS $$
+    SELECT CASE WHEN EXISTS(SELECT 1 FROM lote_inventario WHERE cod_producto=p_cod_producto)
+      THEN COALESCE((SELECT SUM(cantidad_disponible-cantidad_reservada) FROM lote_inventario WHERE cod_producto=p_cod_producto AND estado='ACTIVO'),0)::INTEGER
+      ELSE COALESCE((SELECT SUM(stock_total-stock_reservado) FROM inventario WHERE cod_producto=p_cod_producto),0)::INTEGER END;
+$$;
+CREATE OR REPLACE FUNCTION fn_reservar_stock(p_cod_usuario BIGINT,p_cod_producto BIGINT,p_cantidad INTEGER,p_cod_pedido BIGINT DEFAULT NULL)
+RETURNS INTEGER LANGUAGE plpgsql AS $$ BEGIN RETURN fn_reservar_stock_por_lotes(p_cod_usuario,p_cod_producto,p_cantidad,p_cod_pedido,NULL); END; $$;
+CREATE OR REPLACE FUNCTION fn_consumir_reservas_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN PERFORM fn_consumir_reservas_lote_pedido(p_cod_pedido); END; $$;
+CREATE OR REPLACE FUNCTION fn_liberar_reservas_pedido(p_cod_pedido BIGINT)
+RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN PERFORM fn_liberar_reservas_lote_pedido(p_cod_pedido); END; $$;
+CREATE OR REPLACE FUNCTION fn_expirar_reservas_vencidas()
+RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE r RECORD; v_total INTEGER:=0;
+BEGIN
+ FOR r IN SELECT * FROM reserva_inventario WHERE estado_reserva='ACTIVA' AND fecha_expiracion<now() FOR UPDATE LOOP
+   IF r.cod_lote IS NOT NULL THEN UPDATE lote_inventario SET cantidad_reservada=GREATEST(cantidad_reservada-r.cantidad,0),fecha_actualizacion=now() WHERE cod_lote=r.cod_lote; END IF;
+   UPDATE reserva_inventario SET estado='EXPIRADA',estado_reserva='EXPIRADA' WHERE cod_reserva=r.cod_reserva; v_total:=v_total+1;
+ END LOOP; PERFORM fn_recalcular_inventario_desde_lotes(NULL,NULL); RETURN v_total;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_recibir_orden_abastecimiento(p_cod_orden_abastecimiento BIGINT,p_cod_almacen BIGINT,p_observacion TEXT DEFAULT 'Recepción de orden de abastecimiento')
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE r RECORD; v_proveedor BIGINT; v_estado TEXT;
+BEGIN
+ SELECT cod_proveedor,estado INTO v_proveedor,v_estado FROM orden_abastecimiento WHERE cod_orden_abastecimiento=p_cod_orden_abastecimiento FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Orden de abastecimiento no encontrada: %',p_cod_orden_abastecimiento; END IF;
+ IF v_estado='RECIBIDA' THEN RETURN; END IF; IF v_estado='CANCELADA' THEN RAISE EXCEPTION 'No se puede recibir una orden cancelada'; END IF;
+ FOR r IN SELECT * FROM orden_abastecimiento_detalle WHERE cod_orden_abastecimiento=p_cod_orden_abastecimiento LOOP
+   PERFORM fn_crear_lote_inventario(r.cod_producto,p_cod_almacen,r.cantidad,r.costo_unitario,'OC-'||p_cod_orden_abastecimiento||'-DET-'||r.cod_orden_abastecimiento_detalle,v_proveedor,r.cod_orden_abastecimiento_detalle,now(),NULL);
+ END LOOP;
+ UPDATE orden_abastecimiento SET estado='RECIBIDA',cod_almacen=p_cod_almacen,fecha_actualizacion=now() WHERE cod_orden_abastecimiento=p_cod_orden_abastecimiento;
+END; $$;
+COMMIT;
+
+-- FASE B: redefiniciones finales de contratos Django.
+CREATE OR REPLACE FUNCTION fn_crear_pedido_desde_carrito(p_cod_usuario BIGINT,p_cod_direccion_envio BIGINT,p_cod_metodo_envio BIGINT DEFAULT NULL) RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE car BIGINT; ped BIGINT; met BIGINT; zon BIGINT; r RECORD; q JSONB; f JSONB; env JSONB; tasa NUMERIC; es_prime BOOLEAN; base NUMERIC;
+BEGIN
+ SELECT cod_carrito INTO car FROM carrito WHERE cod_usuario=p_cod_usuario AND estado='ACTIVO' FOR UPDATE; IF car IS NULL OR NOT EXISTS(SELECT 1 FROM carrito_detalle WHERE cod_carrito=car) THEN RAISE EXCEPTION 'Carrito activo vacío o inexistente'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM direccion_usuario WHERE cod_direccion=p_cod_direccion_envio AND cod_usuario=p_cod_usuario AND activo) THEN RAISE EXCEPTION 'Dirección inválida'; END IF;
+ SELECT COALESCE(p_cod_metodo_envio,(SELECT cod_metodo_envio FROM metodo_envio WHERE activo ORDER BY costo_base,cod_metodo_envio LIMIT 1)) INTO met;
+ SELECT z.cod_zona INTO zon FROM direccion_usuario d JOIN zona_entrega z ON z.ciudad=d.ciudad AND z.provincia=d.provincia AND z.activo WHERE d.cod_direccion=p_cod_direccion_envio LIMIT 1;
+ tasa:=fn_obtener_tasa_impuesto(); es_prime:=fn_usuario_tiene_membresia_activa(p_cod_usuario);
+ INSERT INTO pedido(numero_pedido,cod_usuario,cod_direccion_envio,cod_estado_pedido,cod_metodo_envio,cod_zona_entrega,tasa_impuesto,es_premium) VALUES(fn_generar_numero_pedido(),p_cod_usuario,p_cod_direccion_envio,'PENDIENTE_PAGO',met,zon,tasa,es_prime) RETURNING cod_pedido INTO ped;
+ FOR r IN SELECT cod_producto,cantidad FROM carrito_detalle WHERE cod_carrito=car LOOP
+  PERFORM fn_validar_limite_retail(p_cod_usuario,r.cod_producto,r.cantidad); q:=fn_cotizar_producto_por_lotes(p_cod_usuario,r.cod_producto,r.cantidad); base:=CASE WHEN (q->>'cantidad_cubierta')::INTEGER=r.cantidad THEN ROUND((q->>'subtotal_total')::NUMERIC/r.cantidad,2) ELSE (SELECT precio_actual FROM producto WHERE cod_producto=r.cod_producto) END; f:=fn_calcular_precio_final_item(p_cod_usuario,r.cod_producto,r.cantidad,base,NULL);
+  INSERT INTO pedido_detalle(cod_pedido,cod_producto,cantidad,precio_unitario,precio_base_unitario,descuento_promocion_unitario,descuento_prime_unitario,descuento_cupon_unitario,precio_final_unitario,subtotal_linea) VALUES(ped,r.cod_producto,r.cantidad,(f->>'precio_final_unitario')::NUMERIC,base,(f->>'descuento_promocion')::NUMERIC,(f->>'descuento_prime')::NUMERIC,(f->>'descuento_cupon')::NUMERIC,(f->>'precio_final_unitario')::NUMERIC,(f->>'subtotal')::NUMERIC);
+  PERFORM fn_reservar_stock_por_lotes(p_cod_usuario,r.cod_producto,r.cantidad,ped,(SELECT cod_pedido_detalle FROM pedido_detalle WHERE cod_pedido=ped AND cod_producto=r.cod_producto));
+ END LOOP;
+ PERFORM fn_recalcular_total_pedido(ped); env:=fn_calcular_costo_envio(p_cod_usuario,met,zon,(SELECT subtotal-descuento FROM pedido WHERE cod_pedido=ped)); UPDATE pedido SET costo_envio=(env->>'costo_envio')::NUMERIC WHERE cod_pedido=ped; PERFORM fn_recalcular_total_pedido(ped); UPDATE carrito SET estado='CONVERTIDO',fecha_actualizacion=now() WHERE cod_carrito=car; INSERT INTO pedido_estado_historial(cod_pedido,cod_estado_pedido,comentario) VALUES(ped,'PENDIENTE_PAGO','Pedido creado con precio final recalculado'); RETURN ped;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_capturar_pago_simulado(p_cod_transaccion BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE x RECORD; c RECORD;
+BEGIN
+ SELECT tp.*,p.cod_estado_pedido,p.total,p.subtotal,p.descuento,p.impuesto,p.tasa_impuesto,p.costo_envio,p.requiere_abastecimiento INTO x FROM transaccion_pago tp JOIN pedido p ON p.cod_pedido=tp.cod_pedido WHERE tp.cod_transaccion=p_cod_transaccion FOR UPDATE OF tp,p;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Transacción no encontrada'; END IF; IF x.cod_estado_pago='CAPTURADO' THEN RETURN; END IF;
+ IF x.cod_estado_pedido='CANCELADO' OR x.cod_estado_pago<>'AUTORIZADO' OR x.monto<>x.total THEN RAISE EXCEPTION 'Captura no permitida'; END IF;
+ SELECT * INTO c FROM cuenta_simulada WHERE cod_metodo_pago=x.cod_metodo_pago FOR UPDATE; IF c.saldo_disponible<x.monto THEN RAISE EXCEPTION 'Saldo insuficiente al capturar'; END IF;
+ UPDATE cuenta_simulada SET saldo_disponible=saldo_disponible-x.monto,monto_usado_hoy=monto_usado_hoy+x.monto,fecha_uso=current_date WHERE cod_cuenta=c.cod_cuenta;
+ UPDATE transaccion_pago SET cod_estado_pago='CAPTURADO',mensaje='Pago capturado correctamente',fecha_actualizacion=now() WHERE cod_transaccion=p_cod_transaccion;
+ PERFORM fn_consumir_reservas_pedido(x.cod_pedido); PERFORM fn_actualizar_estado_pedido(x.cod_pedido,CASE WHEN x.requiere_abastecimiento THEN 'ESPERANDO_PROVEEDOR' ELSE 'PREPARANDO' END,'Pago capturado');
+ INSERT INTO factura(cod_pedido,numero_factura,subtotal,descuento,impuesto,tasa_impuesto,costo_envio,total) VALUES(x.cod_pedido,fn_generar_numero_factura(),x.subtotal,x.descuento,x.impuesto,x.tasa_impuesto,x.costo_envio,x.total) ON CONFLICT(cod_pedido) DO NOTHING;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_recalcular_total_pedido(p_cod_pedido BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE s NUMERIC; d NUMERIC; t NUMERIC; e NUMERIC;
+BEGIN SELECT COALESCE(SUM(cantidad*precio_base_unitario),0),COALESCE(SUM(cantidad*(descuento_promocion_unitario+descuento_prime_unitario+descuento_cupon_unitario)),0) INTO s,d FROM pedido_detalle WHERE cod_pedido=p_cod_pedido; SELECT tasa_impuesto,costo_envio INTO t,e FROM pedido WHERE cod_pedido=p_cod_pedido FOR UPDATE; UPDATE pedido SET subtotal=s,descuento=LEAST(d,s),impuesto=ROUND(GREATEST(s-d,0)*COALESCE(t,0)/100,2),total=ROUND(GREATEST(s-d,0)+ROUND(GREATEST(s-d,0)*COALESCE(t,0)/100,2)+COALESCE(e,0),2),fecha_actualizacion=now() WHERE cod_pedido=p_cod_pedido; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_estado_pedido(p_cod_pedido BIGINT,p_cod_estado_pedido VARCHAR,p_comentario TEXT DEFAULT NULL) RETURNS VOID LANGUAGE plpgsql AS $$ DECLARE a TEXT; BEGIN SELECT cod_estado_pedido INTO a FROM pedido WHERE cod_pedido=p_cod_pedido FOR UPDATE; IF NOT FOUND THEN RAISE EXCEPTION 'Pedido no encontrado'; END IF; PERFORM fn_validar_transicion_pedido(a,p_cod_estado_pedido); UPDATE pedido SET cod_estado_pedido=p_cod_estado_pedido,observacion=COALESCE(p_comentario,observacion),fecha_actualizacion=now() WHERE cod_pedido=p_cod_pedido; END; $$;
+CREATE OR REPLACE FUNCTION fn_cancelar_pedido(p_cod_pedido BIGINT,p_motivo TEXT DEFAULT 'Cancelación solicitada') RETURNS VOID LANGUAGE plpgsql AS $$ DECLARE a TEXT; BEGIN SELECT cod_estado_pedido INTO a FROM pedido WHERE cod_pedido=p_cod_pedido FOR UPDATE; IF NOT FOUND OR a IN ('ENTREGADO','DEVUELTO','REEMBOLSADO','CANCELADO') THEN RAISE EXCEPTION 'Pedido no cancelable'; END IF; PERFORM fn_liberar_reservas_pedido(p_cod_pedido); PERFORM fn_anular_autorizaciones_pedido(p_cod_pedido); PERFORM fn_actualizar_estado_pedido(p_cod_pedido,'CANCELADO',p_motivo); END; $$;
+
+-- ============================================================
+-- FASE C: TRACKING PERSISTENTE Y MANTENIMIENTO
+-- ============================================================
+-- FASE D: CRUD lógico reutilizable y operaciones administrativas seguras.
+CREATE OR REPLACE FUNCTION fn_listar_entidad_administrable(p_entidad TEXT,p_solo_activos BOOLEAN DEFAULT TRUE) RETURNS JSONB LANGUAGE plpgsql STABLE AS $$
+DECLARE q TEXT; r JSONB; BEGIN
+ IF p_entidad NOT IN ('categoria','marca','producto','almacen','proveedor','transportista','metodo_envio','zona_entrega','plan_membresia','promocion','cupon','regla_precio','contenido_digital','rol','permiso','parametro_sistema') THEN RAISE EXCEPTION 'Entidad no administrable'; END IF;
+ q:=format('SELECT COALESCE(jsonb_agg(to_jsonb(x)),''[]''::jsonb) FROM (SELECT * FROM %I %s) x',p_entidad,CASE WHEN p_solo_activos AND p_entidad IN ('categoria','marca','almacen','proveedor','transportista','metodo_envio','zona_entrega','plan_membresia','promocion','cupon','regla_precio','contenido_digital','rol','permiso') THEN 'WHERE activo IS TRUE' ELSE '' END); EXECUTE q INTO r; RETURN r; END; $$;
+CREATE OR REPLACE FUNCTION fn_crear_regla_precio(p_cod_producto BIGINT,p_cod_categoria BIGINT,p_margen NUMERIC,p_operativo NUMERIC DEFAULT 0,p_fijo NUMERIC DEFAULT 0,p_impuesto NUMERIC DEFAULT NULL,p_prioridad INTEGER DEFAULT 100) RETURNS BIGINT LANGUAGE plpgsql AS $$ DECLARE x BIGINT; BEGIN INSERT INTO regla_precio(cod_producto,cod_categoria,margen_porcentaje,costo_operativo_porcentaje,costo_fijo_unitario,porcentaje_impuesto,prioridad) VALUES(p_cod_producto,p_cod_categoria,p_margen,p_operativo,p_fijo,p_impuesto,p_prioridad) RETURNING cod_regla_precio INTO x; RETURN x; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_regla_precio(p_cod_regla BIGINT,p_margen NUMERIC,p_operativo NUMERIC,p_fijo NUMERIC,p_impuesto NUMERIC,p_prioridad INTEGER,p_activo BOOLEAN) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE regla_precio SET margen_porcentaje=p_margen,costo_operativo_porcentaje=p_operativo,costo_fijo_unitario=p_fijo,porcentaje_impuesto=p_impuesto,prioridad=p_prioridad,activo=p_activo,fecha_actualizacion=now() WHERE cod_regla_precio=p_cod_regla; IF NOT FOUND THEN RAISE EXCEPTION 'Regla de precio no encontrada'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_regla_precio(p_cod_regla BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE regla_precio SET activo=FALSE,fecha_actualizacion=now() WHERE cod_regla_precio=p_cod_regla; END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_cupon(p_cod_cupon BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE cupon SET activo=FALSE WHERE cod_cupon=p_cod_cupon; IF NOT FOUND THEN RAISE EXCEPTION 'Cupón no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_cupon(p_cod_cupon BIGINT,p_nombre TEXT,p_valor NUMERIC,p_activo BOOLEAN) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE cupon SET nombre=p_nombre,valor=p_valor,activo=p_activo WHERE cod_cupon=p_cod_cupon; IF NOT FOUND THEN RAISE EXCEPTION 'Cupón no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_promocion(p_cod_promocion BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE promocion SET activo=FALSE WHERE cod_promocion=p_cod_promocion; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_promocion(p_cod_promocion BIGINT,p_nombre TEXT,p_valor NUMERIC,p_activo BOOLEAN) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE promocion SET nombre=p_nombre,valor=p_valor,activo=p_activo WHERE cod_promocion=p_cod_promocion; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_metodo_envio(p_cod_metodo BIGINT,p_nombre TEXT,p_dias_min INTEGER,p_dias_max INTEGER,p_costo NUMERIC,p_prime BOOLEAN,p_activo BOOLEAN) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE metodo_envio SET nombre=p_nombre,dias_min=p_dias_min,dias_max=p_dias_max,costo_base=p_costo,es_premium_gratis=p_prime,activo=p_activo WHERE cod_metodo_envio=p_cod_metodo; IF NOT FOUND THEN RAISE EXCEPTION 'Método de envío no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_metodo_envio_logico(p_cod_metodo BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE metodo_envio SET activo=FALSE WHERE cod_metodo_envio=p_cod_metodo; END; $$;
+CREATE OR REPLACE FUNCTION fn_resolver_alerta_stock(p_cod_alerta BIGINT,p_observacion TEXT DEFAULT NULL) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE alerta_stock SET atendida=TRUE,mensaje=COALESCE(mensaje,'')||COALESCE(' | Resuelta: '||p_observacion,'') WHERE cod_alerta=p_cod_alerta; IF NOT FOUND THEN RAISE EXCEPTION 'Alerta no encontrada'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_crear_proveedor_contacto(p_cod_proveedor BIGINT,p_nombre TEXT,p_cargo TEXT DEFAULT NULL,p_email TEXT DEFAULT NULL,p_telefono TEXT DEFAULT NULL,p_principal BOOLEAN DEFAULT FALSE) RETURNS BIGINT LANGUAGE plpgsql AS $$ DECLARE x BIGINT; BEGIN INSERT INTO proveedor_contacto(cod_proveedor,nombre,cargo,email,telefono,principal) VALUES(p_cod_proveedor,p_nombre,p_cargo,p_email,p_telefono,p_principal) RETURNING cod_contacto INTO x; RETURN x; END; $$;
+CREATE OR REPLACE FUNCTION fn_desasociar_producto_proveedor(p_cod_producto BIGINT,p_cod_proveedor BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN UPDATE producto_proveedor SET activo=FALSE WHERE cod_producto=p_cod_producto AND cod_proveedor=p_cod_proveedor; END; $$;
+CREATE OR REPLACE FUNCTION fn_validar_transicion_envio(p_actual VARCHAR,p_nuevo VARCHAR) RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN
+ IF p_actual=p_nuevo THEN RETURN; END IF;
+ IF NOT ((p_actual='CREADO' AND p_nuevo IN ('PREPARANDO','CANCELADO')) OR (p_actual='PREPARANDO' AND p_nuevo='LISTO_ENVIO') OR (p_actual='LISTO_ENVIO' AND p_nuevo='ENVIADO') OR (p_actual='ENVIADO' AND p_nuevo='EN_TRANSITO') OR (p_actual='EN_TRANSITO' AND p_nuevo IN ('CENTRO_LOCAL','EN_REPARTO')) OR (p_actual='CENTRO_LOCAL' AND p_nuevo='EN_REPARTO') OR (p_actual='EN_REPARTO' AND p_nuevo='ENTREGADO')) THEN RAISE EXCEPTION 'Transición de envío inválida: % -> %',p_actual,p_nuevo; END IF;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_programar_tracking_pedido(p_cod_pedido BIGINT) RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE e BIGINT; d INTEGER:=3; n INTEGER:=0;
+BEGIN
+ SELECT cod_envio INTO e FROM envio WHERE cod_pedido=p_cod_pedido; IF e IS NULL THEN e:=fn_generar_tracking_inicial(p_cod_pedido,NULL); END IF;
+ SELECT me.dias_max INTO d FROM envio en JOIN metodo_envio me ON me.cod_metodo_envio=en.cod_metodo_envio WHERE en.cod_envio=e; d:=COALESCE(d,3);
+ INSERT INTO tracking_evento_programado(cod_envio,cod_tipo_evento,descripcion,ubicacion,fecha_programada,orden,visible_cliente) VALUES
+ (e,'PAYMENT_CONFIRMED','Pago aprobado','Pasarela RetailPay',now(),1,TRUE),(e,'PREPARING_PACKAGE','Preparando pedido','Bodega',now()+interval '5 minutes',2,TRUE),(e,'PACKAGE_READY','Pedido listo para envío','Bodega',now()+interval '15 minutes',3,TRUE),(e,'PICKED_UP','Recogido por transportista','Centro de operación',now()+interval '30 minutes',4,TRUE),(e,'IN_TRANSIT','En tránsito','Ruta nacional',now()+interval '1 hour',5,TRUE),(e,'IN_TRANSIT','Llegó a centro local','Centro local',now()+make_interval(days=>GREATEST(d-1,1)),6,TRUE),(e,'OUT_FOR_DELIVERY','En reparto','Centro local',now()+make_interval(days=>GREATEST(d,1)),7,TRUE),(e,'DELIVERED','Entregado al cliente','Dirección de entrega',now()+make_interval(days=>GREATEST(d,1),mins=>30),8,TRUE)
+ ON CONFLICT(cod_envio,orden) DO NOTHING; GET DIAGNOSTICS n=ROW_COUNT; RETURN n;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_envio_estado(p_cod_envio BIGINT,p_estado VARCHAR,p_comentario TEXT DEFAULT NULL) RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE a TEXT; p BIGINT;
+BEGIN SELECT COALESCE(estado_envio,estado),cod_pedido INTO a,p FROM envio WHERE cod_envio=p_cod_envio FOR UPDATE; IF NOT FOUND THEN RAISE EXCEPTION 'Envío no encontrado'; END IF; PERFORM fn_validar_transicion_envio(a,p_estado); UPDATE envio SET estado=p_estado,estado_envio=p_estado,fecha_entrega=CASE WHEN p_estado='ENTREGADO' THEN now() ELSE fecha_entrega END WHERE cod_envio=p_cod_envio; END; $$;
+CREATE OR REPLACE FUNCTION fn_procesar_tracking_pendiente(p_fecha_hasta TIMESTAMPTZ DEFAULT now()) RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE r RECORD; s TEXT; n INTEGER:=0;
+BEGIN FOR r IN SELECT * FROM tracking_evento_programado WHERE procesado=FALSE AND fecha_programada<=p_fecha_hasta ORDER BY fecha_programada,cod_programacion FOR UPDATE SKIP LOCKED LOOP
+ s:=CASE r.orden WHEN 2 THEN 'PREPARANDO' WHEN 3 THEN 'LISTO_ENVIO' WHEN 4 THEN 'ENVIADO' WHEN 5 THEN 'EN_TRANSITO' WHEN 6 THEN 'CENTRO_LOCAL' WHEN 7 THEN 'EN_REPARTO' WHEN 8 THEN 'ENTREGADO' ELSE NULL END;
+ INSERT INTO tracking_evento(cod_envio,cod_tipo_evento,descripcion,ubicacion,visible_cliente,fecha_evento,orden) VALUES(r.cod_envio,r.cod_tipo_evento,r.descripcion,r.ubicacion,r.visible_cliente,r.fecha_programada,r.orden);
+ IF s IS NOT NULL THEN PERFORM fn_actualizar_envio_estado(r.cod_envio,s,r.descripcion); IF s IN ('PREPARANDO','LISTO_ENVIO','ENVIADO','EN_TRANSITO','EN_REPARTO','ENTREGADO') THEN PERFORM fn_actualizar_estado_pedido((SELECT cod_pedido FROM envio WHERE cod_envio=r.cod_envio),s,r.descripcion); END IF; END IF;
+ UPDATE tracking_evento_programado SET procesado=TRUE,fecha_procesado=now(),fecha_actualizacion=now() WHERE cod_programacion=r.cod_programacion; n:=n+1;
+ END LOOP; RETURN n; END; $$;
+CREATE OR REPLACE FUNCTION fn_registrar_carritos_abandonados(p_minutos INTEGER DEFAULT 1440) RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE n INTEGER; BEGIN INSERT INTO log_carrito_abandonado(cod_carrito,total_estimado) SELECT c.cod_carrito,fn_total_carrito(c.cod_carrito) FROM carrito c WHERE c.estado='ACTIVO' AND c.fecha_actualizacion<now()-make_interval(mins=>p_minutos) AND NOT EXISTS(SELECT 1 FROM log_carrito_abandonado l WHERE l.cod_carrito=c.cod_carrito); GET DIAGNOSTICS n=ROW_COUNT; RETURN n; END; $$;
+CREATE OR REPLACE FUNCTION fn_cancelar_pedidos_impagos_vencidos(p_minutos INTEGER DEFAULT 30) RETURNS INTEGER LANGUAGE plpgsql AS $$
+DECLARE r RECORD; n INTEGER:=0; BEGIN FOR r IN SELECT cod_pedido FROM pedido WHERE cod_estado_pedido IN ('PENDIENTE_PAGO','PAGO_AUTORIZADO') AND fecha_creacion<now()-make_interval(mins=>p_minutos) FOR UPDATE SKIP LOCKED LOOP PERFORM fn_cancelar_pedido(r.cod_pedido,'Pago no completado dentro del plazo'); n:=n+1; END LOOP; RETURN n; END; $$;
+CREATE OR REPLACE FUNCTION fn_generar_tracking_inicial(p_cod_pedido BIGINT,p_cod_metodo_envio BIGINT DEFAULT NULL) RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE e BIGINT; m BIGINT; t BIGINT; d INTEGER;
+BEGIN SELECT cod_envio INTO e FROM envio WHERE cod_pedido=p_cod_pedido; IF e IS NOT NULL THEN RETURN e; END IF; SELECT COALESCE(p_cod_metodo_envio,cod_metodo_envio,(SELECT cod_metodo_envio FROM metodo_envio WHERE activo ORDER BY costo_base LIMIT 1)) INTO m FROM pedido WHERE cod_pedido=p_cod_pedido; SELECT cod_transportista INTO t FROM transportista WHERE activo ORDER BY cod_transportista LIMIT 1; SELECT dias_max INTO d FROM metodo_envio WHERE cod_metodo_envio=m; INSERT INTO envio(cod_pedido,cod_transportista,cod_metodo_envio,numero_tracking,estado,estado_envio,fecha_estimada_entrega) VALUES(p_cod_pedido,t,m,fn_generar_numero_tracking(),'CREADO','CREADO',current_date+COALESCE(d,3)) RETURNING cod_envio INTO e; RETURN e; END; $$;
+CREATE OR REPLACE FUNCTION fn_registrar_evento_tracking(p_cod_pedido BIGINT,p_cod_tipo_evento VARCHAR,p_descripcion TEXT,p_ubicacion TEXT DEFAULT 'Centro de operación',p_visible_cliente BOOLEAN DEFAULT TRUE) RETURNS BIGINT LANGUAGE plpgsql AS $$ DECLARE e BIGINT; x BIGINT; BEGIN e:=fn_generar_tracking_inicial(p_cod_pedido,NULL); INSERT INTO tracking_evento(cod_envio,cod_tipo_evento,descripcion,ubicacion,visible_cliente,orden) VALUES(e,p_cod_tipo_evento,p_descripcion,p_ubicacion,p_visible_cliente,COALESCE((SELECT MAX(orden)+1 FROM tracking_evento WHERE cod_envio=e),1)) RETURNING cod_tracking_evento INTO x; RETURN x; END; $$;
+CREATE OR REPLACE FUNCTION fn_marcar_pedido_entregado(p_cod_pedido BIGINT,p_comentario TEXT DEFAULT 'Pedido entregado al cliente') RETURNS VOID LANGUAGE plpgsql AS $$ BEGIN PERFORM fn_actualizar_envio_estado((SELECT cod_envio FROM envio WHERE cod_pedido=p_cod_pedido),'ENTREGADO',p_comentario); PERFORM fn_actualizar_estado_pedido(p_cod_pedido,'ENTREGADO',p_comentario); END; $$;
+
+-- FASE J: relación usuario/proveedor y CRUD DB-first pendiente de Fase D.
+CREATE OR REPLACE FUNCTION fn_asociar_usuario_proveedor(p_cod_usuario BIGINT,p_cod_proveedor BIGINT) RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE v_id BIGINT;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM usuario WHERE cod_usuario=p_cod_usuario AND activo) THEN RAISE EXCEPTION 'Usuario no encontrado o inactivo'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM proveedor WHERE cod_proveedor=p_cod_proveedor AND activo) THEN RAISE EXCEPTION 'Proveedor no encontrado o inactivo'; END IF;
+  UPDATE usuario_proveedor SET activo=FALSE,fecha_actualizacion=now() WHERE cod_usuario=p_cod_usuario AND activo AND cod_proveedor<>p_cod_proveedor;
+  INSERT INTO usuario_proveedor(cod_usuario,cod_proveedor,activo) VALUES(p_cod_usuario,p_cod_proveedor,TRUE)
+  ON CONFLICT(cod_usuario,cod_proveedor) DO UPDATE SET activo=TRUE,fecha_actualizacion=now()
+  RETURNING cod_usuario_proveedor INTO v_id;
+  RETURN v_id;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_desasociar_usuario_proveedor(p_cod_usuario BIGINT,p_cod_proveedor BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE usuario_proveedor SET activo=FALSE,fecha_actualizacion=now() WHERE cod_usuario=p_cod_usuario AND cod_proveedor=p_cod_proveedor; IF NOT FOUND THEN RAISE EXCEPTION 'Asociación usuario/proveedor no encontrada'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_crear_producto_atributo(p_nombre TEXT,p_tipo_dato VARCHAR DEFAULT 'TEXT') RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE v_id BIGINT; BEGIN INSERT INTO producto_atributo(nombre,tipo_dato,activo) VALUES(trim(p_nombre),upper(COALESCE(p_tipo_dato,'TEXT')),TRUE) RETURNING cod_atributo INTO v_id; RETURN v_id; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_producto_atributo(p_cod_atributo BIGINT,p_nombre TEXT,p_tipo_dato VARCHAR,p_activo BOOLEAN DEFAULT TRUE) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE producto_atributo SET nombre=trim(p_nombre),tipo_dato=upper(p_tipo_dato),activo=p_activo WHERE cod_atributo=p_cod_atributo; IF NOT FOUND THEN RAISE EXCEPTION 'Atributo no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_producto_atributo(p_cod_atributo BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE producto_atributo SET activo=FALSE WHERE cod_atributo=p_cod_atributo; IF NOT FOUND THEN RAISE EXCEPTION 'Atributo no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_asignar_producto_atributo_valor(p_cod_producto BIGINT,p_cod_atributo BIGINT,p_valor TEXT) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+  IF NOT EXISTS(SELECT 1 FROM producto WHERE cod_producto=p_cod_producto) THEN RAISE EXCEPTION 'Producto no encontrado'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM producto_atributo WHERE cod_atributo=p_cod_atributo AND activo) THEN RAISE EXCEPTION 'Atributo no encontrado o inactivo'; END IF;
+  INSERT INTO producto_atributo_valor(cod_producto,cod_atributo,valor,activo) VALUES(p_cod_producto,p_cod_atributo,trim(p_valor),TRUE)
+  ON CONFLICT(cod_producto,cod_atributo) DO UPDATE SET valor=EXCLUDED.valor,activo=TRUE;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_desasociar_producto_atributo_valor(p_cod_producto BIGINT,p_cod_atributo BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE producto_atributo_valor SET activo=FALSE WHERE cod_producto=p_cod_producto AND cod_atributo=p_cod_atributo; IF NOT FOUND THEN RAISE EXCEPTION 'Valor técnico no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_imagen_producto(p_cod_imagen BIGINT,p_url_imagen TEXT,p_alt_text TEXT,p_orden INTEGER,p_activo BOOLEAN DEFAULT TRUE) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN
+  IF p_orden<1 THEN RAISE EXCEPTION 'El orden debe ser positivo'; END IF;
+  UPDATE producto_imagen SET url_imagen=trim(p_url_imagen),alt_text=NULLIF(trim(COALESCE(p_alt_text,'')),''),orden=p_orden,activo=p_activo WHERE cod_imagen=p_cod_imagen;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Imagen no encontrada'; END IF;
+END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_imagen_producto(p_cod_imagen BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE producto_imagen SET activo=FALSE,es_principal=FALSE WHERE cod_imagen=p_cod_imagen; IF NOT FOUND THEN RAISE EXCEPTION 'Imagen no encontrada'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_ordenar_imagen_producto(p_cod_imagen BIGINT,p_orden INTEGER,p_es_principal BOOLEAN DEFAULT FALSE) RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE p BIGINT; BEGIN IF p_orden<1 THEN RAISE EXCEPTION 'El orden debe ser positivo'; END IF; SELECT cod_producto INTO p FROM producto_imagen WHERE cod_imagen=p_cod_imagen AND activo; IF p IS NULL THEN RAISE EXCEPTION 'Imagen activa no encontrada'; END IF; IF p_es_principal THEN UPDATE producto_imagen SET es_principal=FALSE WHERE cod_producto=p; END IF; UPDATE producto_imagen SET orden=p_orden,es_principal=p_es_principal WHERE cod_imagen=p_cod_imagen; END; $$;
+CREATE OR REPLACE FUNCTION fn_crear_beneficio_membresia(p_cod_plan BIGINT,p_codigo VARCHAR,p_nombre TEXT,p_valor NUMERIC DEFAULT NULL,p_descripcion TEXT DEFAULT NULL) RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE v_id BIGINT; BEGIN IF NOT EXISTS(SELECT 1 FROM plan_membresia WHERE cod_plan=p_cod_plan AND activo) THEN RAISE EXCEPTION 'Plan no encontrado o inactivo'; END IF; INSERT INTO beneficio_membresia(cod_plan,codigo,nombre,valor,descripcion,activo) VALUES(p_cod_plan,upper(trim(p_codigo)),trim(p_nombre),p_valor,p_descripcion,TRUE) RETURNING cod_beneficio INTO v_id; RETURN v_id; END; $$;
+CREATE OR REPLACE FUNCTION fn_actualizar_beneficio_membresia(p_cod_beneficio BIGINT,p_nombre TEXT,p_valor NUMERIC,p_descripcion TEXT,p_activo BOOLEAN DEFAULT TRUE) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE beneficio_membresia SET nombre=trim(p_nombre),valor=p_valor,descripcion=p_descripcion,activo=p_activo WHERE cod_beneficio=p_cod_beneficio; IF NOT FOUND THEN RAISE EXCEPTION 'Beneficio no encontrado'; END IF; END; $$;
+CREATE OR REPLACE FUNCTION fn_desactivar_beneficio_membresia(p_cod_beneficio BIGINT) RETURNS VOID LANGUAGE plpgsql AS $$
+BEGIN UPDATE beneficio_membresia SET activo=FALSE WHERE cod_beneficio=p_cod_beneficio; IF NOT FOUND THEN RAISE EXCEPTION 'Beneficio no encontrado'; END IF; END; $$;
+
+-- Última redefinición del wrapper de disponibilidad: combina almacenes ya
+-- migrados a lotes con los que aún conservan inventario agregado.
+CREATE OR REPLACE FUNCTION fn_stock_disponible_producto(p_cod_producto BIGINT)
+RETURNS INTEGER LANGUAGE sql STABLE AS $$
+    SELECT (
+        COALESCE((SELECT SUM(cantidad_disponible-cantidad_reservada) FROM lote_inventario
+                  WHERE cod_producto=p_cod_producto AND estado='ACTIVO'),0)
+        + COALESCE((SELECT SUM(i.stock_total-i.stock_reservado) FROM inventario i
+                    WHERE i.cod_producto=p_cod_producto
+                      AND NOT EXISTS (SELECT 1 FROM lote_inventario l
+                                      WHERE l.cod_producto=i.cod_producto AND l.cod_almacen=i.cod_almacen)),0)
+    )::INTEGER;
+$$;

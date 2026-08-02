@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.operaciones.models import CuentaSimulada, Factura, MetodoEnvio, MetodoPago, Notificacion, Pedido, SoporteTicket, TransaccionPago
+from apps.operaciones.models import CuentaSimulada, Envio, Factura, MetodoEnvio, MetodoPago, Notificacion, Pedido, SoporteTicket, TransaccionPago
 from apps.operaciones.services.notificacion_service import marcar_notificacion_leida
 from apps.operaciones.services.pago_service import (
     autorizar_pago_simulado,
@@ -118,7 +118,10 @@ def api_facturas(request):
                 "numero_factura": f.numero_factura,
                 "numero_pedido": f.cod_pedido.numero_pedido,
                 "subtotal": _money(f.subtotal),
+                "descuento": _money(f.descuento),
                 "impuesto": _money(f.impuesto),
+                "tasa_impuesto": _money(f.tasa_impuesto),
+                "costo_envio": _money(f.costo_envio),
                 "total": _money(f.total),
                 "estado": f.estado,
                 "fecha_emision": _dt(f.fecha_emision),
@@ -163,6 +166,7 @@ def api_registrar_metodo_pago(request):
 
 
 @login_required(login_url="/login/")
+@sensitive_post_parameters("idempotency_key")
 @require_POST
 def api_autorizar_pago(request):
     try:
@@ -181,7 +185,9 @@ def api_autorizar_pago(request):
         if not metodo_ok:
             return _json_error("Método de pago inválido para este usuario.", status=403)
 
-        idem = request.POST.get("idempotency_key") or str(uuid.uuid4())
+        idem = (request.POST.get("idempotency_key") or "").strip()
+        if not idem or len(idem) > 120:
+            return _json_error("Debes enviar idempotency_key para autorizar el pago.", status=400)
         cod_transaccion = autorizar_pago_simulado(cod_pedido, cod_metodo_pago, idem)
         tx = TransaccionPago.objects.filter(cod_transaccion=cod_transaccion, cod_pedido__cod_usuario=request.user).first()
         if not tx:
@@ -203,11 +209,24 @@ def api_capturar_pago(request):
         tx = get_object_or_404(TransaccionPago, cod_transaccion=cod_transaccion, cod_pedido__cod_usuario=request.user)
         capturar_pago_simulado(tx.cod_transaccion)
         factura = Factura.objects.filter(cod_pedido=tx.cod_pedido).first()
+        envio = Envio.objects.filter(cod_pedido=tx.cod_pedido).first()
         return _json_ok(
             mensaje="Pago capturado. Pedido confirmado.",
             cod_pedido=tx.cod_pedido_id,
             numero_pedido=tx.cod_pedido.numero_pedido,
             numero_factura=factura.numero_factura if factura else None,
+            factura={
+                "numero_factura": factura.numero_factura,
+                "subtotal": _money(factura.subtotal),
+                "descuento": _money(factura.descuento),
+                "impuesto": _money(factura.impuesto),
+                "costo_envio": _money(factura.costo_envio),
+                "total": _money(factura.total),
+            } if factura else None,
+            tracking={
+                "numero_tracking": envio.numero_tracking,
+                "estado": envio.estado_envio or envio.estado,
+            } if envio else None,
         )
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)

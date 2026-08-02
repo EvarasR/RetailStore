@@ -1,0 +1,6 @@
+{% extends 'core/base.html' %}
+{% block title %}Carrito | TechTail{% endblock %}
+{% block page %}carrito{% endblock %}
+{% block content %}
+<main class="tt-page tt-cart-page"><nav class="tt-breadcrumb"><a href="{% url 'clientes:inicio' %}">Inicio</a><span>›</span><strong>Carrito</strong></nav><div class="tt-cart-layout"><section><header class="tt-section-heading"><div><p class="tt-eyebrow">Tu selección</p><h1>Carrito de compra</h1></div><a href="{% url 'clientes:catalogo' %}">Seguir comprando</a></header><div id="tt-cart-items" class="tt-cart-items"></div></section><aside class="tt-order-summary"><p class="tt-eyebrow">Resumen</p><h2>Subtotal del pedido</h2><div id="tt-cart-summary"></div><button id="tt-cart-checkout" class="tt-primary-button">Continuar al checkout</button><p class="tt-small-note">Los impuestos, descuentos y envío se calculan definitivamente en PostgreSQL durante checkout.</p></aside></div></main>
+{% endblock %}

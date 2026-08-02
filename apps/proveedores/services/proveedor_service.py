@@ -143,3 +143,33 @@ def cancelar_orden_abastecimiento(cod_orden_abastecimiento, motivo="Orden cancel
         [cod_orden_abastecimiento, motivo],
         ["BIGINT", "TEXT"],
     )
+
+
+def crear_contacto_proveedor(cod_proveedor, nombre, cargo=None, email=None, telefono=None, principal=False):
+    return ejecutar_funcion_scalar(
+        "fn_crear_proveedor_contacto",
+        [cod_proveedor, nombre, cargo, email, telefono, principal],
+        ["BIGINT", "TEXT", "TEXT", "TEXT", "TEXT", "BOOLEAN"],
+        usar_transaccion=True,
+    )
+
+
+def desasociar_producto_proveedor(cod_producto, cod_proveedor):
+    return ejecutar_funcion_void(
+        "fn_desasociar_producto_proveedor",
+        [cod_producto, cod_proveedor],
+        ["BIGINT", "BIGINT"],
+        usar_transaccion=True,
+    )
+
+
+def asociar_usuario_proveedor(cod_usuario, cod_proveedor):
+    return ejecutar_funcion_scalar(
+        "fn_asociar_usuario_proveedor", [cod_usuario, cod_proveedor], ["BIGINT", "BIGINT"], usar_transaccion=True
+    )
+
+
+def desasociar_usuario_proveedor(cod_usuario, cod_proveedor):
+    return ejecutar_funcion_void(
+        "fn_desasociar_usuario_proveedor", [cod_usuario, cod_proveedor], ["BIGINT", "BIGINT"], usar_transaccion=True
+    )

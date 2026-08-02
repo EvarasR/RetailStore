@@ -4,12 +4,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Comprar Prime | Retail Prime</title>
+  <title>Retail Prime | Membresías</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
 </head>
 <body data-page="checkout-prime" data-plan-id="{{ plan.cod_plan }}">
 <header class="rp-topbar">
-  <a class="rp-brand" href="/"><span class="rp-brand-mark">RP</span><span>Retail Prime</span></a>
+  <a class="rp-brand" href="/"><img class="rp-brand-logo" src="{% static 'retail/img/brand/retail-prime-logo.svg' %}" alt="Retail Prime"><span>Retail Prime</span></a>
   <nav class="rp-actions">
     <a class="rp-icon-btn" href="/">Tienda</a>
     <a class="rp-icon-btn" href="{% url 'core:perfil' %}">Mi cuenta</a>
