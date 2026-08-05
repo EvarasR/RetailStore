@@ -1,7 +1,11 @@
 .venv/
+venv/
+entorno/
 __pycache__/
 *.pyc
 .env
+.env.*
+*.env
 db.sqlite3
 media/*
 !media/productos/
@@ -10,4 +14,9 @@ media/*
 !media/productos/**/*.pdf
 staticfiles/
 .vscode/
-entorno/
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+Thumbs.db
+.pytest_cache/
+.ruff_cache/
