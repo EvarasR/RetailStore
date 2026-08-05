@@ -586,3 +586,25 @@ CREATE TRIGGER trg_programar_tracking_pago
 AFTER INSERT OR UPDATE OF cod_estado_pago ON transaccion_pago
 FOR EACH ROW EXECUTE FUNCTION fn_trg_programar_tracking_pago();
 COMMIT;
+
+-- TECHTAIL: redefinición final de marca sin eliminar el historial SQL.
+CREATE OR REPLACE FUNCTION fn_trg_usuario_bienvenida()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    PERFORM fn_crear_notificacion(
+        NEW.cod_usuario,
+        'BIENVENIDA',
+        'Bienvenido a TechTail',
+        'Tu cuenta fue creada correctamente. Ya puedes explorar el catálogo.'
+    );
+    PERFORM fn_encolar_email(
+        NEW.cod_usuario,
+        NEW.email,
+        'Bienvenido a TechTail',
+        'Hola ' || NEW.nombres || ', tu cuenta fue creada correctamente en TechTail.'
+    );
+    RETURN NEW;
+END;
+$$;

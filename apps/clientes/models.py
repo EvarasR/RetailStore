@@ -1,5 +1,5 @@
 # Modelos Django mapeados desde una base PostgreSQL existente.
-# Proyecto: Retail Prime
+# Proyecto: TechTail
 # Importante:
 # - No renombrar db_table ni db_column.
 # - managed = False porque la estructura la controlan los archivos SQL.

@@ -1,46 +1,21 @@
-{% load static %}
-<!doctype html>
-<html lang="es" data-theme="light">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crear cuenta | TechTail</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
-</head>
-<body data-page="login">
-  <main class="rp-auth-shell">
-    <form class="rp-auth-card rp-register-card" method="post" autocomplete="off">
-      {% csrf_token %}
-      <a class="rp-brand rp-auth-brand" href="/"><img class="rp-brand-logo" src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>TechTail</span></a>
-      <p class="rp-kicker">Cuenta cliente</p>
-      <h1>Crear cuenta</h1>
-      <p class="rp-muted">Regístrate para comprar, guardar direcciones, métodos de pago simulados, facturación y tracking.</p>
-      {% if messages %}
-        {% for message in messages %}<div class="rp-alert">{{ message }}</div>{% endfor %}
-      {% endif %}
-      <div class="rp-form-row">
-        <div><label>Nombres</label><input name="nombres" required maxlength="120" placeholder="Ana"></div>
-        <div><label>Apellidos</label><input name="apellidos" required maxlength="120" placeholder="Mendoza"></div>
-      </div>
-      <label>Correo</label>
-      <input name="email" type="email" required maxlength="180" placeholder="cliente@example.com">
-      <div class="rp-form-row">
-        <div><label>Teléfono</label><input name="telefono" maxlength="30" placeholder="0999999999"></div>
-        <div><label>Documento</label><input name="documento_identidad" maxlength="40" placeholder="Opcional"></div>
-      </div>
-      <label>Contraseña</label>
-      <input name="password" type="password" required minlength="8" placeholder="Mínimo 8 caracteres">
-      <label>Repetir contraseña</label>
-      <input name="password2" type="password" required minlength="8" placeholder="Repite la contraseña">
-      <label class="rp-check"><input name="acepta" type="checkbox" required> Acepto las condiciones de uso académico y la política simulada de Retail Prime.</label>
-      <button class="rp-primary" type="submit">Crear cuenta</button>
-      <a class="rp-link" href="{% url 'core:login' %}">Ya tengo cuenta</a>
-      <a class="rp-link" href="/">Volver a la tienda</a>
-    </form>
-  </main>
-  <script src="{% static 'retail/js/retail.js' %}"></script>
-</body>
-</html>
+{% extends 'core/base_auth.html' %}
+{% block title %}TechTail | Registro{% endblock %}
+{% block story_title %}Crea tu cuenta y equipa tu próxima gran idea.{% endblock %}
+{% block story_copy %}Guarda direcciones, métodos simulados de pago, favoritos y todas las compras de tu operación.{% endblock %}
+{% block form_content %}
+<form class="rp-auth-form rp-register-form" method="post" autocomplete="off">
+  {% csrf_token %}
+  <p class="rp-kicker">Cuenta cliente</p>
+  <h2>Únete a TechTail</h2>
+  <p class="rp-auth-intro">Tu centro de compras, entregas y soporte tecnológico empieza aquí.</p>
+  {% if messages %}{% for message in messages %}<div class="rp-alert">{{ message }}</div>{% endfor %}{% endif %}
+  <div class="rp-form-row"><label>Nombres<input name="nombres" required maxlength="120" autocomplete="given-name" placeholder="Ana"></label><label>Apellidos<input name="apellidos" required maxlength="120" autocomplete="family-name" placeholder="Mendoza"></label></div>
+  <label>Correo electrónico<input name="email" type="email" required maxlength="180" autocomplete="email" placeholder="ana@empresa.com"></label>
+  <div class="rp-form-row"><label>Teléfono<input name="telefono" maxlength="30" autocomplete="tel" placeholder="099 999 9999"></label><label>Documento <small>opcional</small><input name="documento_identidad" maxlength="40" placeholder="Cédula o RUC"></label></div>
+  <div class="rp-form-row"><label>Contraseña<input name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label><label>Repetir contraseña<input name="password2" type="password" required minlength="8" autocomplete="new-password" placeholder="Repite tu contraseña"></label></div>
+  <label class="rp-check"><input name="acepta" type="checkbox" required> Acepto las condiciones académicas y la política simulada de TechTail.</label>
+  <button class="rp-primary rp-auth-submit" type="submit">Crear mi cuenta <span>→</span></button>
+  <p class="rp-auth-switch">¿Ya tienes cuenta? <a href="{% url 'core:login' %}">Inicia sesión</a></p>
+  <a class="rp-auth-back" href="/">← Volver a la tienda</a>
+</form>
+{% endblock %}

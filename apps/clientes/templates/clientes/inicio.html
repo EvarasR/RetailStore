@@ -1,30 +1,70 @@
 {% extends 'core/base.html' %}
 {% load static %}
-{% block title %}Retail Prime | Inicio{% endblock %}
+{% block title %}TechTail | Inicio{% endblock %}
 {% block page %}inicio{% endblock %}
 {% block content %}
-<main id="top">
-  <section class="tt-hero">
-    <div class="tt-hero-content">
-      <p class="tt-eyebrow">Retail Prime · Infraestructura lista para crecer</p>
-      <h1>Tecnología profesional para cada conexión crítica.</h1>
-      <p>Redes, ciberseguridad, servidores, energía, videovigilancia y periféricos técnicos en un solo lugar.</p>
-      <div class="tt-hero-actions"><a class="tt-primary-button" href="{% url 'clientes:catalogo' %}">Explorar catálogo</a><a class="tt-secondary-button" href="#prime">Conoce Retail Prime</a></div>
-      <ul class="tt-hero-trust"><li>Stock validado</li><li>Pago simulado seguro</li><li>Tracking persistente</li></ul>
+<main>
+  <section class="rp-hero-slider" data-hero-slider aria-label="Promociones TechTail">
+    <div class="rp-hero-track">
+      <article class="rp-hero-slide is-active">
+        <img src="{% static 'retail/img/banners/techtail-main-banner.svg' %}" alt="Ecosistema tecnológico TechTail">
+        <div class="rp-hero-copy"><p>TechTail · Tecnología empresarial</p><h1>La infraestructura correcta transforma todo.</h1><span>Redes, seguridad, energía y cómputo con una experiencia de compra profesional.</span><div><a href="{% url 'clientes:catalogo' %}" class="rp-hero-primary">Explorar catálogo</a><a href="#prime" class="rp-hero-secondary">Conocer Prime</a></div></div>
+      </article>
+      <article class="rp-hero-slide">
+        <img src="{% static 'retail/img/banners/banner-seguridad.svg' %}" alt="Soluciones de ciberseguridad">
+        <div class="rp-hero-copy"><p>Seguridad de extremo a extremo</p><h2>Protege cada conexión crítica.</h2><span>Firewalls, videovigilancia IP y continuidad para operaciones exigentes.</span><div><a href="{% url 'clientes:catalogo' %}?q=seguridad" class="rp-hero-primary">Ver seguridad</a></div></div>
+      </article>
+      <article class="rp-hero-slide">
+        <img src="{% static 'retail/img/banners/banner-servidores.svg' %}" alt="Servidores y almacenamiento">
+        <div class="rp-hero-copy"><p>Potencia para crecer</p><h2>Servidores y storage sin límites.</h2><span>Construye una plataforma estable, escalable y preparada para tu negocio.</span><div><a href="{% url 'clientes:catalogo' %}?q=servidor" class="rp-hero-primary">Ver infraestructura</a></div></div>
+      </article>
     </div>
-    <div class="tt-hero-visual" aria-label="Soluciones de infraestructura tecnológica"><img class="rp-main-banner-asset" src="{% static 'retail/img/banners/retail-prime-main-banner.svg' %}" alt="Retail Prime: tecnología, redes y seguridad"><div class="tt-network-orb tt-orb-one"></div><div class="tt-network-orb tt-orb-two"></div><div class="tt-hero-device"><span>RETAIL PRIME</span><strong>NETWORK<br>CORE</strong><i></i><i></i><i></i><i></i></div><div class="tt-hero-stat"><strong>∞</strong><span>posibilidades para tu infraestructura</span></div></div>
+    <button class="rp-hero-arrow is-prev" type="button" data-hero-prev aria-label="Banner anterior">‹</button>
+    <button class="rp-hero-arrow is-next" type="button" data-hero-next aria-label="Banner siguiente">›</button>
+    <div class="rp-hero-dots" data-hero-dots></div>
   </section>
 
-  <section class="tt-page tt-home-section"><div class="tt-section-heading"><div><p class="tt-eyebrow">Compra por categoría</p><h2>Todo lo que tu operación necesita</h2></div><a href="{% url 'clientes:catalogo' %}">Ver catálogo completo</a></div><div id="tt-home-categories" class="tt-category-grid"></div></section>
+  <section class="rp-service-ribbon" aria-label="Beneficios de compra">
+    <article><span>▣</span><div><strong>Compra protegida</strong><small>TechTail Pay Secure</small></div></article>
+    <article><span>⌖</span><div><strong>Tracking en vivo</strong><small>Eventos persistentes</small></div></article>
+    <article><span>↻</span><div><strong>Soporte experto</strong><small>Decisiones compatibles</small></div></article>
+    <article><span>✦</span><div><strong>TechTail</strong><small>Beneficios elegibles</small></div></article>
+  </section>
 
-  <section class="tt-page tt-home-section"><div class="tt-section-heading"><div><p class="tt-eyebrow">Selección Retail Prime</p><h2>Ofertas destacadas en tecnología</h2></div><a href="{% url 'clientes:catalogo' %}">Ver más productos</a></div><div id="tt-featured-products" class="tt-product-grid"></div></section>
+  <section class="rp-page rp-home-section">
+    <header class="rp-section-heading"><div><p class="rp-kicker">Explora por solución</p><h2>Categorías para cada proyecto</h2><span>Encuentra rápido lo que tu infraestructura necesita.</span></div><a href="{% url 'clientes:catalogo' %}">Ver todo →</a></header>
+    <div class="rp-carousel" data-carousel>
+      <button class="rp-carousel-btn is-prev" type="button" data-carousel-prev aria-label="Categorías anteriores">‹</button>
+      <div id="tt-home-categories" class="rp-carousel-track rp-category-strip"></div>
+      <button class="rp-carousel-btn is-next" type="button" data-carousel-next aria-label="Categorías siguientes">›</button>
+    </div>
+  </section>
 
-  <section class="tt-page tt-home-section"><div class="tt-promo-grid"><article class="tt-promo-card tt-promo-network"><p>Soluciones integradas</p><h2>Arma tu red empresarial</h2><span>Switches, access points, seguridad y administración.</span><a href="{% url 'clientes:catalogo' %}?q=redes">Explorar redes →</a></article><article class="tt-promo-card tt-promo-security"><p>Protección inteligente</p><h2>Cuida tu infraestructura</h2><span>Videovigilancia IP, UPS y seguridad de red.</span><a href="{% url 'clientes:catalogo' %}?q=seguridad">Ver seguridad →</a></article><article class="tt-promo-card tt-promo-rack"><p>Espacios eficientes</p><h2>Organiza tu rack</h2><span>Cableado, herramientas y accesorios profesionales.</span><a href="{% url 'clientes:catalogo' %}?q=cableado">Ver cableado →</a></article></div></section>
+  <section class="rp-page rp-home-section">
+    <header class="rp-section-heading"><div><p class="rp-kicker">Selección TechTail</p><h2>Tecnología destacada</h2><span>Equipos publicados con precio y disponibilidad servidos por el backend.</span></div><a href="{% url 'clientes:catalogo' %}">Ver catálogo →</a></header>
+    <div class="rp-carousel" data-carousel>
+      <button class="rp-carousel-btn is-prev" type="button" data-carousel-prev aria-label="Productos anteriores">‹</button>
+      <div id="tt-featured-products" class="rp-carousel-track rp-product-strip"></div>
+      <button class="rp-carousel-btn is-next" type="button" data-carousel-next aria-label="Productos siguientes">›</button>
+    </div>
+  </section>
 
-  <section class="tt-page tt-home-section"><div class="tt-section-heading"><div><p class="tt-eyebrow">Compra con criterio</p><h2>Encuentra la solución adecuada</h2></div></div><div class="tt-solution-grid"><article><span>01</span><h3>Mejora tu WiFi</h3><p>Equipos para conectividad estable, escalable y segura.</p><a href="{% url 'clientes:catalogo' %}?q=wifi">Explorar</a></article><article><span>02</span><h3>Equipa tu empresa</h3><p>Servidores, almacenamiento y dispositivos para crecer.</p><a href="{% url 'clientes:catalogo' %}?q=servidor">Explorar</a></article><article><span>03</span><h3>Protege tus activos</h3><p>Continuidad eléctrica, cámaras IP y seguridad perimetral.</p><a href="{% url 'clientes:catalogo' %}?q=ups">Explorar</a></article><article><span>04</span><h3>Optimiza tu puesto</h3><p>Periféricos confiables para equipos técnicos de alto rendimiento.</p><a href="{% url 'clientes:catalogo' %}?q=periféricos">Explorar</a></article></div></section>
+  <section class="rp-page rp-campaign-grid">
+    <a href="{% url 'clientes:catalogo' %}?q=redes"><img src="{% static 'retail/img/banners/banner-redes.svg' %}" alt="Redes empresariales"><span><small>Conectividad sin pausas</small><strong>Redes empresariales</strong><b>Explorar →</b></span></a>
+    <a href="{% url 'clientes:catalogo' %}?q=cableado"><img src="{% static 'retail/img/banners/banner-cableado.svg' %}" alt="Cableado estructurado"><span><small>Orden que se nota</small><strong>Cableado estructurado</strong><b>Explorar →</b></span></a>
+    <a href="{% url 'clientes:catalogo' %}?q=ups"><img src="{% static 'retail/img/banners/banner-ups.svg' %}" alt="UPS y energía"><span><small>Continuidad operativa</small><strong>UPS y energía</strong><b>Explorar →</b></span></a>
+    <a href="{% url 'clientes:catalogo' %}?q=cámara"><img src="{% static 'retail/img/banners/banner-videovigilancia.svg' %}" alt="Videovigilancia IP"><span><small>Visibilidad inteligente</small><strong>Videovigilancia IP</strong><b>Explorar →</b></span></a>
+  </section>
 
-  <section id="prime" class="tt-prime-section"><div class="tt-page"><div class="tt-prime-heading"><div><p class="tt-eyebrow">Retail Prime</p><h2>Más valor para operaciones que no pueden detenerse.</h2><p>Beneficios comerciales aplicables solo cuando las reglas reales de stock, pago y envío lo permiten.</p></div><span class="tt-prime-symbol">✦</span></div><div id="tt-prime-plans" class="tt-membership-grid"><div class="tt-membership-loading">Cargando planes disponibles…</div></div><p class="tt-prime-disclaimer">Prime no elimina límites retail, no crea stock y no omite la validación de pago.</p></div></section>
+  <section class="rp-page rp-buying-guides">
+    <header class="rp-section-heading"><div><p class="rp-kicker">Compra con criterio</p><h2>Una solución para cada reto</h2></div></header>
+    <div><article><span>01</span><h3>Mejora tu WiFi</h3><p>Conectividad estable y escalable para equipos distribuidos.</p><a href="{% url 'clientes:catalogo' %}?q=wifi">Ver soluciones</a></article><article><span>02</span><h3>Protege tus activos</h3><p>Seguridad perimetral, energía y vigilancia para tu operación.</p><a href="{% url 'clientes:catalogo' %}?q=seguridad">Ver soluciones</a></article><article><span>03</span><h3>Escala tu cómputo</h3><p>Servidores, NAS, discos y periféricos de alto desempeño.</p><a href="{% url 'clientes:catalogo' %}?q=servidor">Ver soluciones</a></article></div>
+  </section>
 
-  {% if user.is_authenticated %}<section class="tt-page tt-home-section"><div class="tt-account-strip"><div><p class="tt-eyebrow">Tu cuenta Retail Prime</p><h2>Continúa donde lo dejaste</h2><p>{% if user.is_staff %}Administra el negocio desde tu panel o explora el catálogo como cliente.{% else %}Consulta pedidos, facturas, direcciones y beneficios desde tu cuenta.{% endif %}</p></div><div><a class="tt-secondary-button" href="{% url 'core:perfil' %}">Ir a mi cuenta</a><a class="tt-primary-button" href="{% url 'clientes:pedidos' %}">Ver mis pedidos</a></div></div></section>{% endif %}
+  <section id="prime" class="rp-prime-zone">
+    <div class="rp-page"><header><div><p class="rp-kicker">TechTail</p><h2>Más velocidad. Más valor. Menos fricción.</h2><p>Beneficios que se aplican solo cuando stock, pago y envío cumplen las reglas reales del pedido.</p></div><span>✦</span></header><div id="tt-prime-plans" class="tt-membership-grid"><div class="tt-membership-loading">Cargando planes disponibles…</div></div><small>Prime no crea inventario, no modifica límites retail y no omite validaciones de pago.</small></div>
+  </section>
+
+  {% if user.is_authenticated %}<section class="rp-page rp-account-cta"><div><p class="rp-kicker">Tu cuenta TechTail</p><h2>Todo listo para continuar.</h2><p>Revisa pedidos, facturas, direcciones y beneficios en tu centro de cuenta.</p></div><div><a href="{% url 'core:perfil' %}">Ir a mi cuenta</a><a href="{% url 'clientes:pedidos' %}">Ver pedidos →</a></div></section>{% endif %}
 </main>
 {% endblock %}

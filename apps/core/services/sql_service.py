@@ -1,5 +1,5 @@
 """
-Servicios base para ejecutar funciones PostgreSQL del proyecto Retail Prime.
+Servicios base para ejecutar funciones PostgreSQL del proyecto TechTail.
 
 Regla del proyecto:
 - La lógica crítica vive en PostgreSQL.

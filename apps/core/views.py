@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -12,11 +12,14 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.core.models import Canton, DireccionUsuario, PerfilUsuario, Provincia
+from apps.core.models import Canton, DireccionUsuario, PerfilUsuario, Provincia, UsuarioRol
 from apps.core.services.usuario_service import (
+    actualizar_direccion_usuario,
+    cambiar_password_usuario,
     crear_direccion_usuario,
     crear_usuario_cliente,
     eliminar_direccion_usuario,
+    verificar_email_usuario,
 )
 
 
@@ -40,8 +43,16 @@ def _is_admin(user):
     return user.is_authenticated and getattr(user, "is_staff", False)
 
 
+def _roles_usuario(user):
+    if not user.is_authenticated:
+        return set()
+    return set(UsuarioRol.objects.filter(cod_usuario=user, cod_rol__activo=True).values_list("cod_rol__nombre", flat=True))
+
+
 def _destino_por_rol(user):
     if _is_admin(user):
+        return "administracion:panel"
+    if _roles_usuario(user).intersection({"WAREHOUSE_MANAGER", "SUPPLIER_MANAGER", "SUPPORT"}):
         return "administracion:panel"
     # El portal proveedor sólo se habilita con la relación explícita vigente.
     try:
@@ -67,7 +78,7 @@ def _redirect_seguro_por_rol(request, user, next_url=None):
     path = urlparse(next_url).path or "/"
     es_ruta_admin = path.startswith("/panel/") or path == "/panel/" or path.startswith("/admin/")
 
-    if _is_admin(user):
+    if _is_admin(user) or _roles_usuario(user).intersection({"WAREHOUSE_MANAGER", "SUPPLIER_MANAGER", "SUPPORT"}):
         return redirect(next_url if es_ruta_admin else destino_rol)
 
     if es_ruta_admin:
@@ -140,7 +151,7 @@ def registro_view(request):
                 user = authenticate(request, username=email, password=password)
                 if user is not None:
                     login(request, user)
-                    messages.success(request, "Cuenta creada correctamente. Bienvenido a Retail Prime.")
+                    messages.success(request, "Cuenta creada correctamente. Bienvenido a TechTail.")
                     return redirect("clientes:inicio")
                 messages.success(request, "Cuenta creada. Ahora inicia sesión.")
                 return redirect("core:login")
@@ -165,10 +176,24 @@ def perfil_view(request):
 
 @require_GET
 @ensure_csrf_cookie
-def api_session(request):
+def api_csrf(request):
+    return _json_ok(mensaje="Cookie CSRF establecida correctamente.")
+
+
+def _build_session_response(request, mensaje=None):
     user = request.user
     if not user.is_authenticated:
-        return _json_ok(autenticado=False, usuario=None, es_admin=False, es_prime=False)
+        data = {
+            "ok": True,
+            "autenticado": False,
+            "usuario": None,
+            "es_admin": False,
+            "es_prime": False,
+            "roles": [],
+        }
+        if mensaje:
+            data["mensaje"] = mensaje
+        return _json_ok(**data)
 
     es_prime = False
     try:
@@ -177,17 +202,121 @@ def api_session(request):
     except Exception:
         es_prime = False
 
+    usuario_data = {
+        "id": user.cod_usuario,
+        "cod_usuario": user.cod_usuario,
+        "email": user.email,
+        "nombre": user.get_full_name() or user.nombres or user.email,
+        "nombres": user.nombres,
+        "apellidos": user.apellidos,
+        "nombre_completo": user.get_full_name(),
+    }
+    data = {
+        "ok": True,
+        "autenticado": True,
+        "es_admin": _is_admin(user),
+        "es_prime": es_prime,
+        "roles": sorted(_roles_usuario(user)),
+        "usuario": usuario_data,
+    }
+    if mensaje:
+        data["mensaje"] = mensaje
+    return _json_ok(**data)
+
+
+@require_GET
+@ensure_csrf_cookie
+def api_session(request):
+    return _build_session_response(request)
+
+
+def _get_request_data(request):
+    import json
+    if request.content_type and "application/json" in request.content_type:
+        try:
+            return json.loads(request.body.decode("utf-8"))
+        except Exception:
+            return {}
+    if request.POST:
+        return request.POST
+    return {}
+
+
+@require_POST
+@ensure_csrf_cookie
+@sensitive_post_parameters("password", "contraseña", "clave")
+def api_auth_login(request):
+    data = _get_request_data(request)
+    email = (
+        data.get("email")
+        or data.get("correo")
+        or data.get("username")
+        or data.get("usuario")
+        or ""
+    ).strip().lower()
+    password = (
+        data.get("password")
+        or data.get("contraseña")
+        or data.get("clave")
+        or ""
+    )
+    if not email or not password:
+        return _json_error("Credenciales incorrectas", status=401)
+    try:
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            user = authenticate(request, email=email, password=password)
+    except Exception:
+        user = None
+    if user is not None:
+        login(request, user)
+        return _build_session_response(request, mensaje="Sesión iniciada correctamente")
+    return _json_error("Credenciales incorrectas", status=401)
+
+
+@require_POST
+@ensure_csrf_cookie
+@sensitive_post_parameters("password", "password2")
+def api_auth_registro(request):
+    data = _get_request_data(request)
+    email = (data.get("email") or "").strip().lower()
+    nombres = (data.get("nombres") or "").strip()
+    apellidos = (data.get("apellidos") or "").strip()
+    telefono = (data.get("telefono") or "").strip() or None
+    documento = (data.get("documento_identidad") or "").strip() or None
+    password = data.get("password") or ""
+    password2 = data.get("password2") or ""
+    acepta = data.get("acepta") in (True, "true", "on", 1, "1")
+
+    if not acepta:
+        return _json_error("Debes aceptar las condiciones de uso.", status=400)
+    if password != password2:
+        return _json_error("Las contraseñas no coinciden.", status=400)
+    if len(password) < 8:
+        return _json_error("La contraseña debe tener al menos 8 caracteres.", status=400)
+    try:
+        crear_usuario_cliente(email, password, nombres, apellidos, telefono, documento)
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
+        return _build_session_response(request, mensaje="Cuenta creada e iniciada correctamente")
+    except Exception as exc:
+        return _json_error(_safe_error(exc, "No se pudo crear la cuenta."), status=400)
+
+
+@require_POST
+@ensure_csrf_cookie
+def api_auth_logout(request):
+    logout(request)
     return _json_ok(
-        autenticado=True,
-        es_admin=_is_admin(user),
-        es_prime=es_prime,
-        usuario={
-            "cod_usuario": user.cod_usuario,
-            "email": user.email,
-            "nombres": user.nombres,
-            "apellidos": user.apellidos,
-            "nombre_completo": user.get_full_name(),
-        },
+        mensaje="Sesión cerrada correctamente.",
+        autenticado=False,
+        usuario=None,
+        es_admin=False,
+        es_prime=False,
+        roles=[],
     )
 
 
@@ -353,5 +482,67 @@ def api_eliminar_direccion(request, cod_direccion):
     try:
         eliminar_direccion_usuario(cod_direccion)
         return _json_ok(mensaje="Dirección eliminada.")
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_actualizar_direccion(request, cod_direccion):
+    direccion = DireccionUsuario.objects.filter(cod_direccion=cod_direccion, cod_usuario=request.user, activo=True).first()
+    if not direccion:
+        return _json_error("DirecciÃ³n no encontrada.", status=404)
+    try:
+        provincia, ciudad = _resolver_ubicacion_desde_post(request)
+        actualizar_direccion_usuario(
+            cod_direccion,
+            request.POST.get("alias") or direccion.alias,
+            request.POST.get("receptor") or direccion.receptor,
+            request.POST.get("linea1") or direccion.linea1,
+            request.POST.get("linea2") if "linea2" in request.POST else direccion.linea2,
+            ciudad, provincia, request.POST.get("pais") or direccion.pais,
+            request.POST.get("codigo_postal") if "codigo_postal" in request.POST else direccion.codigo_postal,
+            request.POST.get("telefono_contacto") if "telefono_contacto" in request.POST else direccion.telefono_contacto,
+            request.POST.get("es_predeterminada") in ("true", "on", "1"),
+        )
+        return _json_ok(mensaje="DirecciÃ³n actualizada.")
+    except ValueError as exc:
+        return _json_error(str(exc), status=400)
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@sensitive_post_parameters("password_actual", "password_nueva", "password_confirmacion")
+@require_POST
+def api_cambiar_password(request):
+    actual = request.POST.get("password_actual") or ""
+    nueva = request.POST.get("password_nueva") or ""
+    confirmacion = request.POST.get("password_confirmacion") or ""
+    if not request.user.check_password(actual):
+        return _json_error("La contraseÃ±a actual no es correcta.", status=400)
+    if len(nueva) < 8:
+        return _json_error("La nueva contraseÃ±a debe tener al menos 8 caracteres.", status=400)
+    if nueva != confirmacion:
+        return _json_error("La confirmaciÃ³n no coincide.", status=400)
+    try:
+        cambiar_password_usuario(request.user.pk, nueva)
+        request.user.refresh_from_db(fields=["password"])
+        update_session_auth_hash(request, request.user)
+        return _json_ok(mensaje="ContraseÃ±a actualizada de forma segura.")
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_verificar_email(request):
+    if request.user.email_verificado:
+        return _json_ok(mensaje="Tu correo ya estÃ¡ verificado.")
+    if request.POST.get("confirmar") not in ("1", "true", "on"):
+        return _json_error("Confirma la verificaciÃ³n del correo.", status=400)
+    try:
+        verificar_email_usuario(request.user.pk)
+        return _json_ok(mensaje="Correo verificado para este entorno de demostraciÃ³n.")
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)

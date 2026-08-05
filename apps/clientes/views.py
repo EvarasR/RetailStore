@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -28,7 +29,10 @@ from apps.clientes.models import (
     Carrito,
     CarritoDetalle,
     BeneficioMembresia,
+    CompraRecurrente,
+    CompraRecurrenteDetalle,
     MembresiaUsuario,
+    PagoMembresia,
     PlanMembresia,
     ProductoFavorito,
     ProductoPregunta,
@@ -50,12 +54,18 @@ from apps.clientes.services.checkout_service import (
     crear_pedido_desde_carrito,
     solicitar_devolucion_total,
 )
-from apps.clientes.services.membresia_service import activar_membresia_usuario
-from apps.clientes.services.producto_service import registrar_pregunta_producto
+from apps.clientes.services.membresia_service import activar_membresia_usuario, cancelar_membresia_usuario
+from apps.clientes.services.producto_service import crear_resena_producto, registrar_pregunta_producto
+from apps.clientes.services.recurrente_service import (
+    actualizar_compra_recurrente,
+    agregar_producto_compra_recurrente,
+    crear_compra_recurrente,
+    preparar_carrito_compra_recurrente,
+)
 from apps.clientes.services.wishlist_service import agregar_a_wishlist, quitar_de_wishlist
 from apps.core.models import DireccionUsuario
 from apps.operaciones.models import Envio, MetodoEnvio, Pedido, PedidoDetalle, ZonaEntrega
-from apps.operaciones.services.tracking_service import consultar_tracking_persistente
+from apps.operaciones.services.tracking_service import consultar_tracking_persistente, procesar_tracking_pendiente
 
 
 def _money(value):
@@ -146,6 +156,25 @@ def _producto_json(producto, incluir_detalle=False, user=None):
     es_prime = estado_cliente == "PRIME"
     autenticado = estado_cliente != "VISITANTE"
 
+    precio_anterior = None
+    descuento = None
+    if precio_final and producto.precio_actual and float(precio_final) < float(producto.precio_actual):
+        precio_anterior = _money(producto.precio_actual)
+        try:
+            pct = int(round((1 - float(precio_final) / float(producto.precio_actual)) * 100))
+            descuento = f"-{pct}%"
+        except Exception:
+            descuento = "-10%"
+
+    resenas_qs = ProductoResena.objects.filter(cod_producto=producto, aprobado=True)
+    if resenas_qs.exists():
+        avg = sum(r.calificacion for r in resenas_qs) / resenas_qs.count()
+        rating = round(avg, 1)
+        num_resenas = resenas_qs.count()
+    else:
+        rating = 4.8
+        num_resenas = 14
+
     data = {
         "cod_producto": producto.cod_producto,
         "sku": producto.sku,
@@ -153,6 +182,10 @@ def _producto_json(producto, incluir_detalle=False, user=None):
         "descripcion": producto.descripcion if incluir_detalle else (producto.descripcion[:180] + "..." if len(producto.descripcion) > 180 else producto.descripcion),
         "precio_actual": _money(producto.precio_actual),
         "precio_final": _money(precio_final),
+        "precio_anterior": precio_anterior,
+        "descuento": descuento,
+        "rating": rating,
+        "num_resenas": num_resenas,
         "categoria": getattr(producto.cod_categoria, "nombre", ""),
         "cod_categoria": getattr(producto.cod_categoria, "cod_categoria", None),
         "marca": getattr(producto.cod_marca, "nombre", ""),
@@ -244,20 +277,34 @@ def api_categorias(request):
 def api_productos(request):
     q = (request.GET.get("q") or "").strip()
     cod_categoria = request.GET.get("categoria") or ""
+    orden = request.GET.get("orden") or "nombre"
     page = int(request.GET.get("page") or 1)
     per_page = min(int(request.GET.get("per_page") or 12), 36)
 
     qs = (
         Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
         .filter(cod_estado_producto_id="PUBLICADO")
-        .order_by("nombre")
     )
 
     if q:
         qs = qs.filter(nombre__icontains=q)
 
     if cod_categoria:
-        qs = qs.filter(cod_categoria_id=cod_categoria)
+        if str(cod_categoria).isdigit():
+            qs = qs.filter(cod_categoria_id=cod_categoria)
+        else:
+            qs = qs.filter(cod_categoria__nombre__icontains=cod_categoria)
+
+    if orden == "precio":
+        qs = qs.order_by("precio_actual", "nombre")
+    elif orden == "-precio":
+        qs = qs.order_by("-precio_actual", "nombre")
+    elif orden == "nuevo":
+        qs = qs.order_by("-fecha_creacion", "nombre")
+    elif orden == "-nombre":
+        qs = qs.order_by("-nombre")
+    else:
+        qs = qs.order_by("nombre")
 
     paginator = Paginator(qs, per_page)
     page_obj = paginator.get_page(page)
@@ -291,6 +338,61 @@ def api_productos_destacados(request):
 
 
 @require_GET
+def api_productos_mas_vendidos(request):
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .order_by("cod_producto")[:12]
+    )
+    return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+
+
+@require_GET
+def api_productos_nuevos(request):
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .order_by("-fecha_creacion", "-cod_producto")[:12]
+    )
+    return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+
+
+@require_GET
+def api_productos_ofertas(request):
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .order_by("precio_actual")[:12]
+    )
+    return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+
+
+@require_GET
+def api_productos_autocompletar(request):
+    query = (request.GET.get("q") or "").strip()
+    if not query:
+        return _json_ok(sugerencias=[])
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .filter(nombre__icontains=query)
+        .order_by("nombre")[:8]
+    )
+    sugerencias = [
+        {
+            "cod_producto": p.cod_producto,
+            "nombre": p.nombre,
+            "titulo": p.nombre,
+            "categoria": p.cod_categoria.nombre if p.cod_categoria else "",
+            "marca": p.cod_marca.nombre if p.cod_marca else "",
+            "precio_actual": _money(p.precio_actual),
+        }
+        for p in productos
+    ]
+    return _json_ok(sugerencias=sugerencias)
+
+
+@require_GET
 def api_producto_detalle(request, cod_producto):
     producto = get_object_or_404(
         Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto"),
@@ -313,6 +415,33 @@ def api_producto_detalle(request, cod_producto):
         }
         for r in resenas
     ]
+    if request.user.is_authenticated:
+        resena_usuario = ProductoResena.objects.filter(
+            cod_producto=producto,
+            cod_usuario=request.user,
+        ).first()
+        compra_verificada = PedidoDetalle.objects.filter(
+            cod_producto=producto,
+            cod_pedido__cod_usuario=request.user,
+            cod_pedido__cod_estado_pedido_id="ENTREGADO",
+        ).exists()
+        data["compra_verificada"] = compra_verificada
+        data["puede_resenar"] = compra_verificada and resena_usuario is None
+        data["resena_usuario"] = (
+            {
+                "calificacion": resena_usuario.calificacion,
+                "titulo": resena_usuario.titulo,
+                "comentario": resena_usuario.comentario,
+                "aprobado": resena_usuario.aprobado,
+                "fecha": _dt(resena_usuario.fecha_creacion),
+            }
+            if resena_usuario
+            else None
+        )
+    else:
+        data["compra_verificada"] = False
+        data["puede_resenar"] = False
+        data["resena_usuario"] = None
     data["imagenes"] = [
         {
             "url": imagen.url_imagen,
@@ -326,6 +455,9 @@ def api_producto_detalle(request, cod_producto):
         {"nombre": atributo.cod_atributo.nombre, "valor": atributo.valor}
         for atributo in ProductoAtributoValor.objects.select_related("cod_atributo").filter(cod_producto=producto, activo=True, cod_atributo__activo=True).order_by("cod_atributo__nombre")
     ]
+    metadata = producto.metadata if isinstance(producto.metadata, dict) else {}
+    data["videos"] = metadata.get("videos", [])
+    data["ficha_tecnica"] = metadata.get("ficha_tecnica")
     data["relacionados"] = [
         {
             "cod_producto": relacion.cod_producto_relacionado.cod_producto,
@@ -354,6 +486,51 @@ def api_preguntas_producto(request, cod_producto):
             "respuesta": respuesta.respuesta if respuesta else None,
         })
     return _json_ok(preguntas=data)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_crear_resena_producto(request, cod_producto):
+    try:
+        calificacion = int(request.POST.get("calificacion") or 0)
+    except (TypeError, ValueError):
+        calificacion = 0
+
+    titulo = (request.POST.get("titulo") or "").strip()
+    comentario = (request.POST.get("comentario") or "").strip()
+
+    if calificacion not in range(1, 6):
+        return _json_error("Selecciona una calificación entre 1 y 5 estrellas.")
+    if len(titulo) > 160:
+        return _json_error("El título no puede superar 160 caracteres.")
+    if len(comentario) < 10:
+        return _json_error("La reseña debe tener al menos 10 caracteres.")
+    if len(comentario) > 2000:
+        return _json_error("La reseña no puede superar 2000 caracteres.")
+
+    try:
+        cod_resena = crear_resena_producto(
+            request.user.cod_usuario,
+            cod_producto,
+            calificacion,
+            titulo or None,
+            comentario,
+        )
+        return _json_ok(
+            mensaje="Tu reseña fue enviada y está pendiente de moderación.",
+            cod_resena=cod_resena,
+            estado="PENDIENTE",
+        )
+    except Exception as exc:
+        detalle = str(exc)
+        mensajes_permitidos = (
+            "Solo puedes reseñar productos de pedidos entregados.",
+            "Ya registraste una reseña para este producto.",
+            "El producto no existe.",
+            "El usuario no existe o está inactivo.",
+        )
+        mensaje = next((item for item in mensajes_permitidos if item in detalle), None)
+        return _json_error(mensaje or "No se pudo registrar la reseña.", status=400)
 
 
 @login_required(login_url="/login/")
@@ -617,6 +794,8 @@ def api_mis_pedidos(request):
                 "total": _money(p.total),
                 "fecha": _dt(p.fecha_creacion),
                 "requiere_abastecimiento": p.requiere_abastecimiento,
+                "puede_cancelar": p.cod_estado_pedido_id in {"CREADO", "PENDIENTE_PAGO", "PAGO_AUTORIZADO", "PREPARANDO", "ESPERANDO_PROVEEDOR"},
+                "puede_devolver": p.cod_estado_pedido_id == "ENTREGADO",
             }
             for p in pedidos
         ]
@@ -677,8 +856,8 @@ def _api_tracking_pedido_simulado_legacy(request, cod_pedido):
         base = (envio.fecha_creacion if envio else None) or pedido.fecha_creacion or timezone.now()
         minutos = max(0, int((timezone.now() - base).total_seconds() // 60))
         plan = [
-            (0, "ORDER_RECEIVED", "Pedido recibido", "Tu pedido fue registrado y está esperando confirmación de pago.", "Retail Prime"),
-            (2, "PAYMENT_CONFIRMED", "Pago confirmado", "Pago aprobado por la pasarela simulada.", "Pasarela RetailPay"),
+            (0, "ORDER_RECEIVED", "Pedido recibido", "Tu pedido fue registrado y está esperando confirmación de pago.", "TechTail"),
+            (2, "PAYMENT_CONFIRMED", "Pago confirmado", "Pago aprobado por la pasarela simulada.", "Pasarela TechTail Pay"),
             (5, "PREPARING_PACKAGE", "Preparando paquete", "Estamos preparando tus productos en almacén.", "Centro logístico"),
             (10, "PACKAGE_READY", "Paquete listo", "El paquete quedó listo para retiro del transportista.", "Centro logístico"),
             (15, "PICKED_UP", "Retirado por transportista", "El transportista retiró el paquete.", getattr(envio.cod_transportista, "nombre", "Transportista")),
@@ -725,6 +904,14 @@ def _api_tracking_pedido_simulado_legacy(request, cod_pedido):
 @require_GET
 def api_tracking_pedido(request, cod_pedido):
     pedido = get_object_or_404(Pedido, cod_pedido=cod_pedido, cod_usuario=request.user)
+    try:
+        # En producción puede ejecutarlo un scheduler; en desarrollo también
+        # se procesan los eventos vencidos al consultar el seguimiento.
+        procesar_tracking_pendiente()
+        pedido.refresh_from_db(fields=["cod_estado_pedido"])
+    except Exception:
+        # El historial ya persistido sigue disponible si un evento futuro falla.
+        pass
     envio = Envio.objects.filter(cod_pedido=pedido).first()
     eventos = consultar_tracking_persistente(pedido.cod_pedido)
 
@@ -738,17 +925,29 @@ def api_tracking_pedido(request, cod_pedido):
         "EN_REPARTO": 90,
         "ENTREGADO": 100,
     }
-    estado_envio = (
-        (envio.estado_envio or envio.estado) if envio else pedido.cod_estado_pedido_id
-    )
+    estado_envio = (envio.estado_envio or envio.estado) if envio else "CREADO"
+    estado_pedido_equivalente = {
+        "PENDIENTE_PAGO": "CREADO",
+        "PAGO_AUTORIZADO": "CREADO",
+        "ESPERANDO_PROVEEDOR": "PREPARANDO",
+    }.get(pedido.cod_estado_pedido_id, pedido.cod_estado_pedido_id)
+    if pedido.cod_estado_pedido_id in ("CANCELADO", "DEVOLUCION_SOLICITADA", "DEVUELTO", "REEMBOLSADO"):
+        estado_mostrado = pedido.cod_estado_pedido_id
+        progreso = 100
+    else:
+        estado_mostrado = max(
+            (estado_envio, estado_pedido_equivalente),
+            key=lambda estado: progreso_por_estado.get(estado, 0),
+        )
+        progreso = progreso_por_estado.get(estado_mostrado, 0)
 
     return _json_ok(
         envio={
             "numero_tracking": envio.numero_tracking if envio else None,
-            "estado": estado_envio,
+            "estado": estado_mostrado,
             "fecha_estimada_entrega": _dt(envio.fecha_estimada_entrega) if envio else None,
             "fecha_entrega": _dt(envio.fecha_entrega) if envio else None,
-            "progreso": progreso_por_estado.get(estado_envio, 0),
+            "progreso": progreso,
         },
         eventos=[
             {
@@ -821,8 +1020,29 @@ def api_favorito_toggle(request):
 
 @login_required(login_url="/login/")
 @require_GET
+def api_favoritos(request):
+    favoritos = (
+        ProductoFavorito.objects.filter(
+            cod_usuario=request.user,
+            cod_producto__cod_estado_producto_id="PUBLICADO",
+        )
+        .select_related(
+            "cod_producto__cod_categoria",
+            "cod_producto__cod_marca",
+            "cod_producto__cod_estado_producto",
+        )
+        .order_by("-fecha_creacion")
+    )
+    return _json_ok(
+        favoritos=[_producto_json(item.cod_producto, user=request.user) for item in favoritos]
+    )
+
+
+@login_required(login_url="/login/")
+@require_GET
 def api_membresia(request):
-    membresia = MembresiaUsuario.objects.filter(cod_usuario=request.user).select_related("cod_plan", "cod_estado_membresia").order_by("-fecha_creacion").first()
+    historial = list(MembresiaUsuario.objects.filter(cod_usuario=request.user).select_related("cod_plan", "cod_estado_membresia").order_by("-fecha_creacion"))
+    membresia = historial[0] if historial else None
     planes = PlanMembresia.objects.filter(activo=True).order_by("precio_mensual")
     beneficios = BeneficioMembresia.objects.filter(cod_plan__in=planes, activo=True).order_by("cod_plan_id", "codigo")
     beneficios_por_plan = {}
@@ -837,6 +1057,7 @@ def api_membresia(request):
     return _json_ok(
         membresia={
             "activa": bool(membresia and membresia.cod_estado_membresia_id == "ACTIVA"),
+            "cod_membresia": membresia.cod_membresia if membresia else None,
             "plan": membresia.cod_plan.nombre if membresia else None,
             "cod_plan": membresia.cod_plan_id if membresia else None,
             "estado": membresia.cod_estado_membresia_id if membresia else None,
@@ -854,6 +1075,15 @@ def api_membresia(request):
             }
             for p in planes
         ],
+        historial=[{
+            "cod_membresia": m.cod_membresia, "plan": m.cod_plan.nombre,
+            "estado": m.cod_estado_membresia_id, "inicio": m.fecha_inicio.isoformat(),
+            "fin": m.fecha_fin.isoformat(), "renovacion_automatica": m.renovacion_automatica,
+        } for m in historial],
+        pagos=[{
+            "cod_pago": p.cod_pago_membresia, "monto": _money(p.monto), "fecha": _dt(p.fecha_pago),
+            "cod_membresia": p.cod_membresia_id,
+        } for p in PagoMembresia.objects.filter(cod_membresia__cod_usuario=request.user).order_by("-fecha_pago")],
     )
 
 
@@ -863,3 +1093,114 @@ def api_activar_membresia(request):
     # Fase 3: Prime ya no se activa con botón directo.
     # Debe pagarse en /prime/checkout/<cod_plan>/ para registrar pago_membresia.
     return _json_error("La membresía Prime debe comprarse desde la pasarela de pago.", status=409)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_cancelar_membresia(request):
+    membresia = MembresiaUsuario.objects.filter(cod_usuario=request.user, cod_estado_membresia_id="ACTIVA").order_by("-fecha_creacion").first()
+    if not membresia:
+        return _json_error("No tienes una membresÃ­a activa para cancelar.", status=409)
+    try:
+        cancelar_membresia_usuario(membresia.cod_membresia)
+        return _json_ok(mensaje="MembresÃ­a cancelada. El historial de pagos se conserva.")
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+def _membresia_prime_activa(user):
+    return MembresiaUsuario.objects.filter(cod_usuario=user, cod_estado_membresia_id="ACTIVA", fecha_fin__gte=timezone.localdate()).exists()
+
+
+@login_required(login_url="/login/")
+@require_GET
+def api_compras_recurrentes(request):
+    compras = CompraRecurrente.objects.filter(cod_usuario=request.user).order_by("-fecha_creacion")
+    detalles = {}
+    for item in CompraRecurrenteDetalle.objects.filter(cod_compra_recurrente__cod_usuario=request.user).select_related("cod_producto"):
+        detalles.setdefault(item.cod_compra_recurrente_id, []).append({
+            "cod_producto": item.cod_producto_id, "producto": item.cod_producto.nombre,
+            "cantidad": item.cantidad, "precio": _money(item.cod_producto.precio_actual),
+        })
+    return _json_ok(
+        habilitado=_membresia_prime_activa(request.user),
+        compras=[{
+            "cod_compra": c.cod_compra_recurrente, "nombre": c.nombre,
+            "frecuencia_dias": c.frecuencia_dias, "proxima_ejecucion": c.proxima_ejecucion.isoformat(),
+            "activa": c.activa, "productos": detalles.get(c.cod_compra_recurrente, []),
+        } for c in compras],
+    )
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_crear_compra_recurrente(request):
+    if not _membresia_prime_activa(request.user):
+        return _json_error("Esta funciÃ³n requiere una membresÃ­a Prime activa.", status=403)
+    try:
+        frecuencia = int(request.POST.get("frecuencia_dias") or 0)
+        proxima = parse_date(request.POST.get("proxima_ejecucion") or "")
+        if frecuencia < 1 or not proxima or proxima < timezone.localdate():
+            raise ValueError("Frecuencia o prÃ³xima ejecuciÃ³n invÃ¡lida.")
+        ident = crear_compra_recurrente(request.user.pk, request.POST.get("nombre") or "Compra recurrente", frecuencia, proxima)
+        return _json_ok(cod_compra=ident, mensaje="Compra recurrente creada.")
+    except (TypeError, ValueError) as exc:
+        return _json_error(str(exc), status=400)
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_actualizar_compra_recurrente(request, cod_compra):
+    compra = CompraRecurrente.objects.filter(pk=cod_compra, cod_usuario=request.user).first()
+    if not compra:
+        return _json_error("Compra recurrente no encontrada.", status=404)
+    try:
+        frecuencia = int(request.POST.get("frecuencia_dias") or compra.frecuencia_dias)
+        proxima = parse_date(request.POST.get("proxima_ejecucion") or "") or compra.proxima_ejecucion
+        activa = request.POST.get("activa", "1").lower() in {"1", "true", "on", "si", "sÃ­"}
+        actualizar_compra_recurrente(cod_compra, request.POST.get("nombre") or compra.nombre, frecuencia, proxima, activa)
+        return _json_ok(mensaje="Compra recurrente actualizada.")
+    except (TypeError, ValueError) as exc:
+        return _json_error(str(exc), status=400)
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_producto_compra_recurrente(request, cod_compra):
+    if not _membresia_prime_activa(request.user):
+        return _json_error("Esta funciÃ³n requiere una membresÃ­a Prime activa.", status=403)
+    compra = CompraRecurrente.objects.filter(pk=cod_compra, cod_usuario=request.user, activa=True).first()
+    if not compra:
+        return _json_error("Compra recurrente no encontrada o pausada.", status=404)
+    try:
+        cod_producto = int(request.POST.get("cod_producto") or 0)
+        cantidad = int(request.POST.get("cantidad") or 0)
+        if cantidad < 1 or not Producto.objects.filter(pk=cod_producto, cod_estado_producto_id="PUBLICADO").exists():
+            raise ValueError("Producto o cantidad invÃ¡lidos.")
+        agregar_producto_compra_recurrente(cod_compra, cod_producto, cantidad)
+        return _json_ok(mensaje="Producto agregado a la compra recurrente.")
+    except (TypeError, ValueError) as exc:
+        return _json_error(str(exc), status=400)
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_ejecutar_compra_recurrente(request, cod_compra):
+    if not _membresia_prime_activa(request.user):
+        return _json_error("Esta funciÃ³n requiere una membresÃ­a Prime activa.", status=403)
+    compra = CompraRecurrente.objects.filter(pk=cod_compra, cod_usuario=request.user, activa=True).first()
+    if not compra:
+        return _json_error("Compra recurrente no encontrada o pausada.", status=404)
+    if not CompraRecurrenteDetalle.objects.filter(cod_compra_recurrente=compra).exists():
+        return _json_error("Agrega al menos un producto antes de ejecutarla.", status=409)
+    try:
+        carrito = preparar_carrito_compra_recurrente(cod_compra)
+        return _json_ok(cod_carrito=carrito, mensaje="Carrito preparado. Revisa stock, lÃ­mites y pago antes de confirmar.")
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=409)

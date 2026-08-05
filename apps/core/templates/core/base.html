@@ -4,69 +4,82 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Retail Prime: tecnología profesional para infraestructura, redes y seguridad.">
-  <title>{% block title %}Retail Prime | Tecnología profesional{% endblock %}</title>
+  <meta name="description" content="TechTail: infraestructura, redes, seguridad y tecnología profesional para empresas.">
+  <meta name="theme-color" content="#07162b">
+  <title>{% block title %}TechTail | Tecnología profesional{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/techtail.css' %}">
   <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/brand-override.css' %}">
+  <link rel="stylesheet" href="{% static 'retail/css/retail-prime.css' %}?v=20260802">
+  <link rel="stylesheet" href="{% static 'retail/css/retail-prime-pages.css' %}?v=20260802">
+  <link rel="stylesheet" href="{% static 'retail/css/retail-prime-portals.css' %}?v=20260802">
 </head>
-<body data-page="{% block page %}storefront{% endblock %}">
-  <header class="tt-header">
-    <div class="tt-header-main">
-      <a class="tt-brand" href="{% url 'clientes:inicio' %}" aria-label="TechTail, inicio">
-        <img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail" class="tt-brand-logo">
-        <span class="tt-brand-copy"><strong>Retail Prime</strong><small>Tecnología que conecta</small></span>
+<body id="top" class="rp-app" data-page="{% block page %}storefront{% endblock %}">
+  <a class="rp-skip-link" href="#main-content">Saltar al contenido</a>
+  <header class="rp-header">
+    <div class="rp-top-header">
+      <a class="rp-header-brand" href="{% url 'clientes:inicio' %}" aria-label="TechTail, ir al inicio">
+        <img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail">
       </a>
-      <div class="tt-delivery"><span aria-hidden="true">⌖</span><small>Entrega en</small><strong>Ecuador</strong></div>
-      <form class="tt-search" action="{% url 'clientes:catalogo' %}" method="get" role="search">
+      <button class="rp-mobile-menu" type="button" data-mobile-menu aria-label="Abrir navegación" aria-expanded="false">☰</button>
+      <div class="rp-delivery"><span aria-hidden="true">⌖</span><small>Entregamos en</small><strong>todo Ecuador</strong></div>
+      <form class="rp-market-search" action="{% url 'clientes:catalogo' %}" method="get" role="search">
         <label class="sr-only" for="tt-search-input">Buscar productos</label>
-        <select name="categoria" id="tt-category-select" aria-label="Categoría"><option value="">Todas las categorías</option></select>
-        <input id="tt-search-input" name="q" value="{{ request.GET.q|default:'' }}" type="search" placeholder="Busca switches, UPS, cámaras IP, cableado…">
-        <button type="submit" aria-label="Buscar">Buscar</button>
+        <select name="categoria" id="tt-category-select" aria-label="Categoría"><option value="">Todo</option></select>
+        <input id="tt-search-input" name="q" value="{{ request.GET.q|default:'' }}" type="search" placeholder="Busca switches, UPS, cableado, cámaras IP…">
+        <button type="submit" aria-label="Buscar"><span aria-hidden="true">⌕</span><span>Buscar</span></button>
       </form>
-      <nav class="tt-account-nav" aria-label="Cuenta y compras">
+      <nav class="rp-header-actions" aria-label="Cuenta y compras">
         {% if user.is_authenticated %}
-          <a href="{% url 'core:perfil' %}"><small>Hola, {{ user.nombres|default:user.email|truncatechars:18 }}</small><strong>Mi cuenta</strong></a>
-          <a href="{% url 'clientes:pedidos' %}"><small>Mis</small><strong>Pedidos</strong></a>
-          <a class="tt-cart-link" href="{% url 'clientes:carrito' %}"><span aria-hidden="true">▱</span><strong>Carrito</strong><b id="tt-cart-count">0</b></a>
-          {% if user.is_staff %}<a class="tt-panel-link" href="{% url 'administracion:panel' %}">Panel</a>{% endif %}
+          <a href="{% url 'core:perfil' %}"><small>Hola, {{ user.nombres|default:user.email|truncatechars:16 }}</small><strong>Mi cuenta</strong></a>
+          <a href="{% url 'clientes:pedidos' %}"><small>Compras y</small><strong>Pedidos</strong></a>
+          <a class="rp-cart-action" href="{% url 'clientes:carrito' %}"><span aria-hidden="true">▱</span><strong>Carrito</strong><b id="tt-cart-count">0</b></a>
+          {% if user.is_staff %}<a class="rp-panel-action" href="{% url 'administracion:panel' %}">Panel</a>{% endif %}
         {% else %}
-          <a href="{% url 'core:login' %}?next={{ request.path|urlencode }}"><small>Hola, inicia sesión</small><strong>Cuenta y listas</strong></a>
+          <a href="{% url 'core:login' %}?next={{ request.path|urlencode }}"><small>Hola, ingresa</small><strong>Cuenta</strong></a>
           <a href="{% url 'core:login' %}?next={% url 'clientes:pedidos' %}"><small>Consulta tus</small><strong>Pedidos</strong></a>
-          <a class="tt-cart-link" href="{% url 'core:login' %}?next={% url 'clientes:carrito' %}"><span aria-hidden="true">▱</span><strong>Carrito</strong></a>
+          <a class="rp-cart-action" href="{% url 'core:login' %}?next={% url 'clientes:carrito' %}"><span aria-hidden="true">▱</span><strong>Carrito</strong></a>
         {% endif %}
       </nav>
     </div>
-    <div class="tt-category-nav">
-      <button class="tt-menu-toggle" type="button" data-category-menu aria-expanded="false">☰ Todo</button>
+    <nav class="rp-category-bar" data-mobile-nav aria-label="Categorías principales">
+      <button type="button" data-category-menu aria-expanded="false">☰ Categorías</button>
       <a href="{% url 'clientes:catalogo' %}">Ofertas</a>
-      <a href="{% url 'clientes:catalogo' %}?q=redes">Redes y conectividad</a>
-      <a href="{% url 'clientes:catalogo' %}?q=seguridad">Seguridad de red</a>
+      <a href="{% url 'clientes:catalogo' %}?q=redes">Redes</a>
+      <a href="{% url 'clientes:catalogo' %}?q=seguridad">Ciberseguridad</a>
       <a href="{% url 'clientes:catalogo' %}?q=cableado">Cableado</a>
       <a href="{% url 'clientes:catalogo' %}?q=servidor">Servidores</a>
       <a href="{% url 'clientes:catalogo' %}?q=ups">UPS y energía</a>
       <a href="{% url 'clientes:catalogo' %}?q=cámara">Videovigilancia IP</a>
-      <a href="{% url 'clientes:catalogo' %}#prime">Retail Prime</a>
-      <button id="theme-toggle" class="tt-theme-toggle" type="button" aria-label="Cambiar tema">◐</button>
-    </div>
+      <a href="{% url 'clientes:inicio' %}#prime">Prime</a>
+      <span class="rp-category-promise">Compra segura · Soporte especializado</span>
+      <button id="theme-toggle" class="rp-theme-toggle" type="button" aria-label="Cambiar tema">◐</button>
+    </nav>
   </header>
-  <div id="tt-category-menu" class="tt-category-menu" hidden></div>
-  {% block content %}{% endblock %}
-  <footer class="tt-footer">
-    <div class="tt-footer-top"><a href="#top">Volver arriba</a></div>
-    <div class="tt-footer-grid">
-      <section><img class="rp-footer-logo" src="{% static 'retail/img/brand/retail-prime-logo.svg' %}" alt="Retail Prime"><a href="{% url 'clientes:inicio' %}">Tecnología para empresas</a><a href="{% url 'clientes:catalogo' %}">Explorar catálogo</a><a href="#prime">Membresías Prime</a></section>
-      <section><h2>Compra con confianza</h2><a href="{% url 'clientes:carrito' %}">Carrito y checkout</a><a href="{% url 'core:perfil' %}">Direcciones y pagos</a><a href="{% url 'clientes:pedidos' %}">Pedidos y tracking</a></section>
-      <section><h2>Soporte</h2><span>Atención técnica comercial</span><span>Pagos simulados protegidos</span><span>Políticas académicas simuladas</span></section>
-      <section><h2>Retail Prime</h2><span>Beneficios elegibles</span><span>Ofertas técnicas</span><span>Entrega prioritaria cuando aplique</span></section>
+  <div id="tt-category-menu" class="rp-mega-menu" hidden></div>
+
+  <div id="main-content">{% block content %}{% endblock %}</div>
+
+  <footer class="rp-footer">
+    <a class="rp-back-top" href="#top">Volver arriba ↑</a>
+    <div class="rp-footer-main">
+      <section class="rp-footer-brand">
+        <img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail">
+        <p>Tecnología profesional para conectar, proteger y hacer crecer tu operación.</p>
+        <span>Quito · Guayaquil · Cuenca · Ecuador</span>
+      </section>
+      <section><h2>Soluciones</h2><a href="{% url 'clientes:catalogo' %}?q=redes">Redes empresariales</a><a href="{% url 'clientes:catalogo' %}?q=seguridad">Ciberseguridad</a><a href="{% url 'clientes:catalogo' %}?q=servidor">Servidores y storage</a><a href="{% url 'clientes:catalogo' %}?q=ups">Energía y UPS</a></section>
+      <section><h2>Tu compra</h2><a href="{% url 'clientes:carrito' %}">Carrito y checkout</a><a href="{% url 'clientes:pedidos' %}">Pedidos y tracking</a><a href="{% url 'core:perfil' %}">Facturas y direcciones</a><a href="{% url 'clientes:inicio' %}#prime">Membresías Prime</a></section>
+      <section><h2>Ayuda</h2><a href="mailto:soporte@techtail.local">Soporte técnico</a><span>Pagos simulados protegidos</span><span>Devoluciones según pedido</span><span>Proyecto académico DB-first</span></section>
     </div>
-    <div class="tt-footer-bottom">© {% now "Y" %} Retail Prime · Proyecto académico DB-first</div>
+    <div class="rp-payment-strip"><span>TechTail Pay Secure</span><b>VISA</b><b>Mastercard</b><b>AMEX</b><span>No almacenamos CVV</span></div>
+    <div class="rp-footer-bottom">© {% now "Y" %} TechTail · Experiencia demostrativa · Términos y privacidad simulados</div>
   </footer>
   <div id="tt-toast" class="tt-toast" role="status" aria-live="polite"></div>
+  <div id="toast" class="rp-toast" role="status" aria-live="polite"></div>
   <script src="{% static 'retail/js/retail.js' %}"></script>
   <script src="{% static 'retail/js/storefront.js' %}"></script>
+  <script src="{% static 'retail/js/retail-prime-ui.js' %}?v=20260802"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

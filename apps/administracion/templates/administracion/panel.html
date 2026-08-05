@@ -1,138 +1,28 @@
 {% load static %}
-<!doctype html>
-<html lang="es" data-theme="light">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TechTail | Panel administrativo</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/retail.css' %}">
-  <link rel="stylesheet" href="{% static 'retail/css/global-brand.css' %}">
-</head>
-<body data-page="admin">
-{% if sin_permiso %}
-  <main class="rp-auth-shell">
-    <section class="rp-auth-card">
-      <h1>Acceso restringido</h1>
-      <p class="rp-muted">Tu cuenta no tiene rol administrativo.</p>
-      <a class="rp-primary rp-button-link" href="/">Volver a la tienda</a>
-    </section>
+<!doctype html><html lang="es" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#07162b"><title>TechTail | Panel administrativo</title><link rel="icon" type="image/svg+xml" href="{% static 'retail/img/brand/techtail-favicon.svg' %}"><link rel="stylesheet" href="{% static 'retail/css/retail.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-pages.css' %}"><link rel="stylesheet" href="{% static 'retail/css/retail-prime-portals.css' %}"><link rel="stylesheet" href="{% static 'retail/css/admin-enterprise.css' %}"></head><body class="rp-admin-page" data-page="admin" data-is-admin="{% if es_admin_panel %}1{% else %}0{% endif %}" data-panel-role="{{ rol_principal|default:'ADMIN' }}">
+{% if sin_permiso %}<main class="rp-auth-shell"><section class="rp-auth-card rp-empty-state"><img src="{% static 'retail/img/brand/techtail-mark.svg' %}" alt=""><h1>Acceso restringido</h1><p>Tu cuenta no tiene un rol administrativo habilitado.</p><a class="rp-primary" href="/">Volver a la tienda</a></section></main>{% else %}
+<div class="rp-admin-layout">
+  <aside class="rp-admin-sidebar"><a class="rp-admin-brand" href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>CONTROL CENTER</span></a><div class="rp-admin-role"><span>TT</span><div><strong>{{ user.nombres|default:'Administrador' }}</strong><small>Marketplace Admin</small></div></div><nav><p>Visión general</p><button class="is-active" data-admin-section="dashboard"><span>⌂</span>Dashboard</button><p>Comercio</p><button data-admin-section="productos"><span>▦</span>Productos</button><button data-admin-section="catalogo"><span>◫</span>Catálogo y precios</button><button data-admin-section="pedidos"><span>▤</span>Pedidos</button><button data-admin-section="inventario"><span>▥</span>Inventario y lotes</button><p>Operación</p><button data-admin-section="proveedores"><span>◇</span>Proveedores</button><button data-admin-section="abastecimiento"><span>⇄</span>Abastecimiento</button><button data-admin-section="pagos"><span>▣</span>Pagos y facturas</button><button data-admin-section="tracking"><span>⌖</span>Tracking</button><p>Crecimiento</p><button data-admin-section="marketing"><span>✦</span>Marketing</button><button data-admin-section="prime"><span>★</span>Prime</button><button data-admin-section="reportes"><span>▥</span>Reportes</button></nav><div class="rp-admin-side-footer"><a href="/">← Volver a tienda</a><form method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form></div></aside>
+  <main class="rp-admin-main"><header class="rp-admin-topbar"><button class="rp-admin-mobile-menu" type="button" data-admin-menu>☰</button><label><span>⌕</span><input type="search" placeholder="Buscar en el centro de control" data-admin-global-search></label><div><button type="button" aria-label="Notificaciones">♢<b></b></button><button id="theme-toggle" type="button" aria-label="Cambiar tema">◐</button><span><strong>{{ user.nombres|default:'Admin' }}</strong><small>Administrador</small></span></div></header>
+    <section class="rp-admin-panel" data-admin-panel="dashboard"><div class="rp-admin-hero"><div><p class="rp-kicker">Centro de control TechTail</p><h1>Buenos días, {{ user.nombres|default:'equipo' }}.</h1><span>Monitorea ventas, pedidos, inventario y operación desde datos en vivo.</span><div><b>● Sistemas operativos</b><small>Datos desde PostgreSQL</small></div></div><img src="{% static 'retail/img/banners/banner-servidores.svg' %}" alt="Centro de control"></div><div id="admin-kpis" class="rp-kpi-grid"><div class="rp-kpi-skeleton"></div><div class="rp-kpi-skeleton"></div><div class="rp-kpi-skeleton"></div><div class="rp-kpi-skeleton"></div></div><div class="rp-admin-grid"><article class="rp-admin-card rp-admin-chart-card"><header><div><p class="rp-kicker">Rendimiento</p><h2>Ventas diarias</h2></div><span>Último período</span></header><div id="sales-chart" class="rp-bars"></div></article><article class="rp-admin-card"><header><div><p class="rp-kicker">Operación</p><h2>Estados de pedido</h2></div></header><div id="orders-chart" class="rp-bars"></div></article></div><div class="rp-admin-operations"><article><span>▥</span><div><strong>Control FIFO</strong><small>Inventario por lotes y caducidad</small></div></article><article><span>⌖</span><div><strong>Tracking persistente</strong><small>Eventos programados y visibles</small></div></article><article><span>▣</span><div><strong>TechTail Pay</strong><small>Autorización, captura y factura</small></div></article></div></section>
+
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="productos"><div class="rp-admin-title"><div><p class="rp-kicker">Catálogo</p><h1>Productos</h1><span>{% if es_admin_panel %}Crea, edita, publica, pausa o desactiva productos respetando las reglas comerciales.{% else %}Consulta disponibilidad, preparación comercial y estado de los productos.{% endif %}</span></div>{% if es_admin_panel %}<button type="button" data-admin-create="producto">+ Nuevo producto</button>{% endif %}</div><div class="rp-admin-filters"><label><span>⌕</span><input id="admin-product-search" placeholder="Buscar por nombre o SKU"></label><select id="admin-product-state"><option value="">Todos los estados</option><option value="PUBLICADO">Publicado</option><option value="BORRADOR">Borrador</option><option value="PAUSADO">Pausado</option></select></div><div id="admin-products" class="rp-table-wrap rp-admin-card"></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="catalogo"><div class="rp-admin-title"><div><p class="rp-kicker">Configuración comercial</p><h1>Catálogo y precios</h1><span>Categorías, marcas y reglas alimentadas por las APIs protegidas.</span></div></div><div class="rp-admin-grid rp-admin-grid-3"><article class="rp-admin-card"><header><h2>Categorías activas</h2><button type="button" data-admin-create="categoria">+ Crear</button></header><div id="admin-categories" class="rp-list"></div></article><article class="rp-admin-card"><header><h2>Marcas activas</h2><button type="button" data-admin-create="marca">+ Crear</button></header><div id="admin-brands" class="rp-list"></div></article><article class="rp-admin-card"><header><h2>Reglas de precio</h2><button type="button" data-admin-create="regla_precio">+ Crear</button></header><div id="admin-price-rules" class="rp-list"></div></article></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="pedidos"><div class="rp-admin-title"><div><p class="rp-kicker">Operación comercial</p><h1>Pedidos</h1><span>Estado, cliente, total y fecha de cada orden.</span></div><select id="admin-order-state"><option value="">Todos los estados</option></select></div><div id="admin-orders" class="rp-table-wrap rp-admin-card"></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="inventario"><div class="rp-admin-title"><div><p class="rp-kicker">Control de stock</p><h1>Inventario y lotes FIFO</h1><span>Disponibilidad, reservas, mínimos y alertas operativas.</span></div><button type="button" data-admin-create="lote">+ Recibir lote</button></div><div id="admin-inventory" class="rp-table-wrap rp-admin-card"></div><div class="rp-admin-grid"><article class="rp-admin-card"><header><h2>Lotes FIFO</h2><span>▥</span></header><div id="admin-lots" class="rp-table-wrap"></div></article><article class="rp-admin-card"><header><h2>Alertas de stock</h2><span>!</span></header><div id="admin-stock-alerts" class="rp-list"></div></article></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="proveedores"><div class="rp-admin-title"><div><p class="rp-kicker">Red de abastecimiento</p><h1>Proveedores</h1><span>Calificación, ciudad, contacto y estado comercial.</span></div><button type="button" data-admin-create="proveedor">+ Nuevo proveedor</button></div><div id="admin-suppliers" class="rp-table-wrap rp-admin-card"></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="abastecimiento"><div class="rp-admin-title"><div><p class="rp-kicker">Reposición</p><h1>Órdenes de abastecimiento</h1><span>Solicitudes generadas a proveedores según faltantes reales.</span></div></div><div id="admin-supply-orders" class="rp-table-wrap rp-admin-card"></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="marketing"><div class="rp-admin-title"><div><p class="rp-kicker">Crecimiento</p><h1>Promociones y cupones</h1><span>Campañas configuradas en el catálogo comercial.</span></div></div><div class="rp-admin-grid"><article class="rp-admin-card"><header><h2>Promociones</h2><button type="button" data-admin-create="promocion">+ Crear</button></header><div id="admin-promotions" class="rp-list"></div></article><article class="rp-admin-card"><header><h2>Cupones</h2><button type="button" data-admin-create="cupon">+ Crear</button></header><div id="admin-coupons" class="rp-list"></div></article></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="prime"><div class="rp-admin-title"><div><p class="rp-kicker">Fidelización</p><h1>Prime y beneficios</h1><span>Planes y membresías registradas en el sistema.</span></div></div><div class="rp-admin-grid"><article class="rp-admin-card"><header><h2>Planes Prime</h2><span>★</span></header><div id="admin-prime-plans" class="rp-list"></div></article><article class="rp-admin-card"><header><h2>Membresías</h2><span>✦</span></header><div id="admin-memberships" class="rp-list"></div></article></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="pagos"><div class="rp-admin-title"><div><p class="rp-kicker">TechTail Pay</p><h1>Pagos y facturas</h1><span>Autorizaciones, capturas y estados de transacción.</span></div></div><div id="admin-payments" class="rp-table-wrap rp-admin-card"></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="tracking"><div class="rp-admin-title"><div><p class="rp-kicker">Logística</p><h1>Tracking persistente</h1><span>Envíos y eventos programados por pedido.</span></div><button type="button" data-process-tracking>Procesar pendientes</button></div><div class="rp-admin-grid"><article class="rp-admin-card"><header><h2>Envíos</h2><span>⌖</span></header><div id="admin-shipments" class="rp-table-wrap"></div></article><article class="rp-admin-card"><header><h2>Programaciones</h2><span>◷</span></header><div id="admin-tracking-schedules" class="rp-table-wrap"></div></article></div></section>
+    <section class="rp-admin-panel rp-hidden" data-admin-panel="reportes"><div class="rp-admin-title"><div><p class="rp-kicker">Business intelligence</p><h1>Reportes</h1><span>Lectura visual de ventas desde datos persistentes.</span></div></div><article class="rp-admin-card"><header><h2>Ventas por período</h2><span>▥</span></header><div id="admin-reports" class="rp-bars"></div></article></section>
   </main>
-{% else %}
-  <aside class="rp-admin-sidebar">
-    <a class="rp-brand" href="/"><img src="{% static 'retail/img/brand/techtail-logo.svg' %}" alt="TechTail"><span>Admin Console</span></a>
-    <button data-admin-section="dashboard">Dashboard</button>
-    <button data-admin-section="productos">Productos</button>
-    <button data-admin-section="catalogo">Catálogo y precios</button>
-    <button data-admin-section="pedidos">Pedidos</button>
-    <button data-admin-section="inventario">Inventario</button>
-    <button data-admin-section="proveedores">Proveedores</button>
-    <button data-admin-section="abastecimiento">Abastecimiento</button>
-    <button data-admin-section="marketing">Promociones</button>
-    <button data-admin-section="prime">Prime</button>
-    <button data-admin-section="pagos">Pagos y facturas</button>
-    <button data-admin-section="tracking">Tracking</button>
-    <button data-admin-section="reportes">Reportes</button>
-    <a href="/">Tienda</a>
-    <form class="rp-logout-form" method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button type="submit">Salir</button></form>
-    <button id="theme-toggle" type="button">Modo</button>
-  </aside>
-
-  <main class="rp-admin-main">
-    <header class="rp-admin-head">
-      <div>
-        <p class="rp-kicker">Retail Prime</p>
-        <h1>Panel administrativo</h1>
-      </div>
-      <div class="rp-muted">Dashboard con datos en vivo desde PostgreSQL</div>
-    </header>
-
-    <section class="rp-admin-section" data-admin-panel="dashboard">
-      <div id="admin-kpis" class="rp-kpi-grid"></div>
-      <div class="rp-admin-grid">
-        <article class="rp-card"><h2>Ventas diarias</h2><div id="sales-chart" class="rp-bars"></div></article>
-        <article class="rp-card"><h2>Estados de pedido</h2><div id="orders-chart" class="rp-bars"></div></article>
-      </div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="productos">
-      <div class="rp-section-title">
-        <div><p class="rp-kicker">Catálogo</p><h2>Productos</h2></div>
-        <div class="rp-form-row"><input id="admin-product-search" placeholder="Buscar producto"><select id="admin-product-state"><option value="">Todos</option><option value="PUBLICADO">Publicado</option><option value="BORRADOR">Borrador</option><option value="PAUSADO">Pausado</option></select></div>
-      </div>
-      <div id="admin-products" class="rp-table-wrap"></div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="catalogo">
-      <div class="rp-section-title"><div><p class="rp-kicker">Configuración</p><h2>Categorías, marcas y reglas de precio</h2></div></div>
-      <div class="rp-admin-grid">
-        <article class="rp-card"><h3>Categorías activas</h3><div id="admin-categories" class="rp-list"></div></article>
-        <article class="rp-card"><h3>Marcas activas</h3><div id="admin-brands" class="rp-list"></div></article>
-        <article class="rp-card"><h3>Reglas de precio</h3><div id="admin-price-rules" class="rp-list"></div></article>
-      </div>
-      <p class="rp-muted">Las altas, cambios, desactivaciones y el recálculo FIFO se realizan mediante las APIs administrativas protegidas.</p>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="pedidos">
-      <div class="rp-section-title"><div><p class="rp-kicker">Operación</p><h2>Pedidos</h2></div><select id="admin-order-state"><option value="">Todos los estados</option></select></div>
-      <div id="admin-orders" class="rp-table-wrap"></div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="inventario">
-      <div class="rp-section-title"><div><p class="rp-kicker">Stock</p><h2>Inventario</h2></div></div>
-      <div id="admin-inventory" class="rp-table-wrap"></div>
-      <div class="rp-admin-grid">
-        <article class="rp-card"><h3>Lotes FIFO</h3><div id="admin-lots" class="rp-table-wrap"></div></article>
-        <article class="rp-card"><h3>Alertas de stock</h3><div id="admin-stock-alerts" class="rp-list"></div></article>
-      </div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="proveedores">
-      <div class="rp-section-title"><div><p class="rp-kicker">Abastecimiento</p><h2>Proveedores</h2></div></div>
-      <div id="admin-suppliers" class="rp-table-wrap"></div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="abastecimiento">
-      <div class="rp-section-title"><div><p class="rp-kicker">Reposición</p><h2>Órdenes de abastecimiento</h2></div></div>
-      <div id="admin-supply-orders" class="rp-table-wrap"></div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="marketing">
-      <div class="rp-section-title"><div><p class="rp-kicker">Comercial</p><h2>Promociones y cupones</h2></div></div>
-      <div class="rp-admin-grid">
-        <article class="rp-card"><h3>Promociones</h3><div id="admin-promotions" class="rp-list"></div></article>
-        <article class="rp-card"><h3>Cupones</h3><div id="admin-coupons" class="rp-list"></div></article>
-      </div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="prime">
-      <div class="rp-section-title"><div><p class="rp-kicker">Membresías</p><h2>Prime y beneficios</h2></div></div>
-      <div class="rp-admin-grid">
-        <article class="rp-card"><h3>Planes</h3><div id="admin-prime-plans" class="rp-list"></div></article>
-        <article class="rp-card"><h3>Membresías activas e históricas</h3><div id="admin-memberships" class="rp-list"></div></article>
-      </div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="pagos">
-      <div class="rp-section-title"><div><p class="rp-kicker">Cobros</p><h2>Pagos, autorizaciones, reembolsos y facturas</h2></div></div>
-      <div id="admin-payments" class="rp-table-wrap"></div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="tracking">
-      <div class="rp-section-title"><div><p class="rp-kicker">Logística</p><h2>Tracking persistente</h2><button class="rp-secondary" type="button" data-process-tracking>Procesar pendientes</button></div></div>
-      <div class="rp-admin-grid">
-        <article class="rp-card"><h3>Envíos</h3><div id="admin-shipments" class="rp-table-wrap"></div></article>
-        <article class="rp-card"><h3>Programaciones</h3><div id="admin-tracking-schedules" class="rp-table-wrap"></div></article>
-      </div>
-    </section>
-
-    <section class="rp-admin-section rp-hidden" data-admin-panel="reportes">
-      <div class="rp-section-title"><div><p class="rp-kicker">BI</p><h2>Reportes</h2></div></div>
-      <div class="rp-card"><div id="admin-reports" class="rp-bars"></div></div>
-    </section>
-  </main>
-{% endif %}
-<div id="toast" class="rp-toast"></div>
-<script src="{% static 'retail/js/retail.js' %}"></script>
-</body>
-</html>
+</div>{% endif %}<dialog id="admin-dialog" class="rp-admin-dialog"><header><div><p class="rp-kicker">Administración</p><h2 id="admin-dialog-title">Editar registro</h2></div><button type="button" data-admin-dialog-close aria-label="Cerrar">×</button></header><form id="admin-entity-form"><div id="admin-form-fields" class="rp-admin-form-grid"></div><footer><button type="button" class="rp-secondary" data-admin-dialog-close>Cancelar</button><button type="submit" class="rp-primary">Guardar cambios</button></footer></form></dialog><dialog id="admin-product-manager" class="rp-product-manager"><header><div><p class="rp-kicker">Gestión integral</p><h2 id="admin-product-manager-title">Administrar producto</h2><span id="admin-product-manager-subtitle"></span></div><button type="button" data-product-manager-close aria-label="Cerrar">×</button></header><nav id="admin-product-tabs" aria-label="Secciones del producto"></nav><div id="admin-product-manager-body" class="rp-product-manager-body"></div></dialog>
+<dialog id="admin-product-create" class="rp-product-create"><form id="admin-product-create-form" enctype="multipart/form-data"><header><div><span class="rp-wizard-eyebrow">Catálogo TechTail</span><h2>Crear producto completo</h2><p>Configura todo y publícalo sin salir de este flujo.</p></div><button type="button" data-product-create-close aria-label="Cerrar">×</button></header><div class="rp-wizard-layout"><aside aria-label="Progreso de creación"><button type="button" class="is-active" data-create-step-button="0"><span>1</span><div><strong>Información</strong><small>Identidad y precio</small></div></button><button type="button" data-create-step-button="1"><span>2</span><div><strong>Multimedia</strong><small>Imágenes, PDF y video</small></div></button><button type="button" data-create-step-button="2"><span>3</span><div><strong>Venta y stock</strong><small>Límites y proveedores</small></div></button><button type="button" data-create-step-button="3"><span>4</span><div><strong>Revisión</strong><small>Guardar o publicar</small></div></button></aside><div class="rp-wizard-content">
+<section data-create-step="0"><div class="rp-wizard-heading"><span>Paso 1 de 4</span><h3>Información del producto</h3><p>Lo que el cliente verá en el catálogo.</p></div><div class="rp-wizard-grid"><label>Nombre comercial<input name="nombre" required maxlength="240" placeholder="Ej. Switch administrable PoE+ 24 puertos"></label><label>SKU único<input name="sku" required maxlength="100" placeholder="TT-SW-POE24"></label><label>Categoría<select name="cod_categoria" required data-create-categories><option value="">Selecciona una categoría</option></select></label><label>Marca<select name="cod_marca" required data-create-brands><option value="">Selecciona una marca</option></select></label><label>Precio de exhibición<input type="number" name="precio_actual" min="0.01" step="0.01" required placeholder="0.00"></label><label>Peso (kg)<input type="number" name="peso_kg" min="0" step="0.001" value="0"></label><label class="is-wide">Descripción completa<textarea name="descripcion" required minlength="20" rows="6" placeholder="Describe beneficios, compatibilidad y casos de uso."></textarea></label><fieldset class="is-wide rp-dimensions"><legend>Dimensiones del empaque</legend><label>Largo (cm)<input type="number" name="largo_cm" min="0" step="0.01" value="0"></label><label>Ancho (cm)<input type="number" name="ancho_cm" min="0" step="0.01" value="0"></label><label>Alto (cm)<input type="number" name="alto_cm" min="0" step="0.01" value="0"></label></fieldset></div></section>
+<section data-create-step="1" hidden><div class="rp-wizard-heading"><span>Paso 2 de 4</span><h3>Galería y documentación</h3><p>La primera imagen será la principal. Los archivos subidos se almacenan como URL.</p></div><div class="rp-upload-grid"><label class="rp-dropzone"><span class="rp-drop-icon">▧</span><strong>Imágenes del producto</strong><small>JPG, PNG, WEBP o GIF · máximo 8 MB cada una</small><input type="file" name="imagenes" accept="image/jpeg,image/png,image/webp,image/gif" multiple data-create-images></label><div id="product-create-previews" class="rp-create-previews"></div><label class="rp-field-card"><span>URLs de imágenes opcionales</span><textarea name="imagenes_url" rows="3" placeholder="Una URL HTTPS por línea"></textarea></label><label class="rp-dropzone is-pdf"><span class="rp-drop-icon">PDF</span><strong>Ficha técnica</strong><small>Documento PDF · máximo 15 MB</small><input type="file" name="ficha_tecnica" accept="application/pdf" data-create-pdf></label><label class="rp-field-card"><span>O utiliza una URL directa al PDF</span><input type="url" name="ficha_url" placeholder="https://.../ficha.pdf"><input name="ficha_titulo" value="Ficha técnica PDF" placeholder="Título del documento"></label><label class="rp-dropzone"><span class="rp-drop-icon">▶</span><strong>Video opcional</strong><small>MP4, WEBM o MOV · máximo 60 MB</small><input type="file" name="video" accept="video/mp4,video/webm,video/quicktime"></label><label class="rp-field-card"><span>O URL del video</span><input type="url" name="video_url" placeholder="https://..."><input name="video_titulo" placeholder="Título del video"></label></div></section>
+<section data-create-step="2" hidden><div class="rp-wizard-heading"><span>Paso 3 de 4</span><h3>Reglas de venta y disponibilidad</h3><p>Para publicar ahora necesitas cinco proveedores activos y stock disponible.</p></div><div class="rp-commercial-setup"><article><h4>Límite retail</h4><div class="rp-wizard-grid"><label>Máximo por pedido<input type="number" name="limite_por_pedido" min="1" value="5" required></label><label>Máximo por día<input type="number" name="limite_por_dia" min="1" value="10"></label><label>Máximo por mes<input type="number" name="limite_por_mes" min="1" value="30"></label><label class="rp-check-card"><input type="checkbox" name="requiere_revision"> Requiere revisión manual</label></div></article><article><div class="rp-supplier-title"><div><h4>Red de proveedores</h4><p>Agrega costos, plazo y stock por proveedor.</p></div><button type="button" data-add-create-supplier>+ Agregar proveedor</button></div><div id="product-create-suppliers" class="rp-create-suppliers"></div></article></div></section>
+<section data-create-step="3" hidden><div class="rp-wizard-heading"><span>Paso 4 de 4</span><h3>Revisa antes de guardar</h3><p>TechTail comprobará nuevamente todas las reglas en PostgreSQL.</p></div><div id="product-create-summary" class="rp-create-summary"></div><label class="rp-publish-choice"><input type="checkbox" name="publicar" value="1" checked><span><strong>Publicar al terminar</strong><small>Si falta algún requisito, se guardará como borrador y te indicaremos exactamente qué completar.</small></span></label><div id="product-create-message" class="rp-create-message" role="status"></div></section>
+</div></div><footer><button type="button" class="rp-secondary" data-create-back hidden>← Anterior</button><span></span><button type="button" class="rp-secondary" data-product-create-close>Cancelar</button><button type="button" class="rp-primary" data-create-next>Continuar →</button><button type="submit" class="rp-primary" data-create-submit hidden>Crear producto</button></footer></form></dialog>
+<div id="toast" class="rp-toast"></div><script src="{% static 'retail/js/retail.js' %}"></script><script src="{% static 'retail/js/admin-enterprise.js' %}"></script><script src="{% static 'retail/js/product-create.js' %}"></script><script src="{% static 'retail/js/admin-control.js' %}"></script><script src="{% static 'retail/js/retail-prime-ui.js' %}"></script></body></html>
