@@ -14,7 +14,6 @@ import {
   Crown,
   BarChart3,
   ShieldCheck,
-  ExternalLink,
   Shield,
   Headphones,
 } from 'lucide-react';
@@ -173,17 +172,7 @@ export const AdminSidebar: React.FC = () => {
           <span>Proveedor (/proveedor)</span>
         </NavLink>
 
-        <a
-          href="/panel/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="admin-classic-fallback-btn"
-          style={{ marginTop: '0.5rem' }}
-          title="Abre el panel clásico Django para gestión avanzada no implementada en React"
-        >
-          <span>Abrir Panel Clásico</span>
-          <ExternalLink size={14} />
-        </a>
+
       </div>
     </aside>
   );

@@ -6,7 +6,6 @@ import {
   ShoppingBag,
   Heart,
   LogOut,
-  ExternalLink,
   LayoutDashboard,
   Bell,
   HelpCircle,
@@ -94,34 +93,7 @@ export const AccountSidebar: React.FC = () => {
         </ul>
       </nav>
 
-      {/* Fallback Temporal Hacia Django Clásico */}
-      <div className="tt-account-sidebar__fallback">
-        <span className="tt-account-sidebar__fallback-title">ACCESOS CLÁSICOS (FALLBACK)</span>
-        <ul className="tt-account-sidebar__list" style={{ marginTop: '0.5rem' }}>
-          <li>
-            <a
-              href="/perfil/"
-              className="tt-account-sidebar__link"
-              style={{ color: 'var(--tt-color-text-muted)', fontSize: '0.8125rem' }}
-              title="Ir al portal clásico de perfil Django (/perfil/)"
-            >
-              <ExternalLink size={15} />
-              <span>Perfil Django Clásico</span>
-            </a>
-          </li>
-          <li>
-            <a
-              href="/pedidos/"
-              className="tt-account-sidebar__link"
-              style={{ color: 'var(--tt-color-text-muted)', fontSize: '0.8125rem' }}
-              title="Ir al portal clásico de pedidos y devoluciones Django (/pedidos/)"
-            >
-              <ExternalLink size={15} />
-              <span>Pedidos / Devoluciones Django</span>
-            </a>
-          </li>
-        </ul>
-      </div>
+
 
       {/* Cerrar sesión */}
       <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--tt-color-border)' }}>

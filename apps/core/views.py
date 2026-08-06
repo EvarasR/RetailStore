@@ -189,6 +189,8 @@ def _build_session_response(request, mensaje=None):
             "usuario": None,
             "es_admin": False,
             "es_prime": False,
+            "es_proveedor_externo": False,
+            "cod_proveedor": None,
             "roles": [],
         }
         if mensaje:
@@ -201,6 +203,18 @@ def _build_session_response(request, mensaje=None):
         es_prime = MembresiaUsuario.objects.filter(cod_usuario=user, cod_estado_membresia_id="ACTIVA").exists()
     except Exception:
         es_prime = False
+
+    es_proveedor_externo = False
+    cod_proveedor = None
+    try:
+        from apps.proveedores.services.portal_service import es_usuario_proveedor, obtener_proveedor_usuario
+        if es_usuario_proveedor(user):
+            proveedor = obtener_proveedor_usuario(user)
+            if proveedor:
+                es_proveedor_externo = True
+                cod_proveedor = proveedor.cod_proveedor
+    except Exception:
+        pass
 
     usuario_data = {
         "id": user.cod_usuario,
@@ -216,6 +230,8 @@ def _build_session_response(request, mensaje=None):
         "autenticado": True,
         "es_admin": _is_admin(user),
         "es_prime": es_prime,
+        "es_proveedor_externo": es_proveedor_externo,
+        "cod_proveedor": cod_proveedor,
         "roles": sorted(_roles_usuario(user)),
         "usuario": usuario_data,
     }
@@ -316,6 +332,8 @@ def api_auth_logout(request):
         usuario=None,
         es_admin=False,
         es_prime=False,
+        es_proveedor_externo=False,
+        cod_proveedor=None,
         roles=[],
     )
 

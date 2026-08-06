@@ -52,11 +52,11 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   const contentType = response.headers.get('content-type') || '';
   if (contentType.includes('text/html') || response.redirected) {
     console.error(
-      `[HTTP Error] Respuesta no-JSON en ${url}. Status: ${response.status}, Content-Type: ${contentType}, Redirected: ${response.redirected}, Location: ${response.headers.get('location') || 'N/A'}`
+      `[HTTP Error] Respuesta no-JSON en ${url}. Status: ${response.status}, Content-Type: ${contentType}, Redirected: ${response.redirected}`
     );
-    throw new Error(
-      'Respuesta HTML inesperada o redirección de sesión. Puedes autenticarte con la versión clásica en /login/'
-    );
+    // Notificamos al sistema global que la sesión ha vencido
+    window.dispatchEvent(new CustomEvent('session_expired'));
+    throw new Error('La sesión ha caducado. Vuelve a iniciar sesión.');
   }
 
   let data: Record<string, unknown> | T;
@@ -68,6 +68,9 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   }
 
   if (!response.ok || (data && typeof data === 'object' && 'ok' in data && data.ok === false)) {
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent('session_expired'));
+    }
     const errorMsg =
       (data && typeof data === 'object' && 'mensaje' in data && typeof data.mensaje === 'string'
         ? data.mensaje

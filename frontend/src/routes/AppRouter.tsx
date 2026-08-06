@@ -7,9 +7,12 @@ import { CartPage } from '../pages/CartPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
-import { DjangoFallbackPage } from '../pages/DjangoFallbackPage';
+import { ForbiddenPage } from '../pages/ForbiddenPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
+import { useAuth } from '../hooks/useAuth';
+import { getDefaultRouteForSession } from '../utils/authUtils';
 import { AccountDashboardPage } from '../pages/account/AccountDashboardPage';
 import { ProfilePage } from '../pages/account/ProfilePage';
 import { AddressesPage } from '../pages/account/AddressesPage';
@@ -58,9 +61,25 @@ import { ProviderProductsPage } from '../pages/provider/ProviderProductsPage';
 import { ProviderOrdersPage } from '../pages/provider/ProviderOrdersPage';
 import { ProviderHistoryPage } from '../pages/provider/ProviderHistoryPage';
 
+const DynamicPanelRedirect = () => {
+  const { autenticado, loading, ...session } = useAuth();
+  if (loading) return null;
+  if (!autenticado) return <Navigate to="/login" replace />;
+  return <Navigate to={getDefaultRouteForSession(session)} replace />;
+};
+
+const DynamicProveedorRedirect = () => {
+  const { autenticado, loading, es_proveedor_externo } = useAuth();
+  if (loading) return null;
+  if (!autenticado) return <Navigate to="/login" replace />;
+  if (es_proveedor_externo) return <Navigate to="/proveedor/dashboard" replace />;
+  return <Navigate to="/403" replace />;
+};
+
 export const AppRouter: React.FC = () => {
   return (
     <Routes>
+      <Route path="/403" element={<ForbiddenPage />} />
       <Route path="/" element={<HomePage />} />
       <Route path="/catalogo" element={<CatalogPage />} />
       <Route path="/producto/:id" element={<ProductDetailPage />} />
@@ -415,7 +434,7 @@ export const AppRouter: React.FC = () => {
       <Route
         path="/proveedor"
         element={
-          <RoleRoute allowProvider={true}>
+          <RoleRoute requireExternalProvider={true}>
             <ProviderDashboardPage />
           </RoleRoute>
         }
@@ -423,7 +442,7 @@ export const AppRouter: React.FC = () => {
       <Route
         path="/proveedor/dashboard"
         element={
-          <RoleRoute allowProvider={true}>
+          <RoleRoute requireExternalProvider={true}>
             <ProviderDashboardPage />
           </RoleRoute>
         }
@@ -431,7 +450,7 @@ export const AppRouter: React.FC = () => {
       <Route
         path="/proveedor/productos"
         element={
-          <RoleRoute allowProvider={true}>
+          <RoleRoute requireExternalProvider={true}>
             <ProviderProductsPage />
           </RoleRoute>
         }
@@ -439,7 +458,7 @@ export const AppRouter: React.FC = () => {
       <Route
         path="/proveedor/ordenes"
         element={
-          <RoleRoute allowProvider={true}>
+          <RoleRoute requireExternalProvider={true}>
             <ProviderOrdersPage />
           </RoleRoute>
         }
@@ -447,56 +466,20 @@ export const AppRouter: React.FC = () => {
       <Route
         path="/proveedor/historial"
         element={
-          <RoleRoute allowProvider={true}>
+          <RoleRoute requireExternalProvider={true}>
             <ProviderHistoryPage />
           </RoleRoute>
         }
       />
 
-      {/* Rutas con fallback explícito y visible hacia Django clásico */}
-      <Route
-        path="/perfil"
-        element={
-          <DjangoFallbackPage
-            title="Mi Cuenta y Perfil Corporativo"
-            description="Esta funcionalidad se gestiona actualmente desde la vista clásica en Django, manteniendo todas tus direcciones, preferencias y configuraciones."
-            djangoUrl="/perfil/"
-          />
-        }
-      />
-      <Route
-        path="/pedidos"
-        element={
-          <DjangoFallbackPage
-            title="Mis Pedidos y Devoluciones"
-            description="Consulta tu historial de compras, rastrea tus envíos en tiempo real y solicita devoluciones en el portal oficial de Django."
-            djangoUrl="/pedidos/"
-          />
-        }
-      />
-      <Route
-        path="/panel"
-        element={
-          <DjangoFallbackPage
-            title="Panel de Administración"
-            description="Accede al panel integral corporativo en Django para gestión de inventarios, productos, marcas, lotes y usuarios."
-            djangoUrl="/panel/"
-          />
-        }
-      />
-      <Route
-        path="/proveedores"
-        element={
-          <DjangoFallbackPage
-            title="Portal de Proveedores"
-            description="Gestiona stock, órdenes de compra y abastecimiento desde el portal especializado en Django."
-            djangoUrl="/proveedores/"
-          />
-        }
-      />
+      {/* Redirecciones de rutas legacy */}
+      <Route path="/perfil" element={<Navigate to="/cuenta/perfil" replace />} />
+      <Route path="/pedidos" element={<Navigate to="/cuenta/pedidos" replace />} />
+      <Route path="/panel" element={<DynamicPanelRedirect />} />
+      <Route path="/proveedores" element={<DynamicProveedorRedirect />} />
 
-      {/* Fallback de ruta no encontrada hacia el catálogo */}
-      <Route path="*" element={<CatalogPage />} />
+      {/* Fallback de ruta no encontrada */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

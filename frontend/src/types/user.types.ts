@@ -13,6 +13,8 @@ export interface SessionState {
   autenticado: boolean;
   es_admin: boolean;
   es_prime: boolean;
+  es_proveedor_externo: boolean;
+  cod_proveedor?: number | null;
   roles: string[];
   usuario?: UsuarioPerfil | null;
   loading: boolean;

@@ -7,7 +7,6 @@ import {
   ShoppingCart,
   Package,
   AlertCircle,
-  ExternalLink,
   Store,
 } from 'lucide-react';
 
@@ -74,17 +73,7 @@ export const SupplierManagerSidebar: React.FC = () => {
           <span>Tienda Pública</span>
         </Link>
 
-        <a
-          href="/panel/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ops-nav-item"
-          style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#34d399' }}
-          title="Panel Django clásico (/panel/)"
-        >
-          <ExternalLink size={17} />
-          <span>Panel Clásico (/panel/)</span>
-        </a>
+
       </div>
     </aside>
   );
