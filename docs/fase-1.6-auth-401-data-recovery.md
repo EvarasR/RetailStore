@@ -6,7 +6,7 @@ Este documento reporta los hallazgos y correcciones aplicadas durante la Fase 1.
 * **Causa de la eliminación:** En la Fase 1.5 se ejecutó un script temporal (`verify_auth.py` o shell) que contenía llamadas al ORM (`.delete()`) sobre la tabla de roles y la tabla de asignación.
 * **Estado en el Seed Oficial:** Al inspeccionar `ARCHIVOS SQL/datos.sql`, se confirmó que el rol `PROVEEDOR` **nunca formó parte del seed oficial**. Los únicos 6 roles oficiales son: `CUSTOMER`, `PREMIUM_CUSTOMER`, `ADMIN`, `WAREHOUSE_MANAGER`, `SUPPLIER_MANAGER` y `SUPPORT`.
 * **Datos Restaurados:** **Ninguno**. 
-* **Justificación:** Ya que el rol no forma parte de los datos estables de la aplicación y las autorizaciones modernas dependen de la propiedad nativa `es_proveedor_externo`, se determinó que no existía dependencia legítima y no se requería restaurarlo.
+* **Justificación:** Ya que el rol no forma parte de los datos estables de la aplicación y las autorizaciones modernas dependen de la asociación real en la tabla `usuario_proveedor` (validado mediante `es_usuario_proveedor()`), se determinó que no existía dependencia legítima y no se requería restaurarlo.
 
 > **Importante:** No se ejecutaron operaciones `DELETE`, `TRUNCATE` ni `DROP` durante esta fase. Se generó previamente un volcado JSON de seguridad para el módulo `core`.
 
