@@ -1,0 +1,332 @@
+/* ==========================================================================
+   TECHTAIL OPERATIONAL PANELS STYLES (FASE 7.1)
+   Warehouse, Supplier Manager, Support Internal — Corporativo, Limpio, DB-First
+   ========================================================================== */
+
+.ops-app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--tt-color-background, #0b0f19);
+  color: var(--tt-color-text, #e2e8f0);
+  font-family: inherit;
+}
+
+/* Sidebar Operativa */
+.ops-sidebar {
+  width: 250px;
+  background-color: var(--tt-color-surface, #111827);
+  border-right: 1px solid var(--tt-color-border, #1f2937);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 30;
+  transition: transform 0.25s ease, width 0.25s ease;
+}
+
+.ops-sidebar-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--tt-color-border, #1f2937);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ops-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--tt-color-text, #f8fafc);
+}
+
+.ops-sidebar-nav {
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ops-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: var(--tt-color-text-light, #94a3b8);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.ops-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--tt-color-text, #f8fafc);
+}
+
+.ops-nav-item.active {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+/* Área Principal Operativa */
+.ops-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ops-topbar {
+  height: 64px;
+  background-color: var(--tt-color-surface, #111827);
+  border-bottom: 1px solid var(--tt-color-border, #1f2937);
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.ops-content {
+  padding: 1.5rem 2rem;
+  flex: 1;
+}
+
+/* Tarjetas de Métricas */
+.ops-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.ops-metric-card {
+  background-color: var(--tt-color-surface, #111827);
+  border: 1px solid var(--tt-color-border, #1f2937);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ops-metric-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tt-color-text-light, #94a3b8);
+  font-weight: 600;
+}
+
+.ops-metric-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--tt-color-text, #f8fafc);
+}
+
+/* Tablas Operativas */
+.ops-table-card {
+  background-color: var(--tt-color-surface, #111827);
+  border: 1px solid var(--tt-color-border, #1f2937);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+}
+
+.ops-table-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--tt-color-border, #1f2937);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ops-table-container {
+  overflow-x: auto;
+}
+
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ops-table th {
+  padding: 0.85rem 1.25rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--tt-color-text-light, #94a3b8);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  border-bottom: 1px solid var(--tt-color-border, #1f2937);
+}
+
+.ops-table td {
+  padding: 0.9rem 1.25rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--tt-color-border, #1f2937);
+  color: var(--tt-color-text, #e2e8f0);
+}
+
+.ops-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ops-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Badges Operativos */
+.ops-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ops-badge--critica,
+.ops-badge--alta {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.ops-badge--media {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.ops-badge--ok,
+.ops-badge--baja {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ops-sidebar {
+    position: fixed;
+    transform: translateX(-100%);
+  }
+  .ops-sidebar.open {
+    transform: translateX(0);
+  }
+  .ops-content {
+    padding: 1rem;
+  }
+}
+
+/* ==========================================================================
+   DRAWERS OPERATIVOS Y MODALES (FASE 7.2)
+   ========================================================================== */
+.ops-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  animation: opsFadeIn 0.2s ease;
+}
+
+.ops-drawer-panel {
+  width: 100%;
+  max-width: 540px;
+  background-color: #111827;
+  border-left: 1px solid #1f2937;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  animation: opsSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.ops-drawer-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #0f172a;
+}
+
+.ops-drawer-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ops-drawer-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #1f2937;
+  background-color: #0f172a;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@keyframes opsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes opsSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Barras de Filtro */
+.ops-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  background-color: #111827;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #1f2937;
+}
+
+.ops-filter-input {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ops-filter-input:focus {
+  border-color: #3b82f6;
+}
+
+.ops-filter-select {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+}

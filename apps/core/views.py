@@ -176,10 +176,24 @@ def perfil_view(request):
 
 @require_GET
 @ensure_csrf_cookie
-def api_session(request):
+def api_csrf(request):
+    return _json_ok(mensaje="Cookie CSRF establecida correctamente.")
+
+
+def _build_session_response(request, mensaje=None):
     user = request.user
     if not user.is_authenticated:
-        return _json_ok(autenticado=False, usuario=None, es_admin=False, es_prime=False)
+        data = {
+            "ok": True,
+            "autenticado": False,
+            "usuario": None,
+            "es_admin": False,
+            "es_prime": False,
+            "roles": [],
+        }
+        if mensaje:
+            data["mensaje"] = mensaje
+        return _json_ok(**data)
 
     es_prime = False
     try:
@@ -188,7 +202,116 @@ def api_session(request):
     except Exception:
         es_prime = False
 
+    usuario_data = {
+        "id": user.cod_usuario,
+        "cod_usuario": user.cod_usuario,
+        "email": user.email,
+        "nombre": user.get_full_name() or user.nombres or user.email,
+        "nombres": user.nombres,
+        "apellidos": user.apellidos,
+        "nombre_completo": user.get_full_name(),
+    }
+    data = {
+        "ok": True,
+        "autenticado": True,
+        "es_admin": _is_admin(user),
+        "es_prime": es_prime,
+        "roles": sorted(_roles_usuario(user)),
+        "usuario": usuario_data,
+    }
+    if mensaje:
+        data["mensaje"] = mensaje
+    return _json_ok(**data)
+
+
+@require_GET
+@ensure_csrf_cookie
+def api_session(request):
+    return _build_session_response(request)
+
+
+def _get_request_data(request):
+    import json
+    if request.content_type and "application/json" in request.content_type:
+        try:
+            return json.loads(request.body.decode("utf-8"))
+        except Exception:
+            return {}
+    if request.POST:
+        return request.POST
+    return {}
+
+
+@require_POST
+@ensure_csrf_cookie
+@sensitive_post_parameters("password", "contraseña", "clave")
+def api_auth_login(request):
+    data = _get_request_data(request)
+    email = (
+        data.get("email")
+        or data.get("correo")
+        or data.get("username")
+        or data.get("usuario")
+        or ""
+    ).strip().lower()
+    password = (
+        data.get("password")
+        or data.get("contraseña")
+        or data.get("clave")
+        or ""
+    )
+    if not email or not password:
+        return _json_error("Credenciales incorrectas", status=401)
+    try:
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            user = authenticate(request, email=email, password=password)
+    except Exception:
+        user = None
+    if user is not None:
+        login(request, user)
+        return _build_session_response(request, mensaje="Sesión iniciada correctamente")
+    return _json_error("Credenciales incorrectas", status=401)
+
+
+@require_POST
+@ensure_csrf_cookie
+@sensitive_post_parameters("password", "password2")
+def api_auth_registro(request):
+    data = _get_request_data(request)
+    email = (data.get("email") or "").strip().lower()
+    nombres = (data.get("nombres") or "").strip()
+    apellidos = (data.get("apellidos") or "").strip()
+    telefono = (data.get("telefono") or "").strip() or None
+    documento = (data.get("documento_identidad") or "").strip() or None
+    password = data.get("password") or ""
+    password2 = data.get("password2") or ""
+    acepta = data.get("acepta") in (True, "true", "on", 1, "1")
+
+    if not acepta:
+        return _json_error("Debes aceptar las condiciones de uso.", status=400)
+    if password != password2:
+        return _json_error("Las contraseñas no coinciden.", status=400)
+    if len(password) < 8:
+        return _json_error("La contraseña debe tener al menos 8 caracteres.", status=400)
+    try:
+        crear_usuario_cliente(email, password, nombres, apellidos, telefono, documento)
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
+        return _build_session_response(request, mensaje="Cuenta creada e iniciada correctamente")
+    except Exception as exc:
+        return _json_error(_safe_error(exc, "No se pudo crear la cuenta."), status=400)
+
+
+@require_POST
+@ensure_csrf_cookie
+def api_auth_logout(request):
+    logout(request)
     return _json_ok(
+<<<<<<< HEAD
         autenticado=True,
         es_admin=_is_admin(user),
         es_prime=es_prime,
@@ -200,6 +323,14 @@ def api_session(request):
             "apellidos": user.apellidos,
             "nombre_completo": user.get_full_name(),
         },
+=======
+        mensaje="Sesión cerrada correctamente.",
+        autenticado=False,
+        usuario=None,
+        es_admin=False,
+        es_prime=False,
+        roles=[],
+>>>>>>> recovery/frontend-2026-08-04
     )
 
 

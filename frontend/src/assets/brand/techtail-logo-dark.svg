@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 38" fill="none">
+  <defs>
+    <linearGradient id="tt-logo-dark-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0EA5E9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Símbolo modular TT - Optimizado para fondo oscuro -->
+  <g transform="translate(0, 3)">
+    <rect x="0" y="0" width="32" height="32" rx="8" fill="url(#tt-logo-dark-primary)" />
+    <path d="M8 10 H24 M16 10 V23" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" />
+    <circle cx="8" cy="10" r="1.8" fill="#FFFFFF" />
+    <circle cx="24" cy="10" r="1.8" fill="#FFFFFF" />
+    <circle cx="16" cy="23" r="1.8" fill="#FFFFFF" />
+  </g>
+
+  <!-- Wordmark TechTail - Crema claro / marfil para Dark Mode -->
+  <text x="42" y="24" font-family="'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif" font-size="21" font-weight="800" letter-spacing="-0.03em" fill="#F8FAFC">
+    Tech<tspan fill="#38BDF8">Tail</tspan>
+  </text>
+  <text x="43.5" y="33" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="7.5" font-weight="600" letter-spacing="0.16em" fill="#94A3B8">
+    ENTERPRISE TECH MARKET
+  </text>
+</svg>

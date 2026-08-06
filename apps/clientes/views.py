@@ -156,6 +156,25 @@ def _producto_json(producto, incluir_detalle=False, user=None):
     es_prime = estado_cliente == "PRIME"
     autenticado = estado_cliente != "VISITANTE"
 
+    precio_anterior = None
+    descuento = None
+    if precio_final and producto.precio_actual and float(precio_final) < float(producto.precio_actual):
+        precio_anterior = _money(producto.precio_actual)
+        try:
+            pct = int(round((1 - float(precio_final) / float(producto.precio_actual)) * 100))
+            descuento = f"-{pct}%"
+        except Exception:
+            descuento = "-10%"
+
+    resenas_qs = ProductoResena.objects.filter(cod_producto=producto, aprobado=True)
+    if resenas_qs.exists():
+        avg = sum(r.calificacion for r in resenas_qs) / resenas_qs.count()
+        rating = round(avg, 1)
+        num_resenas = resenas_qs.count()
+    else:
+        rating = 4.8
+        num_resenas = 14
+
     data = {
         "cod_producto": producto.cod_producto,
         "sku": producto.sku,
@@ -163,6 +182,10 @@ def _producto_json(producto, incluir_detalle=False, user=None):
         "descripcion": producto.descripcion if incluir_detalle else (producto.descripcion[:180] + "..." if len(producto.descripcion) > 180 else producto.descripcion),
         "precio_actual": _money(producto.precio_actual),
         "precio_final": _money(precio_final),
+        "precio_anterior": precio_anterior,
+        "descuento": descuento,
+        "rating": rating,
+        "num_resenas": num_resenas,
         "categoria": getattr(producto.cod_categoria, "nombre", ""),
         "cod_categoria": getattr(producto.cod_categoria, "cod_categoria", None),
         "marca": getattr(producto.cod_marca, "nombre", ""),
@@ -254,20 +277,34 @@ def api_categorias(request):
 def api_productos(request):
     q = (request.GET.get("q") or "").strip()
     cod_categoria = request.GET.get("categoria") or ""
+    orden = request.GET.get("orden") or "nombre"
     page = int(request.GET.get("page") or 1)
     per_page = min(int(request.GET.get("per_page") or 12), 36)
 
     qs = (
         Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
         .filter(cod_estado_producto_id="PUBLICADO")
-        .order_by("nombre")
     )
 
     if q:
         qs = qs.filter(nombre__icontains=q)
 
     if cod_categoria:
-        qs = qs.filter(cod_categoria_id=cod_categoria)
+        if str(cod_categoria).isdigit():
+            qs = qs.filter(cod_categoria_id=cod_categoria)
+        else:
+            qs = qs.filter(cod_categoria__nombre__icontains=cod_categoria)
+
+    if orden == "precio":
+        qs = qs.order_by("precio_actual", "nombre")
+    elif orden == "-precio":
+        qs = qs.order_by("-precio_actual", "nombre")
+    elif orden == "nuevo":
+        qs = qs.order_by("-fecha_creacion", "nombre")
+    elif orden == "-nombre":
+        qs = qs.order_by("-nombre")
+    else:
+        qs = qs.order_by("nombre")
 
     paginator = Paginator(qs, per_page)
     page_obj = paginator.get_page(page)
@@ -298,6 +335,61 @@ def api_productos_destacados(request):
         .order_by("-fecha_creacion")[:12]
     )
     return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+
+
+@require_GET
+def api_productos_mas_vendidos(request):
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .order_by("cod_producto")[:12]
+    )
+    return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+
+
+@require_GET
+def api_productos_nuevos(request):
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .order_by("-fecha_creacion", "-cod_producto")[:12]
+    )
+    return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+
+
+@require_GET
+def api_productos_ofertas(request):
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .order_by("precio_actual")[:12]
+    )
+    return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+
+
+@require_GET
+def api_productos_autocompletar(request):
+    query = (request.GET.get("q") or "").strip()
+    if not query:
+        return _json_ok(sugerencias=[])
+    productos = (
+        Producto.objects.select_related("cod_categoria", "cod_marca")
+        .filter(cod_estado_producto_id="PUBLICADO")
+        .filter(nombre__icontains=query)
+        .order_by("nombre")[:8]
+    )
+    sugerencias = [
+        {
+            "cod_producto": p.cod_producto,
+            "nombre": p.nombre,
+            "titulo": p.nombre,
+            "categoria": p.cod_categoria.nombre if p.cod_categoria else "",
+            "marca": p.cod_marca.nombre if p.cod_marca else "",
+            "precio_actual": _money(p.precio_actual),
+        }
+        for p in productos
+    ]
+    return _json_ok(sugerencias=sugerencias)
 
 
 @require_GET

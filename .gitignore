@@ -1,12 +1,28 @@
 .venv/
+venv/
+entorno/
 __pycache__/
 *.pyc
 .env
+.env.*
+*.env
 db.sqlite3
 media/*
 !media/productos/
 !media/productos/**/
 !media/productos/**/*.svg
+<<<<<<< HEAD
 staticfiles/
 .vscode/
 entorno/
+=======
+!media/productos/**/*.pdf
+staticfiles/
+.vscode/
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+Thumbs.db
+.pytest_cache/
+.ruff_cache/
+>>>>>>> recovery/frontend-2026-08-04

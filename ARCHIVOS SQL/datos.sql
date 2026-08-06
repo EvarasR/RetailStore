@@ -1,3 +1,4 @@
+
 -- ============================================================
 -- datos.sql
 -- Sistema Retail Prime - PostgreSQL 15
@@ -767,6 +768,22 @@ SELECT cod_producto, 2, 2, 4, TRUE
 FROM producto
 WHERE sku IN ('ELE-SAM-S24','ELE-APP-IP15','ELE-LG-TV55','COM-LEN-IDEAPAD','COM-HP-PAV15')
 ON CONFLICT DO NOTHING;
+
+-- Fichas técnicas demo requeridas por la validación final de publicación.
+-- La función fn_validar_producto_publicable exige metadata.ficha_tecnica.url
+-- con extensión .pdf. Se utiliza un PDF local de demostración para que el
+-- seed sea coherente; en producción debe reemplazarse por la ficha real.
+UPDATE producto
+SET metadata = COALESCE(metadata, '{}'::jsonb) ||
+    jsonb_build_object(
+        'ficha_tecnica',
+        jsonb_build_object(
+            'url', '/media/productos/fichas/ficha-tecnica-demo.pdf',
+            'nombre', 'Ficha técnica demo - ' || sku
+        )
+    )
+WHERE COALESCE(metadata->'ficha_tecnica'->>'url', '') = ''
+   OR lower(split_part(metadata->'ficha_tecnica'->>'url', '?', 1)) NOT LIKE '%.pdf';
 
 -- Publicar productos luego de cumplir requisitos
 DO $$

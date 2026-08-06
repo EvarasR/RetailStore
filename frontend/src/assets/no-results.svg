@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none">
+  <circle cx="160" cy="100" r="50" fill="#f8fafc"/>
+  <circle cx="152" cy="95" r="22" stroke="#94a3b8" stroke-width="3"/>
+  <path d="M168 111l14 14" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+  <text x="160" y="185" fill="#334155" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="16" text-anchor="middle">No encontramos productos</text>
+  <text x="160" y="205" fill="#64748b" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="12" text-anchor="middle">Intenta buscando con otros términos o categorías</text>
+</svg>

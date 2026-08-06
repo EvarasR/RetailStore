@@ -10,7 +10,11 @@ urlpatterns = [
     path("perfil/", views.perfil_view, name="perfil"),
 
     # APIs internas de sesión/perfil/direcciones.
+    path("api/csrf/", views.api_csrf, name="api_csrf"),
     path("api/session/", views.api_session, name="api_session"),
+    path("api/auth/login/", views.api_auth_login, name="api_auth_login"),
+    path("api/auth/registro/", views.api_auth_registro, name="api_auth_registro"),
+    path("api/auth/logout/", views.api_auth_logout, name="api_auth_logout"),
     path("api/perfil/", views.api_perfil, name="api_perfil"),
     path("api/perfil/actualizar/", views.api_actualizar_perfil, name="api_actualizar_perfil"),
     path("api/ubicaciones/", views.api_ubicaciones, name="api_ubicaciones"),
