@@ -18,7 +18,11 @@ import {
   Headphones,
 } from 'lucide-react';
 
+import { useAuth } from '../../hooks/useAuth';
+
 export const AdminSidebar: React.FC = () => {
+  const { es_proveedor_externo } = useAuth();
+
   return (
     <aside className="admin-sidebar">
       <div className="admin-sidebar-header">
@@ -145,7 +149,7 @@ export const AdminSidebar: React.FC = () => {
           style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
         >
           <Boxes size={16} color="#3b82f6" />
-          <span>Bodega (/warehouse)</span>
+          <span>Bodega e inventario</span>
         </NavLink>
         <NavLink
           to="/supplier-manager"
@@ -153,7 +157,7 @@ export const AdminSidebar: React.FC = () => {
           style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
         >
           <Truck size={16} color="#10b981" />
-          <span>Compras (/supplier-manager)</span>
+          <span>Compras y proveedores</span>
         </NavLink>
         <NavLink
           to="/support"
@@ -161,18 +165,18 @@ export const AdminSidebar: React.FC = () => {
           style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
         >
           <Headphones size={16} color="#f59e0b" />
-          <span>Soporte (/support)</span>
+          <span>Centro de soporte</span>
         </NavLink>
-        <NavLink
-          to="/proveedor"
-          className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
-          style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
-        >
-          <Building2 size={16} color="#38bdf8" />
-          <span>Proveedor (/proveedor)</span>
-        </NavLink>
-
-
+        {es_proveedor_externo && (
+          <NavLink
+            to="/proveedor"
+            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+            style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
+          >
+            <Building2 size={16} color="#38bdf8" />
+            <span>Portal de proveedor</span>
+          </NavLink>
+        )}
       </div>
     </aside>
   );
