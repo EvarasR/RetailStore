@@ -14,6 +14,7 @@ export function getCookie(name: string): string {
 
 export interface ApiOptions extends RequestInit {
   headers?: Record<string, string>;
+  skipSessionExpiredHandling?: boolean;
 }
 
 /**
@@ -54,8 +55,10 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   const isLoginRedirect = response.redirected && response.url.includes('/login');
 
   if (response.status === 401 || isLoginRedirect) {
-    window.dispatchEvent(new CustomEvent('session_expired'));
-    throw new Error('La sesión ha caducado. Vuelve a iniciar sesión.');
+    if (!options.skipSessionExpiredHandling && !url.includes('/login') && !url.includes('/registro')) {
+      window.dispatchEvent(new CustomEvent('session_expired'));
+      throw new Error('La sesión ha caducado. Vuelve a iniciar sesión.');
+    }
   }
 
   if (response.status === 403) {
@@ -82,7 +85,7 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   }
 
   if (!response.ok || (data && typeof data === 'object' && 'ok' in data && data.ok === false)) {
-    if (response.status === 401) {
+    if (response.status === 401 && !options.skipSessionExpiredHandling && !url.includes('/login') && !url.includes('/registro')) {
       window.dispatchEvent(new CustomEvent('session_expired'));
     }
     const errorMsg =
