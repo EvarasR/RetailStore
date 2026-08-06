@@ -14,8 +14,8 @@ def print_result(caso, data):
     print(f"HTTP: {resp.status_code}")
     print(f"JSON: {json.dumps(resp.json()) if resp.status_code != 500 else resp.content}")
 
-print_result("Registro válido", {"email": "nuevo.prueba@example.com", "password": "Password123!", "password2": "Password123!", "nombres": "Nuevo", "apellidos": "Prueba", "acepta": True})
-print_result("Correo ya registrado", {"email": "nuevo.prueba@example.com", "password": "Password123!", "password2": "Password123!", "acepta": True})
-print_result("Contraseñas diferentes", {"email": "nuevo.prueba2@example.com", "password": "Password123!", "password2": "Password1234!", "acepta": True})
-print_result("Contraseña corta", {"email": "nuevo.prueba3@example.com", "password": "123", "password2": "123", "acepta": True})
-print_result("Términos no aceptados", {"email": "nuevo.prueba4@example.com", "password": "Password123!", "password2": "Password123!", "acepta": False})
+print_result("Registro válido", {"email": "nuevo.prueba_2026@example.com", "password": "Password123!", "password2": "Password123!", "nombres": "Nuevo", "apellidos": "Prueba", "acepta": True})
+print_result("Correo ya registrado", {"email": "nuevo.prueba_2026@example.com", "password": "Password123!", "password2": "Password123!", "nombres": "Nuevo", "apellidos": "Prueba", "acepta": True})
+print_result("Contraseñas diferentes", {"email": "nuevo.prueba2@example.com", "password": "Password123!", "password2": "Password1234!", "nombres": "Nuevo", "apellidos": "Prueba", "acepta": True})
+print_result("Contraseña corta", {"email": "nuevo.prueba3@example.com", "password": "123", "password2": "123", "nombres": "Nuevo", "apellidos": "Prueba", "acepta": True})
+print_result("Términos no aceptados", {"email": "nuevo.prueba4@example.com", "password": "Password123!", "password2": "Password123!", "nombres": "Nuevo", "apellidos": "Prueba", "acepta": False})

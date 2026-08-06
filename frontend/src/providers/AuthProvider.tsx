@@ -91,7 +91,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (credentials: Record<string, unknown>): Promise<SessionState> => {
     // 1. Asegurar CSRF (http.ts ya lo hace si es un POST a /api/auth/login/)
     // 2. Ejecutar login
-    await postJSON('/api/auth/login/', credentials);
+    await postJSON('/api/auth/login/', credentials, { skipSessionExpiredHandling: true });
     // 3. Refrescar sesión (force=true) y retornar
     return await refreshSession(true);
   };

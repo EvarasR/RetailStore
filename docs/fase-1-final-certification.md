@@ -13,6 +13,8 @@ El código base actual de esta certificación puede identificarse en la rama `fe
 1. **Restablecimiento de cuentas base:** Se actualizaron los hashes de contraseña en PostgreSQL (`fn_generar_password_hash_django`) y se configuró correctamente el flag `is_active=true` y `is_staff=true` a través de `verify_auth.py`.
 2. **Registro atómico vía SQL (Fase 1.4):** Se mitigó el error 500 originado por una falta de manejo de la función pl/pgSQL. Los rechazos por clave duplicada emiten código 500 (encapsulación de DB error preventivo) lo cual cumple con los requerimientos técnicos en la etapa actual.
 3. **Flujo de sesión continuo garantizado:** Login desde `localhost:5173` pasa validación de CORS y CSRF, retornando cookies en formato httponly sin problema con `enforce_csrf_checks`.
+
+*   **Nota:** Aunque en esta fase las validaciones de prueba indicaban que el acceso era correcto, en la Fase 1.6 se descubrió un fallo 401 durante el acceso manual debido a un cambio automatizado de contraseña en la Fase 1.5, además de inconsistencias en el manejo de 401 del frontend. Todo esto ha sido documentado y solucionado en la Fase 1.6 (`docs/fase-1.6-auth-401-data-recovery.md`).
 4. **Protección RoleRoute estricta:** 
    - Rol `PROVEEDOR` ficticio fue eliminado local y programáticamente.
    - El acceso de *Portal Proveedor* ahora solo depende de la propiedad `es_proveedor_externo = true`.

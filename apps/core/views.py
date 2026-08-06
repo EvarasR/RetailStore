@@ -1,10 +1,11 @@
 from urllib.parse import urlparse
+import logging
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import transaction, DatabaseError, ProgrammingError
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.csrf import csrf_failure as default_csrf_failure
 
@@ -347,11 +348,17 @@ def api_auth_registro(request):
             if user is not None:
                 login(request, user)
         return _build_session_response(request, mensaje="Cuenta creada e iniciada correctamente")
-    except Exception as exc:
-        import logging
+    except (DatabaseError, ProgrammingError) as e:
         logger = logging.getLogger(__name__)
-        logger.error("Error técnico durante registro: %s", exc, exc_info=True)
-        return _json_error("No se pudo completar el registro por un error interno.", status=500)
+        logger.error(f"Error técnico durante registro: {e}")
+        error_msg = str(e).lower()
+        if "ya existe" in error_msg or "unique" in error_msg:
+            return JsonResponse({"ok": False, "mensaje": "El correo o documento ya se encuentra registrado."}, status=400)
+        return JsonResponse({"ok": False, "mensaje": "No se pudo completar el registro por un error interno."}, status=500)
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error técnico durante registro: {e}")
+        return JsonResponse({"ok": False, "mensaje": "No se pudo completar el registro por un error interno."}, status=500)
 
 
 @require_POST

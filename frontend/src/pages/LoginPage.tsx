@@ -6,11 +6,18 @@ import { isValidNextRoute, getDefaultRouteForSession } from '../utils/authUtils'
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const { login, error: sessionError } = useAuth();
+  const [error, setError] = useState<string | null>(sessionError || null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Si el auth context reporta error posteriormente (por ej. expiró estando en el login)
+  React.useEffect(() => {
+    if (sessionError && sessionError !== 'No se pudo consultar la sesión') {
+      setError(sessionError);
+    }
+  }, [sessionError]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
