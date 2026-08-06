@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.csrf import csrf_failure as default_csrf_failure
 
@@ -296,11 +297,23 @@ def api_auth_login(request):
         user = authenticate(request, username=email, password=password)
         if user is None:
             user = authenticate(request, email=email, password=password)
-    except Exception:
-        user = None
+    except Exception as exc:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error("Error técnico durante authenticate: %s", exc, exc_info=True)
+        return _json_error("No se pudo completar el inicio de sesión por un error interno.", status=500)
+
     if user is not None:
-        login(request, user)
+        try:
+            login(request, user)
+        except Exception as exc:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error("Error técnico durante login (sesión): %s", exc, exc_info=True)
+            return _json_error("No se pudo completar el inicio de sesión por un error interno.", status=500)
+            
         return _build_session_response(request, mensaje="Sesión iniciada correctamente")
+        
     return _json_error("Credenciales incorrectas", status=401)
 
 
@@ -324,16 +337,21 @@ def api_auth_registro(request):
         return _json_error("Las contraseñas no coinciden.", status=400)
     if len(password) < 8:
         return _json_error("La contraseña debe tener al menos 8 caracteres.", status=400)
+
     try:
-        crear_usuario_cliente(email, password, nombres, apellidos, telefono, documento)
-        user = authenticate(request, username=email, password=password)
-        if user is None:
-            user = authenticate(request, email=email, password=password)
-        if user is not None:
-            login(request, user)
+        with transaction.atomic():
+            crear_usuario_cliente(email, password, nombres, apellidos, telefono, documento)
+            user = authenticate(request, username=email, password=password)
+            if user is None:
+                user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)
         return _build_session_response(request, mensaje="Cuenta creada e iniciada correctamente")
     except Exception as exc:
-        return _json_error(_safe_error(exc, "No se pudo crear la cuenta."), status=400)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error("Error técnico durante registro: %s", exc, exc_info=True)
+        return _json_error("No se pudo completar el registro por un error interno.", status=500)
 
 
 @require_POST
