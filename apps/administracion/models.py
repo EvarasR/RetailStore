@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Modelos Django mapeados desde una base PostgreSQL existente.
 # Proyecto: TechTail
 # Importante:
@@ -56,65 +55,6 @@ class Producto(models.Model):
         managed = False
         db_table = 'producto'
 
-=======
-# Modelos Django mapeados desde una base PostgreSQL existente.
-# Proyecto: TechTail
-# Importante:
-# - No renombrar db_table ni db_column.
-# - managed = False porque la estructura la controlan los archivos SQL.
-# - Las tablas con llave primaria compuesta usan models.CompositePrimaryKey.
-# - Requiere Django 5.2 o superior para CompositePrimaryKey.
-
-from django.db import models
-
-
-class Categoria(models.Model):
-    cod_categoria = models.BigAutoField(primary_key=True)
-    cod_categoria_padre = models.ForeignKey('self', models.DO_NOTHING, db_column='cod_categoria_padre', blank=True, null=True)
-    nombre = models.CharField(max_length=120)
-    slug = models.CharField(unique=True, max_length=140)
-    descripcion = models.TextField(blank=True, null=True)
-    activo = models.BooleanField()
-    fecha_creacion = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'categoria'
-        unique_together = (('cod_categoria_padre', 'nombre'),)
-
-class Marca(models.Model):
-    cod_marca = models.BigAutoField(primary_key=True)
-    nombre = models.CharField(unique=True, max_length=120)
-    descripcion = models.TextField(blank=True, null=True)
-    activo = models.BooleanField()
-
-    class Meta:
-        managed = False
-        db_table = 'marca'
-
-class Producto(models.Model):
-    cod_producto = models.BigAutoField(primary_key=True)
-    cod_categoria = models.ForeignKey('administracion.Categoria', models.DO_NOTHING, db_column='cod_categoria')
-    cod_marca = models.ForeignKey('administracion.Marca', models.DO_NOTHING, db_column='cod_marca')
-    sku = models.CharField(unique=True, max_length=80)
-    nombre = models.CharField(max_length=180)
-    descripcion = models.TextField()
-    precio_actual = models.DecimalField(max_digits=12, decimal_places=2)
-    peso_kg = models.DecimalField(max_digits=10, decimal_places=3)
-    largo_cm = models.DecimalField(max_digits=10, decimal_places=2)
-    ancho_cm = models.DecimalField(max_digits=10, decimal_places=2)
-    alto_cm = models.DecimalField(max_digits=10, decimal_places=2)
-    cod_estado_producto = models.ForeignKey('core.EstadoProducto', models.DO_NOTHING, db_column='cod_estado_producto')
-    requiere_revision_mayorista = models.BooleanField()
-    metadata = models.JSONField()
-    fecha_creacion = models.DateTimeField()
-    fecha_actualizacion = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'producto'
-
->>>>>>> recovery/frontend-2026-08-04
 class ProductoImagen(models.Model):
     # Puede haber varias imágenes por producto; PostgreSQL solo garantiza una principal mediante índice único parcial.
     cod_imagen = models.BigAutoField(primary_key=True)

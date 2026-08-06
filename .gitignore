@@ -11,11 +11,6 @@ media/*
 !media/productos/
 !media/productos/**/
 !media/productos/**/*.svg
-<<<<<<< HEAD
-staticfiles/
-.vscode/
-entorno/
-=======
 !media/productos/**/*.pdf
 staticfiles/
 .vscode/
@@ -25,4 +20,3 @@ frontend/dist/
 Thumbs.db
 .pytest_cache/
 .ruff_cache/
->>>>>>> recovery/frontend-2026-08-04
