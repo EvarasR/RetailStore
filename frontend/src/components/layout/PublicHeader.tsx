@@ -12,7 +12,7 @@ import techTailLogoDarkSvg from '../../assets/brand/techtail-logo-dark.svg';
 import techTailHeaderBadgeSvg from '../../assets/brand/techtail-header-badge.svg';
 
 export const PublicHeader: React.FC = () => {
-  const { autenticado, es_admin, es_prime, roles, usuario, logout } = useAuth();
+  const { autenticado, es_admin, es_prime, es_proveedor_externo, roles, usuario, logout } = useAuth();
   const { cart } = useCart();
   const { isDark } = useTheme();
 
@@ -86,28 +86,19 @@ export const PublicHeader: React.FC = () => {
                     <span style={{ fontSize: '0.6875rem', fontWeight: 700 }}>ERP</span>
                     <span className="tt-nav-item__strong">/admin</span>
                   </Link>
-                  <a
-                    href="/panel/"
-                    className="tt-nav-item"
-                    style={{ backgroundColor: 'var(--tt-color-surface)', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}
-                    title="Panel Admin clásico (/panel/)"
-                  >
-                    <span style={{ fontSize: '0.6875rem', color: 'var(--tt-color-primary)', fontWeight: 700 }}>ADMIN</span>
-                    <span className="tt-nav-item__strong">/panel/</span>
-                  </a>
                 </div>
               )}
 
-              {roles?.some((r) => ['SUPPLIER', 'PROVEEDOR', 'PROV', 'SUPPLIER_MANAGER'].some(k => r.toUpperCase().includes(k))) && (
-                <a
-                  href="/proveedores/"
+              {(es_proveedor_externo || roles?.includes('SUPPLIER_MANAGER')) && (
+                <Link
+                  to="/proveedor/dashboard"
                   className="tt-nav-item"
                   style={{ backgroundColor: 'var(--tt-color-surface)', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}
-                  title="Portal Proveedor clásico (/proveedores/)"
+                  title="Portal Proveedor React"
                 >
-                  <span style={{ fontSize: '0.6875rem', color: '#0284c7', fontWeight: 700 }}>PROV</span>
-                  <span className="tt-nav-item__strong">/proveedores/</span>
-                </a>
+                  <span style={{ fontSize: '0.6875rem', color: '#0284c7', fontWeight: 700 }}>EXTERNO</span>
+                  <span className="tt-nav-item__strong">/proveedor</span>
+                </Link>
               )}
 
               <button
@@ -127,14 +118,6 @@ export const PublicHeader: React.FC = () => {
                 <span>Hola, identifícate</span>
                 <span className="tt-nav-item__strong">Cuentas y Roles</span>
               </Link>
-              <a
-                href="/login/"
-                className="tt-nav-item"
-                style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)', textDecoration: 'underline' }}
-                title="Acceder con vista clásica Django (/login/)"
-              >
-                Login clásico
-              </a>
             </div>
           )}
 

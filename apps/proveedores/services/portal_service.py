@@ -15,10 +15,10 @@ from apps.proveedores.models import (
 
 
 def es_usuario_proveedor(usuario):
-    return UsuarioRol.objects.filter(
+    return UsuarioProveedor.objects.filter(
         cod_usuario=usuario,
-        cod_rol__nombre__in=("PROVEEDOR", "SUPPLIER_MANAGER"),
-        cod_rol__activo=True,
+        activo=True,
+        cod_proveedor__activo=True
     ).exists()
 
 
@@ -33,8 +33,6 @@ def obtener_proveedor_usuario(usuario):
 
 
 def puede_gestionar_proveedor(usuario, cod_proveedor):
-    if getattr(usuario, "is_staff", False):
-        return Proveedor.objects.filter(cod_proveedor=cod_proveedor, activo=True).exists()
     proveedor = obtener_proveedor_usuario(usuario)
     return bool(proveedor and proveedor.cod_proveedor == cod_proveedor and es_usuario_proveedor(usuario))
 

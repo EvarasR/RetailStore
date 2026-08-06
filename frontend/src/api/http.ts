@@ -50,13 +50,27 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   });
 
   const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('text/html') || response.redirected) {
-    console.error(
-      `[HTTP Error] Respuesta no-JSON en ${url}. Status: ${response.status}, Content-Type: ${contentType}, Redirected: ${response.redirected}, Location: ${response.headers.get('location') || 'N/A'}`
-    );
-    throw new Error(
-      'Respuesta HTML inesperada o redirección de sesión. Puedes autenticarte con la versión clásica en /login/'
-    );
+  const isHtml = contentType.includes('text/html');
+  const isLoginRedirect = response.redirected && response.url.includes('/login');
+
+  if (response.status === 401 || isLoginRedirect) {
+    window.dispatchEvent(new CustomEvent('session_expired'));
+    throw new Error('La sesión ha caducado. Vuelve a iniciar sesión.');
+  }
+
+  if (response.status === 403) {
+    if (isHtml) {
+      throw new Error('No se pudo validar la sesión de seguridad. Recarga el formulario e inténtalo nuevamente.');
+    }
+    // Si es JSON, dejamos que se procese normalmente para extraer el mensaje,
+    // pero disparamos el evento global (excepto en login/registro o csrf).
+    if (!url.includes('/login') && !url.includes('/registro') && !url.includes('/csrf')) {
+      window.dispatchEvent(new CustomEvent('forbidden_access'));
+    }
+  }
+
+  if (isHtml) {
+    throw new Error(`Error del servidor (HTML): ${response.status} ${response.statusText}`);
   }
 
   let data: Record<string, unknown> | T;
@@ -68,6 +82,9 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   }
 
   if (!response.ok || (data && typeof data === 'object' && 'ok' in data && data.ok === false)) {
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent('session_expired'));
+    }
     const errorMsg =
       (data && typeof data === 'object' && 'mensaje' in data && typeof data.mensaje === 'string'
         ? data.mensaje

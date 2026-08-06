@@ -5,16 +5,23 @@ import { AppRouter } from './routes/AppRouter';
 import { useTheme } from './hooks/useTheme';
 import './styles/marketplace.css';
 
+import { AuthProvider } from './providers/AuthProvider';
+import { SessionNavigationBridge } from './routes/SessionNavigationBridge';
+
 export const App: React.FC = () => {
   // Inicializa el sistema de temas (sincronizando localStorage con el DOM)
   useTheme();
 
   return (
-    <BrowserRouter>
-      <AppShell>
-        <AppRouter />
-      </AppShell>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <SessionNavigationBridge>
+          <AppShell>
+            <AppRouter />
+          </AppShell>
+        </SessionNavigationBridge>
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 

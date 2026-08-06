@@ -7,7 +7,6 @@ import {
   Layers,
   AlertTriangle,
   ClipboardList,
-  ExternalLink,
   Store,
 } from 'lucide-react';
 
@@ -74,17 +73,7 @@ export const WarehouseSidebar: React.FC = () => {
           <span>Tienda Pública</span>
         </Link>
 
-        <a
-          href="/panel/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ops-nav-item"
-          style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa' }}
-          title="Panel Django clásico (/panel/)"
-        >
-          <ExternalLink size={17} />
-          <span>Panel Clásico (/panel/)</span>
-        </a>
+
       </div>
     </aside>
   );

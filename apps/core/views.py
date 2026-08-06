@@ -4,7 +4,22 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.db import transaction
+from django.http import JsonResponse, HttpResponseForbidden
+from django.views.csrf import csrf_failure as default_csrf_failure
+
+def csrf_failure(request, reason=""):
+    if request.path.startswith("/api/") or request.headers.get("x-requested-with") == "fetch":
+        return JsonResponse(
+            {
+                "ok": False,
+                "mensaje": "No se pudo validar la sesión de seguridad. Recarga el formulario e inténtalo nuevamente.",
+                "razon": reason
+            },
+            status=403
+        )
+    return default_csrf_failure(request, reason=reason)
+
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -189,6 +204,8 @@ def _build_session_response(request, mensaje=None):
             "usuario": None,
             "es_admin": False,
             "es_prime": False,
+            "es_proveedor_externo": False,
+            "cod_proveedor": None,
             "roles": [],
         }
         if mensaje:
@@ -201,6 +218,18 @@ def _build_session_response(request, mensaje=None):
         es_prime = MembresiaUsuario.objects.filter(cod_usuario=user, cod_estado_membresia_id="ACTIVA").exists()
     except Exception:
         es_prime = False
+
+    es_proveedor_externo = False
+    cod_proveedor = None
+    try:
+        from apps.proveedores.services.portal_service import es_usuario_proveedor, obtener_proveedor_usuario
+        if es_usuario_proveedor(user):
+            proveedor = obtener_proveedor_usuario(user)
+            if proveedor:
+                es_proveedor_externo = True
+                cod_proveedor = proveedor.cod_proveedor
+    except Exception:
+        pass
 
     usuario_data = {
         "id": user.cod_usuario,
@@ -216,6 +245,8 @@ def _build_session_response(request, mensaje=None):
         "autenticado": True,
         "es_admin": _is_admin(user),
         "es_prime": es_prime,
+        "es_proveedor_externo": es_proveedor_externo,
+        "cod_proveedor": cod_proveedor,
         "roles": sorted(_roles_usuario(user)),
         "usuario": usuario_data,
     }
@@ -266,11 +297,23 @@ def api_auth_login(request):
         user = authenticate(request, username=email, password=password)
         if user is None:
             user = authenticate(request, email=email, password=password)
-    except Exception:
-        user = None
+    except Exception as exc:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error("Error técnico durante authenticate: %s", exc, exc_info=True)
+        return _json_error("No se pudo completar el inicio de sesión por un error interno.", status=500)
+
     if user is not None:
-        login(request, user)
+        try:
+            login(request, user)
+        except Exception as exc:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error("Error técnico durante login (sesión): %s", exc, exc_info=True)
+            return _json_error("No se pudo completar el inicio de sesión por un error interno.", status=500)
+            
         return _build_session_response(request, mensaje="Sesión iniciada correctamente")
+        
     return _json_error("Credenciales incorrectas", status=401)
 
 
@@ -294,16 +337,21 @@ def api_auth_registro(request):
         return _json_error("Las contraseñas no coinciden.", status=400)
     if len(password) < 8:
         return _json_error("La contraseña debe tener al menos 8 caracteres.", status=400)
+
     try:
-        crear_usuario_cliente(email, password, nombres, apellidos, telefono, documento)
-        user = authenticate(request, username=email, password=password)
-        if user is None:
-            user = authenticate(request, email=email, password=password)
-        if user is not None:
-            login(request, user)
+        with transaction.atomic():
+            crear_usuario_cliente(email, password, nombres, apellidos, telefono, documento)
+            user = authenticate(request, username=email, password=password)
+            if user is None:
+                user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)
         return _build_session_response(request, mensaje="Cuenta creada e iniciada correctamente")
     except Exception as exc:
-        return _json_error(_safe_error(exc, "No se pudo crear la cuenta."), status=400)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error("Error técnico durante registro: %s", exc, exc_info=True)
+        return _json_error("No se pudo completar el registro por un error interno.", status=500)
 
 
 @require_POST
@@ -316,6 +364,8 @@ def api_auth_logout(request):
         usuario=None,
         es_admin=False,
         es_prime=False,
+        es_proveedor_externo=False,
+        cod_proveedor=None,
         roles=[],
     )
 

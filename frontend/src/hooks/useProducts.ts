@@ -156,7 +156,8 @@ export function useAutocomplete() {
       try {
         const results = await fetchAutocomplete(newQuery);
         setSuggestions(results);
-      } catch (err) {
+      } catch (err: unknown) {
+        console.error('Error fetching suggestions:', err);
         setSuggestions([]);
       } finally {
         setLoading(false);

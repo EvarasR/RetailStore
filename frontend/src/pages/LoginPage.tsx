@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getJSON, postJSON } from '../api/http';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { isValidNextRoute, getDefaultRouteForSession } from '../utils/authUtils';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { refetch } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,18 +22,16 @@ export const LoginPage: React.FC = () => {
 
     try {
       setLoading(true);
-      // 1. Asegurar que exista la cookie CSRF oficial antes del login
-      try {
-        await getJSON('/api/session/');
-      } catch {
-        // Fallback silencioso por si aún no hay sesión o es visitante
+      // 1. Ejecutar login a través del contexto central (que ya se encarga de refrescar sesión)
+      const sessionData = await login({ email: email.trim(), password });
+      
+      // 2. Determinar a dónde redirigir basándose en next y roles
+      const next = searchParams.get('next');
+      if (isValidNextRoute(next)) {
+        navigate(next as string);
+      } else {
+        navigate(getDefaultRouteForSession(sessionData));
       }
-      // 2. Enviar credenciales en JSON
-      await postJSON('/api/auth/login/', { email: email.trim(), password });
-      // 3. Refrescar estado global de sesión de usuario en el hook
-      await refetch();
-      // 4. Redirigir al inicio del Marketplace
-      navigate('/');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Credenciales incorrectas';
       setError(message);
@@ -55,11 +54,6 @@ export const LoginPage: React.FC = () => {
           <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '0.85rem', borderRadius: '0.375rem', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
             <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>No se pudo iniciar sesión</div>
             <div>{error}</div>
-            <div style={{ marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid #fecaca' }}>
-              <a href="/login/" style={{ textDecoration: 'underline', fontWeight: 700, color: '#b91c1c' }}>
-                → Usar login clásico Django (/login/)
-              </a>
-            </div>
           </div>
         )}
 
@@ -116,24 +110,6 @@ export const LoginPage: React.FC = () => {
           <Link to="/registro" style={{ color: '#0284c7', fontWeight: 700 }}>
             Crear cuenta corporativa
           </Link>
-        </div>
-
-        <div style={{ marginTop: '1.25rem', padding: '0.875rem', backgroundColor: 'var(--tt-color-surface)', border: '1px solid var(--tt-color-border)', borderRadius: '0.5rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)', marginBottom: '0.35rem' }}>
-            ¿Prefieres la versión tradicional o tienes algún inconveniente?
-          </div>
-          <a
-            href="/login/"
-            style={{
-              display: 'inline-block',
-              fontSize: '0.8125rem',
-              fontWeight: 700,
-              color: 'var(--tt-color-primary)',
-              textDecoration: 'underline',
-            }}
-          >
-            Usar login clásico Django (/login/)
-          </a>
         </div>
       </div>
     </div>

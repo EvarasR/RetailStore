@@ -33,15 +33,17 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const cantonesFiltrados = locations?.cantones.filter(
-    (c) => Number(c.cod_provincia) === Number(codProvincia)
-  ) || [];
+  const cantonesFiltrados = React.useMemo(() => {
+    return locations?.cantones.filter(
+      (c) => Number(c.cod_provincia) === Number(codProvincia)
+    ) || [];
+  }, [locations?.cantones, codProvincia]);
 
   useEffect(() => {
     if (cantonesFiltrados.length > 0 && !cantonesFiltrados.some((c) => c.cod_canton === codCanton)) {
       setCodCanton(cantonesFiltrados[0].cod_canton);
     }
-  }, [codProvincia, cantonesFiltrados, codCanton]);
+  }, [cantonesFiltrados, codCanton, setCodCanton]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

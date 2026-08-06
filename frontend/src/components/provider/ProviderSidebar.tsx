@@ -6,7 +6,6 @@ import {
   Package,
   ClipboardCheck,
   History,
-  ExternalLink,
   Store,
 } from 'lucide-react';
 
@@ -65,17 +64,7 @@ export const ProviderSidebar: React.FC = () => {
           <span>Volver a la Tienda</span>
         </Link>
 
-        <a
-          href="/proveedores/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="prov-nav-item"
-          style={{ backgroundColor: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}
-          title="Panel Proveedor clásico Django (/proveedores/)"
-        >
-          <ExternalLink size={17} />
-          <span>Portal Clásico (/proveedores/)</span>
-        </a>
+
       </div>
     </aside>
   );
