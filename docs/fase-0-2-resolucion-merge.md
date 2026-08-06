@@ -34,3 +34,15 @@ El `manage.py check` finalizó sin errores ni advertencias en el sistema de mode
 
 ## Resumen del Commit
 Todos los conflictos han sido subsanados de manera quirúrgica preservando la intención del merge previo sin alterar lógica adicional.
+
+## Integración en main
+
+- Commit de reparación: 300a72b
+- Commit de merge: 2bdc656
+- Fecha de integración: 2026-08-06
+- Resultado de py_compile: Exitoso sin errores
+- Resultado de compileall: Exitoso sin errores
+- Resultado de manage.py check: System check identified no issues
+- Resultado de lint: 2 advertencias, 0 errores
+- Resultado de build: Exitoso (built in 1.17s)
+- Confirmación de origin/main: origin/main apunta al mismo commit de merge (2bdc656) y el árbol está limpio
