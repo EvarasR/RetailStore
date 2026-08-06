@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { getJSON, postJSON } from '../api/http';
 import { useAuth } from '../hooks/useAuth';
 import { isValidNextRoute, getDefaultRouteForSession } from '../utils/authUtils';
 
@@ -9,7 +8,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { refetch } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -23,26 +22,14 @@ export const LoginPage: React.FC = () => {
 
     try {
       setLoading(true);
-      // 1. Asegurar que exista la cookie CSRF oficial antes del login
-      try {
-        await getJSON('/api/session/');
-      } catch {
-        // Fallback silencioso por si aún no hay sesión o es visitante
-      }
-      // 2. Enviar credenciales en JSON
-      await postJSON('/api/auth/login/', { email: email.trim(), password });
-      // 3. Refrescar estado global de sesión de usuario en el hook
-      await refetch();
-      // 4. Determinar a dónde redirigir basándose en next y roles
+      // 1. Ejecutar login a través del contexto central (que ya se encarga de refrescar sesión)
+      const sessionData = await login({ email: email.trim(), password });
+      
+      // 2. Determinar a dónde redirigir basándose en next y roles
       const next = searchParams.get('next');
       if (isValidNextRoute(next)) {
         navigate(next as string);
       } else {
-        // Necesitamos esperar a que el refetch actualice el session para saber a dónde ir
-        // Sin embargo, refetch() no devuelve el valor nuevo directamente al componente
-        // Entonces podríamos hacer otro fetch temporal o esperar a que el context lo pase.
-        // Lo más seguro es redirigir a una ruta de "gateway" o leer el API directamente
-        const sessionData = await getJSON<any>('/api/session/');
         navigate(getDefaultRouteForSession(sessionData));
       }
     } catch (err: unknown) {

@@ -6,6 +6,7 @@ import { useTheme } from './hooks/useTheme';
 import './styles/marketplace.css';
 
 import { AuthProvider } from './providers/AuthProvider';
+import { SessionNavigationBridge } from './routes/SessionNavigationBridge';
 
 export const App: React.FC = () => {
   // Inicializa el sistema de temas (sincronizando localStorage con el DOM)
@@ -14,9 +15,11 @@ export const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AppShell>
-          <AppRouter />
-        </AppShell>
+        <SessionNavigationBridge>
+          <AppShell>
+            <AppRouter />
+          </AppShell>
+        </SessionNavigationBridge>
       </BrowserRouter>
     </AuthProvider>
   );

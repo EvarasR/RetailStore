@@ -33,7 +33,7 @@ export const ProviderTopbar: React.FC<ProviderTopbarProps> = ({ title, razonSoci
             {usuario?.nombre_completo || usuario?.email || 'Socio Proveedor'}
           </span>
           <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-            ({es_admin ? 'ADMIN' : 'PROVEEDOR'})
+            ({es_admin ? 'ADMIN' : 'EXTERNO'})
           </span>
         </div>
       </div>

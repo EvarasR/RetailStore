@@ -16,7 +16,7 @@ export const RegisterPage: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { refetch } = useAuth();
+  const { refreshSession } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +30,7 @@ export const RegisterPage: React.FC = () => {
     try {
       setLoading(true);
       await postJSON('/api/auth/registro/', formData);
-      await refetch();
+      await refreshSession(true);
       navigate('/');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'No se pudo crear la cuenta';

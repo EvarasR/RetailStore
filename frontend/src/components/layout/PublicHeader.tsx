@@ -12,7 +12,7 @@ import techTailLogoDarkSvg from '../../assets/brand/techtail-logo-dark.svg';
 import techTailHeaderBadgeSvg from '../../assets/brand/techtail-header-badge.svg';
 
 export const PublicHeader: React.FC = () => {
-  const { autenticado, es_admin, es_prime, roles, usuario, logout } = useAuth();
+  const { autenticado, es_admin, es_prime, es_proveedor_externo, roles, usuario, logout } = useAuth();
   const { cart } = useCart();
   const { isDark } = useTheme();
 
@@ -89,14 +89,14 @@ export const PublicHeader: React.FC = () => {
                 </div>
               )}
 
-              {roles?.some((r) => ['SUPPLIER', 'PROVEEDOR', 'PROV', 'SUPPLIER_MANAGER'].some(k => r.toUpperCase().includes(k))) && (
+              {(es_proveedor_externo || roles?.includes('SUPPLIER_MANAGER')) && (
                 <Link
-                  to="/proveedor"
+                  to="/proveedor/dashboard"
                   className="tt-nav-item"
                   style={{ backgroundColor: 'var(--tt-color-surface)', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}
                   title="Portal Proveedor React"
                 >
-                  <span style={{ fontSize: '0.6875rem', color: '#0284c7', fontWeight: 700 }}>PROV</span>
+                  <span style={{ fontSize: '0.6875rem', color: '#0284c7', fontWeight: 700 }}>EXTERNO</span>
                   <span className="tt-nav-item__strong">/proveedor</span>
                 </Link>
               )}

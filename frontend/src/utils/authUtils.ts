@@ -32,19 +32,24 @@ export function isValidNextRoute(next: string | null | undefined): boolean {
   let decoded = next;
   try {
     decoded = decodeURIComponent(next);
-  } catch (e) {
+    // Segunda pasada por si viene con doble codificación (ej. /%252F%252Fevil.example)
+    decoded = decodeURIComponent(decoded);
+  } catch {
     return false; // Invalid encoding
   }
 
   const trimmed = decoded.trim();
-  // Debe empezar con '/' pero no con '//' (que podría ser un dominio externo sin protocolo)
-  // Tampoco debe empezar con 'http' ni 'javascript:' ni '\'
+  // Debe empezar con '/' pero no con '//' o '/\' (que podría ser un dominio externo sin protocolo)
   if (!trimmed.startsWith('/')) return false;
   if (trimmed.startsWith('//')) return false;
   if (trimmed.startsWith('/\\')) return false;
-  if (trimmed.toLowerCase().startsWith('http')) return false;
-  if (trimmed.toLowerCase().startsWith('javascript:')) return false;
-  if (trimmed.toLowerCase().startsWith('data:')) return false;
+  if (trimmed.startsWith('\\')) return false;
+  
+  // Prohibir protocolos explícitos ocultos tras espacios, tabs o mayúsculas
+  const normalized = trimmed.toLowerCase().replace(/[\s\t\n\r]/g, '');
+  if (normalized.startsWith('http://') || normalized.startsWith('https://')) return false;
+  if (normalized.startsWith('javascript:')) return false;
+  if (normalized.startsWith('data:')) return false;
 
   return true;
 }

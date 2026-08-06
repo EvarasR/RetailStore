@@ -2,7 +2,7 @@
 
 ## 1. Estado inicial y commit
 - **Hash exacto del commit de la FASE 1**: `4cfd2f8 feat(auth): secure React session and role routing`
-- **Hash del nuevo commit (FASE 1.1)**: `d459422 fix(auth): harden session and role routing`
+- **Hash del nuevo commit (FASE 1.1)**: `2be6f10 fix(auth): harden session and role routing`
 - **Rama actual**: `feat/react-auth-routing-security`
 - **Archivos creados inicialmente**: `docs/fase-1-auth-routing.md`, `frontend/src/pages/ForbiddenPage.tsx`, `frontend/src/pages/NotFoundPage.tsx`, `frontend/src/providers/AuthProvider.tsx`, `frontend/src/utils/authUtils.ts`
 - **Archivos modificados inicialmente**: Múltiples Sidebars y Headers, App.tsx, http.ts, useAuth.ts, LoginPage.tsx, AppRouter.tsx, RoleRoute.tsx, user.types.ts, apps/core/views.py.
@@ -35,7 +35,7 @@ El `AuthProvider` envuelve a `BrowserRouter`. Esto es válido y robusto porque e
 }
 ```
 
-**CUSTOMER (`ana.cliente@example.com`):**
+**CUSTOMER (`cliente@example.test`):**
 ```json
 {
   "ok": true,
@@ -46,13 +46,13 @@ El `AuthProvider` envuelve a `BrowserRouter`. Esto es válido y robusto porque e
   "cod_proveedor": null,
   "roles": ["CUSTOMER"],
   "usuario": {
-    "id": 35,
-    "cod_usuario": 35,
-    "email": "ana.cliente@example.com",
-    "nombre": "Ana Mendoza",
-    "nombres": "Ana",
-    "apellidos": "Mendoza",
-    "nombre_completo": "Ana Mendoza"
+    "id": 100,
+    "cod_usuario": 100,
+    "email": "cliente@example.test",
+    "nombre": "Usuario Cliente",
+    "nombres": "Usuario",
+    "apellidos": "Cliente",
+    "nombre_completo": "Usuario Cliente"
   }
 }
 ```
@@ -70,8 +70,8 @@ El `AuthProvider` envuelve a `BrowserRouter`. Esto es válido y robusto porque e
 ```json
 {
   "es_proveedor_externo": true,
-  "cod_proveedor": 25,
-  "roles": ["PROVEEDOR"]
+  "cod_proveedor": 100,
+  "roles": []
 }
 ```
 
