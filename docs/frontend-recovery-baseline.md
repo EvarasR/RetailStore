@@ -1,11 +1,20 @@
-# Línea Base de Recuperación del Frontend (FASE 0)
+# Línea Base de Recuperación del Frontend (FASE 0 y 0.1)
 
 ## 1. Rama y Commit Base
 - **Rama activa:** `recovery/frontend-2026-08-04`
-- **Commit base encontrado:** `2406586a4b41a192a4ed71d0ccd9ae7b66530861` (fix(sql): seed technical-sheet PDF metadata before publication)
+- **Commit base validado:** `37b13e9` (chore(recovery): establish reproducible frontend baseline)
 
 ## 2. Estado Git Encontrado
-Al iniciar, se encontró el archivo `ARCHIVOS SQL/datos.sql` con modificaciones sin registrar (unstaged). Los archivos de la carpeta `frontend/src` se encontraban correctamente rastreados por Git en esta rama de recuperación.
+Al iniciar la FASE 0, se encontró el archivo `ARCHIVOS SQL/datos.sql` con modificaciones sin registrar (unstaged). Los archivos de la carpeta `frontend/src` se encontraban correctamente rastreados por Git en esta rama de recuperación.
+
+### Auditoría del archivo `datos.sql` en commit `37b13e9`
+El archivo `datos.sql` fue incluido en el commit `37b13e9` porque contenía cambios locales previos a la recuperación (un espacio en blanco/línea vacía eliminada al inicio del archivo). Este cambio no fue originado por la FASE 0, sino que correspondía al caso A: "El archivo ya contenía cambios recuperados antes de la FASE 0 y solamente fue incorporado al commit" al ejecutar el proceso de guardado de línea base.
+
+### Auditoría del archivo `.env`
+Se validó correctamente con `git ls-files .env` (vacío) y `git check-ignore -v .env` (regla `*.env` de la línea 8 del `.gitignore`). El archivo `.env` no está siendo rastreado y las credenciales permanecen seguras y fuera del versionamiento.
+
+### Rastreo del Frontend
+Se ha comprobado que la carpeta `frontend/src` está debidamente rastreada por Git. El comando `git ls-files frontend/src` reportó un total exacto de **301 archivos** rastreados.
 
 ## 3. Comandos de Instalación
 Para recrear el entorno de manera controlada y reproducible:
@@ -34,15 +43,14 @@ Se requiere un archivo `.env` en la raíz del proyecto para que Django funcione 
 - **Backend (Django):** `python manage.py runserver`
 - **Frontend (Vite):** En la carpeta frontend, ejecutar `npm run dev`
 
-## 6. Resultado de las Comprobaciones
-- `python manage.py check`: **Éxito**. "System check identified no issues (0 silenced)." (Requirió la creación de un `.env` base temporal).
-- `python -m compileall apps TiendaRetail`: **Éxito**. Los módulos de Python se compilaron correctamente sin errores de sintaxis.
-- `npm install`, `npm run lint`, `npm run build`: **Fallido**. (Ver incidencias).
+## 6. Resultado de las Comprobaciones (FASE 0.1)
+- **Node.js:** Versión `v24.19.0`
+- **npm:** Versión `11.17.0`
+- **npm install:** Ejecutado correctamente (añadidos 40 paquetes).
+- **npm run lint:** 0 errores, 2 advertencias (regla `exhaustive-deps` y `no-unused-vars`). Validado con éxito.
+- **npm run build:** Construcción de Vite realizada con éxito en 3.30s (compilando los dist `index.html`, `index.css`, `index.js`).
+- **Django `manage.py check`:** **Éxito**. "System check identified no issues (0 silenced)." (Ejecutado sin depender de `Activate.ps1`).
+- **Django `compileall`:** **Éxito**. Los módulos de Python compilaron correctamente sin errores de sintaxis.
 
 ## 7. Incidencias Detectadas
-- **Ausencia de Node/npm:** El comando `npm` no se reconoce en el entorno de ejecución actual, por lo que no fue posible compilar ni construir las dependencias del frontend de forma automatizada.
-- **Políticas de Ejecución (PowerShell):** El sistema restringe la ejecución de scripts, bloqueando la activación directa de `entorno\Scripts\activate.ps1`.
-- **Falta de variables de entorno:** El chequeo de Django (`manage.py check`) fallaba inicialmente por la ausencia de `SECRET_KEY`. Se creó un archivo `.env` base para solucionar esto.
-
-## 8. Archivos Recuperados que no estaban originalmente en Git
-Se ha comprobado con `git ls-files frontend/src` que toda la base de código de React (componentes, apis, assets) ya se encuentra rastreada y asegurada en el historial de Git actual, corrigiendo la omisión original. Se ha blindado el archivo `.gitignore` para prevenir que `node_modules` y directorios de compilación vuelvan a subirse accidentalmente.
+- **Políticas de Ejecución (PowerShell):** El sistema restringe la ejecución de scripts (`.ps1`). Esto bloqueó el script de activación del entorno virtual de Python y el alias nativo `npm`. Se superó mediante `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` y ejecutando Python directamente desde el binario `.\entorno\Scripts\python.exe`.
