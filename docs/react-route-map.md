@@ -1,76 +1,65 @@
-# Mapa de Rutas de React
+# Mapa de Rutas React
 
-Este documento presenta el árbol de rutas públicas y protegidas mapeadas en el frontend React.
-
-## Árbol de Rutas Actuales
-
-- `/` (en AppRouter.tsx)
-- `/catalogo` (en AppRouter.tsx)
-- `/producto/:id` (en AppRouter.tsx)
-- `/carrito` (en AppRouter.tsx)
-- `/checkout` (en AppRouter.tsx)
-- `/login` (en AppRouter.tsx)
-- `/registro` (en AppRouter.tsx)
-- `/cuenta` (en AppRouter.tsx)
-- `/cuenta/perfil` (en AppRouter.tsx)
-- `/cuenta/direcciones` (en AppRouter.tsx)
-- `/cuenta/pedidos` (en AppRouter.tsx)
-- `/cuenta/pedidos/:id` (en AppRouter.tsx)
-- `/cuenta/tracking/:id` (en AppRouter.tsx)
-- `/cuenta/wishlist` (en AppRouter.tsx)
-- `/cuenta/notificaciones` (en AppRouter.tsx)
-- `/cuenta/soporte` (en AppRouter.tsx)
-- `/cuenta/membresia` (en AppRouter.tsx)
-- `/cuenta/seguridad` (en AppRouter.tsx)
-- `/admin` (en AppRouter.tsx)
-- `/admin/dashboard` (en AppRouter.tsx)
-- `/admin/productos` (en AppRouter.tsx)
-- `/admin/pedidos` (en AppRouter.tsx)
-- `/admin/inventario` (en AppRouter.tsx)
-- `/admin/proveedores` (en AppRouter.tsx)
-- `/admin/abastecimiento` (en AppRouter.tsx)
-- `/admin/cupones` (en AppRouter.tsx)
-- `/admin/promociones` (en AppRouter.tsx)
-- `/admin/pagos` (en AppRouter.tsx)
-- `/admin/tracking` (en AppRouter.tsx)
-- `/admin/prime` (en AppRouter.tsx)
-- `/admin/reportes` (en AppRouter.tsx)
-- `/admin/control` (en AppRouter.tsx)
-- `/warehouse` (en AppRouter.tsx)
-- `/warehouse/dashboard` (en AppRouter.tsx)
-- `/warehouse/inventario` (en AppRouter.tsx)
-- `/warehouse/lotes` (en AppRouter.tsx)
-- `/warehouse/alertas` (en AppRouter.tsx)
-- `/warehouse/pedidos` (en AppRouter.tsx)
-- `/supplier-manager` (en AppRouter.tsx)
-- `/supplier-manager/dashboard` (en AppRouter.tsx)
-- `/supplier-manager/proveedores` (en AppRouter.tsx)
-- `/supplier-manager/abastecimiento` (en AppRouter.tsx)
-- `/supplier-manager/productos` (en AppRouter.tsx)
-- `/supplier-manager/faltantes` (en AppRouter.tsx)
-- `/support` (en AppRouter.tsx)
-- `/support/dashboard` (en AppRouter.tsx)
-- `/support/tickets` (en AppRouter.tsx)
-- `/support/incidencias` (en AppRouter.tsx)
-- `/support/pedidos` (en AppRouter.tsx)
-- `/proveedor` (en AppRouter.tsx)
-- `/proveedor/dashboard` (en AppRouter.tsx)
-- `/proveedor/productos` (en AppRouter.tsx)
-- `/proveedor/ordenes` (en AppRouter.tsx)
-- `/proveedor/historial` (en AppRouter.tsx)
-- `/perfil` (en AppRouter.tsx)
-- `/pedidos` (en AppRouter.tsx)
-- `/panel` (en AppRouter.tsx)
-- `/proveedores` (en AppRouter.tsx)
-- `*` (en AppRouter.tsx)
-
-## Árboles por Rol (Propuestos y Actuales)
-- **Público**: `/`, `/catalogo`, `/producto/:id`, `/carrito`, `/checkout`, `/login`, `/registro`
-- **Cuenta (CUSTOMER/PREMIUM)**: `/cuenta/*`
-- **ADMIN**: `/admin/*`
-- **WAREHOUSE_MANAGER**: `/warehouse/*`
-- **SUPPLIER_MANAGER**: `/supplier-manager/*`
-- **SUPPORT**: `/support/*`
-- **PROVEEDOR_EXTERNO**: `/proveedor/*`
-
-*Nota: Se observan rutas como `/perfil`, `/pedidos`, `/panel`, `/proveedores` que son rutas 'legacy' o redirecciones al backend Django que deben ser absorbidas completamente por los módulos nativos mostrados arriba.*
+| Ruta | Actual/Propuesta | Componente | Archivo | Layout | Guard | Roles permitidos | Comportamiento actual | Endpoint principal | Dependencia Django | Estado | Acción final |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `/` | Actual | HomePage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/catalogo` | Actual | CatalogPage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/producto/:id` | Actual | ProductDetailPage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/carrito` | Actual | CartPage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/checkout` | Actual | CheckoutPage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/login` | Actual | LoginPage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/registro` | Actual | RegisterPage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/perfil` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/direcciones` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/pedidos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/pedidos/:id` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/tracking/:id` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/wishlist` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/notificaciones` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/soporte` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/membresia` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/cuenta/seguridad` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin` | Actual | Navigate to="/admin/dashboard" replace / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/dashboard` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/productos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/pedidos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/inventario` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/proveedores` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/abastecimiento` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/cupones` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/promociones` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/pagos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/tracking` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/prime` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/reportes` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/admin/control` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/warehouse` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/warehouse/dashboard` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/warehouse/inventario` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/warehouse/lotes` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/warehouse/alertas` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/warehouse/pedidos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/supplier-manager` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/supplier-manager/dashboard` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/supplier-manager/proveedores` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/supplier-manager/abastecimiento` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/supplier-manager/productos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/supplier-manager/faltantes` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/support` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/support/dashboard` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/support/tickets` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/support/incidencias` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/support/pedidos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/proveedor` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/proveedor/dashboard` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/proveedor/productos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/proveedor/ordenes` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/proveedor/historial` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/perfil` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/pedidos` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/panel` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/proveedores` | Actual | Unknown | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `*` | Actual | CatalogPage / | frontend/src/routes/AppRouter.tsx | MainLayout | AuthGuard | User | Funciona | `/api/` | N/A | ACTIVO | Mantener |
+| `/proveedores` | Legacy | DjangoFallback | N/A | Ninguno | None | PROVEEDOR | Navegación dura a backend Django | N/A | SÍ | LEGACY | Reemplazar con /proveedor/dashboard |
+| `/panel` | Legacy | DjangoFallback | N/A | Ninguno | None | ADMIN | Navegación dura a backend Django | N/A | SÍ | LEGACY | Reemplazar con /admin/dashboard |

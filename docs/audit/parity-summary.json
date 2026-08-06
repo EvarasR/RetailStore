@@ -1,0 +1,51 @@
+{
+  "date": "2026-08-05T21:37:49.747143",
+  "commit": "c66bb1a",
+  "total_ops": 145,
+  "counts": {
+    "COMPLETO": 18,
+    "PARCIAL": 3,
+    "AUSENTE": 91,
+    "BLOQUEADO": 33,
+    "NO_APLICA": 0
+  },
+  "gaps": {
+    "FALTA_UI": 56,
+    "NINGUNA": 18,
+    "MOCK_PRODUCTIVO": 3,
+    "FALLBACK_DJANGO": 35,
+    "FALTA_ENDPOINT": 33
+  },
+  "role_parity": {
+    "TODOS": 26.666666666666668,
+    "CUSTOMER": 13.513513513513514,
+    "PREMIUM_CUSTOMER": 25.0,
+    "ADMIN": 3.125,
+    "WAREHOUSE_MANAGER": 40.0,
+    "SUPPLIER_MANAGER": 0.0,
+    "PROVEEDOR_EXTERNO": 25.0,
+    "SUPPORT": 50.0
+  },
+  "module_parity": {
+    "Auth": 42.857142857142854,
+    "Cuenta": 0.0,
+    "Storefront": 0.0,
+    "Producto": 0.0,
+    "Carrito": 0.0,
+    "Checkout": 0.0,
+    "Pedidos": 0.0,
+    "Prime": 50.0,
+    "Recurrentes": 0.0,
+    "Soporte": 66.66666666666666,
+    "Admin Cat\u00e1logo": 0.0,
+    "Admin Promos": 0.0,
+    "Admin Pedidos": 0.0,
+    "Warehouse": 40.0,
+    "Supplier Admin": 0.0,
+    "External": 25.0,
+    "Support Admin": 50.0,
+    "Admin Core": 50.0,
+    "Admin Aux": 0.0
+  },
+  "formula": "COMPLETO / (COMPLETO + PARCIAL + AUSENTE + BLOQUEADO) * 100"
+}

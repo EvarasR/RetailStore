@@ -1,0 +1,60 @@
+Path,Component,File
+/,HomePage /,frontend/src/routes/AppRouter.tsx
+/catalogo,CatalogPage /,frontend/src/routes/AppRouter.tsx
+/producto/:id,ProductDetailPage /,frontend/src/routes/AppRouter.tsx
+/carrito,CartPage /,frontend/src/routes/AppRouter.tsx
+/checkout,CheckoutPage /,frontend/src/routes/AppRouter.tsx
+/login,LoginPage /,frontend/src/routes/AppRouter.tsx
+/registro,RegisterPage /,frontend/src/routes/AppRouter.tsx
+/cuenta,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/perfil,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/direcciones,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/pedidos,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/pedidos/:id,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/tracking/:id,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/wishlist,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/notificaciones,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/soporte,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/membresia,Unknown,frontend/src/routes/AppRouter.tsx
+/cuenta/seguridad,Unknown,frontend/src/routes/AppRouter.tsx
+/admin,"Navigate to=""/admin/dashboard"" replace /",frontend/src/routes/AppRouter.tsx
+/admin/dashboard,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/productos,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/pedidos,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/inventario,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/proveedores,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/abastecimiento,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/cupones,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/promociones,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/pagos,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/tracking,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/prime,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/reportes,Unknown,frontend/src/routes/AppRouter.tsx
+/admin/control,Unknown,frontend/src/routes/AppRouter.tsx
+/warehouse,Unknown,frontend/src/routes/AppRouter.tsx
+/warehouse/dashboard,Unknown,frontend/src/routes/AppRouter.tsx
+/warehouse/inventario,Unknown,frontend/src/routes/AppRouter.tsx
+/warehouse/lotes,Unknown,frontend/src/routes/AppRouter.tsx
+/warehouse/alertas,Unknown,frontend/src/routes/AppRouter.tsx
+/warehouse/pedidos,Unknown,frontend/src/routes/AppRouter.tsx
+/supplier-manager,Unknown,frontend/src/routes/AppRouter.tsx
+/supplier-manager/dashboard,Unknown,frontend/src/routes/AppRouter.tsx
+/supplier-manager/proveedores,Unknown,frontend/src/routes/AppRouter.tsx
+/supplier-manager/abastecimiento,Unknown,frontend/src/routes/AppRouter.tsx
+/supplier-manager/productos,Unknown,frontend/src/routes/AppRouter.tsx
+/supplier-manager/faltantes,Unknown,frontend/src/routes/AppRouter.tsx
+/support,Unknown,frontend/src/routes/AppRouter.tsx
+/support/dashboard,Unknown,frontend/src/routes/AppRouter.tsx
+/support/tickets,Unknown,frontend/src/routes/AppRouter.tsx
+/support/incidencias,Unknown,frontend/src/routes/AppRouter.tsx
+/support/pedidos,Unknown,frontend/src/routes/AppRouter.tsx
+/proveedor,Unknown,frontend/src/routes/AppRouter.tsx
+/proveedor/dashboard,Unknown,frontend/src/routes/AppRouter.tsx
+/proveedor/productos,Unknown,frontend/src/routes/AppRouter.tsx
+/proveedor/ordenes,Unknown,frontend/src/routes/AppRouter.tsx
+/proveedor/historial,Unknown,frontend/src/routes/AppRouter.tsx
+/perfil,Unknown,frontend/src/routes/AppRouter.tsx
+/pedidos,Unknown,frontend/src/routes/AppRouter.tsx
+/panel,Unknown,frontend/src/routes/AppRouter.tsx
+/proveedores,Unknown,frontend/src/routes/AppRouter.tsx
+*,CatalogPage /,frontend/src/routes/AppRouter.tsx

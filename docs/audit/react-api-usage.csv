@@ -1,0 +1,17 @@
+Method,URL,File,Line
+POST,/panel/api/inventario/acciones/,frontend/src/api/adminInventory.api.ts,26
+POST,/panel/api/tracking/acciones/,frontend/src/api/adminTracking.api.ts,9
+POST,/operaciones/api/prime/pagar/,frontend/src/api/membership.api.ts,28
+POST,/api/membresia/cancelar/,frontend/src/api/membership.api.ts,33
+POST,/proveedores/api/stock/actualizar/,frontend/src/api/provider.api.ts,15
+POST,/api/seguridad/password/,frontend/src/api/security.api.ts,5
+POST,/api/seguridad/verificar-email/,frontend/src/api/security.api.ts,14
+POST,/operaciones/api/soporte/tickets/crear/,frontend/src/api/support.api.ts,10
+POST,/panel/api/control-empresarial/acciones/,frontend/src/api/supportInternal.api.ts,49
+POST,/panel/api/control-empresarial/acciones/,frontend/src/api/supportInternal.api.ts,66
+POST,/panel/api/inventario/acciones/,frontend/src/api/warehouse.api.ts,86
+POST,/panel/api/inventario/acciones/,frontend/src/api/warehouse.api.ts,94
+POST,/api/auth/logout/,frontend/src/hooks/useAuth.ts,45
+GET,/api/session/,frontend/src/pages/LoginPage.tsx,26
+POST,/api/auth/login/,frontend/src/pages/LoginPage.tsx,31
+POST,/api/auth/registro/,frontend/src/pages/RegisterPage.tsx,32
