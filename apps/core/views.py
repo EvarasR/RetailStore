@@ -311,26 +311,12 @@ def api_auth_registro(request):
 def api_auth_logout(request):
     logout(request)
     return _json_ok(
-<<<<<<< HEAD
-        autenticado=True,
-        es_admin=_is_admin(user),
-        es_prime=es_prime,
-        roles=sorted(_roles_usuario(user)),
-        usuario={
-            "cod_usuario": user.cod_usuario,
-            "email": user.email,
-            "nombres": user.nombres,
-            "apellidos": user.apellidos,
-            "nombre_completo": user.get_full_name(),
-        },
-=======
         mensaje="Sesión cerrada correctamente.",
         autenticado=False,
         usuario=None,
         es_admin=False,
         es_prime=False,
         roles=[],
->>>>>>> recovery/frontend-2026-08-04
     )
 
 

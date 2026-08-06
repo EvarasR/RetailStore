@@ -46,8 +46,6 @@ VALUES
 ((SELECT cod_categoria FROM categoria WHERE slug='fibra-transceptores'),(SELECT cod_marca FROM marca WHERE nombre='LinkCraft'),'RP-SFP-10G','Transceptor SFP+ 10G SR','Módulo óptico multimodo para enlaces de 10 Gbps hasta 300 metros.',79.00,.03,6,1.4,1.2,'{"velocidad":"10 Gbps","fibra":"multimodo","alcance":"300 m"}')
 ON CONFLICT (sku) DO UPDATE SET cod_categoria=EXCLUDED.cod_categoria,cod_marca=EXCLUDED.cod_marca,nombre=EXCLUDED.nombre,descripcion=EXCLUDED.descripcion,precio_actual=EXCLUDED.precio_actual,metadata=EXCLUDED.metadata,cod_estado_producto='BORRADOR',fecha_actualizacion=now();
 
-<<<<<<< HEAD
-=======
 -- La publicación final exige una ficha técnica PDF en metadata.
 UPDATE producto
 SET metadata = COALESCE(metadata, '{}'::jsonb) ||
@@ -63,8 +61,6 @@ WHERE sku LIKE 'RP-%'
       COALESCE(metadata->'ficha_tecnica'->>'url', '') = ''
       OR lower(split_part(metadata->'ficha_tecnica'->>'url', '?', 1)) NOT LIKE '%.pdf'
   );
-
->>>>>>> recovery/frontend-2026-08-04
 INSERT INTO regla_limite_compra(cod_categoria,limite_por_pedido,limite_por_dia,limite_por_mes,requiere_revision)
 SELECT c.cod_categoria,10,20,60,FALSE FROM categoria c
 WHERE c.slug IN ('redes','seguridad-red','wifi-empresarial','cableado','energia-ups','videovigilancia-ip','servidores','almacenamiento','perifericos-profesionales','herramientas-red','racks','fibra-transceptores')

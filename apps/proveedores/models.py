@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Modelos Django mapeados desde una base PostgreSQL existente.
 # Proyecto: TechTail
 # Importante:
@@ -10,19 +9,6 @@
 from django.db import models
 
 
-=======
-# Modelos Django mapeados desde una base PostgreSQL existente.
-# Proyecto: TechTail
-# Importante:
-# - No renombrar db_table ni db_column.
-# - managed = False porque la estructura la controlan los archivos SQL.
-# - Las tablas con llave primaria compuesta usan models.CompositePrimaryKey.
-# - Requiere Django 5.2 o superior para CompositePrimaryKey.
-
-from django.db import models
-
-
->>>>>>> recovery/frontend-2026-08-04
 class Proveedor(models.Model):
     cod_proveedor = models.BigAutoField(primary_key=True)
     ruc = models.CharField(unique=True, max_length=40)
