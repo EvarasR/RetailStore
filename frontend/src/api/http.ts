@@ -50,13 +50,20 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   });
 
   const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('text/html') || response.redirected) {
-    console.error(
-      `[HTTP Error] Respuesta no-JSON en ${url}. Status: ${response.status}, Content-Type: ${contentType}, Redirected: ${response.redirected}`
-    );
-    // Notificamos al sistema global que la sesión ha vencido
+  const isHtml = contentType.includes('text/html');
+  const isLoginRedirect = response.redirected && response.url.includes('/login');
+
+  if (response.status === 401 || isLoginRedirect) {
     window.dispatchEvent(new CustomEvent('session_expired'));
     throw new Error('La sesión ha caducado. Vuelve a iniciar sesión.');
+  }
+
+  if (response.status === 403) {
+    throw new Error('No tienes permisos para realizar esta acción.');
+  }
+
+  if (isHtml) {
+    throw new Error(`Error del servidor (HTML): ${response.status} ${response.statusText}`);
   }
 
   let data: Record<string, unknown> | T;

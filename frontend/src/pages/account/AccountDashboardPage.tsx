@@ -255,14 +255,14 @@ export const AccountDashboardPage: React.FC = () => {
           </span>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <a href="/perfil/" className="tt-btn tt-btn--secondary" style={{ fontSize: '0.8125rem', padding: '0.4rem 0.8rem' }}>
+          <Link to="/cuenta/perfil" className="tt-btn tt-btn--secondary" style={{ fontSize: '0.8125rem', padding: '0.4rem 0.8rem' }}>
             <ExternalLink size={15} />
-            <span>Perfil Clásico (/perfil/)</span>
-          </a>
-          <a href="/pedidos/" className="tt-btn tt-btn--secondary" style={{ fontSize: '0.8125rem', padding: '0.4rem 0.8rem' }}>
+            <span>Editar Perfil</span>
+          </Link>
+          <Link to="/cuenta/pedidos" className="tt-btn tt-btn--secondary" style={{ fontSize: '0.8125rem', padding: '0.4rem 0.8rem' }}>
             <ExternalLink size={15} />
-            <span>Devoluciones (/pedidos/)</span>
-          </a>
+            <span>Ver Pedidos</span>
+          </Link>
         </div>
       </div>
     </AccountLayout>
