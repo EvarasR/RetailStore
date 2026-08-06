@@ -21,6 +21,7 @@
 4. **Cliente HTTP y Eventos**
    - `frontend/src/api/http.ts` fue modificado para despachar un evento personalizado `session_expired` cuando recibe un error 401 o una redirección a texto/HTML (síntoma de sesión vencida de Django).
    - `AuthProvider` escucha este evento, reinicia su estado interno de `session`, provocando un logout sin recargar por completo y limpiando estados de memoria.
+   - *Nota Histórica (FASE 1.3)*: Inicialmente, el cliente fallaba silenciosamente enmascarando los fallos CSRF de login y registro como "No tienes permisos" (403 HTML). La FASE 1.3 corrigió la capa proxy y la gestión de 403 para soportar adecuadamente el CSRF.
 
 5. **Páginas de Error (403/404) e UI**
    - Creadas `ForbiddenPage` (403) y `NotFoundPage` (404) que usan los tokens de estilos y paletas existentes.

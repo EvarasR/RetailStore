@@ -66,6 +66,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
+
 ROOT_URLCONF = "TiendaRetail.urls"
 
 TEMPLATES = [

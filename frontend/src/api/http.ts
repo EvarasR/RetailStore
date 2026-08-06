@@ -59,7 +59,14 @@ export async function http<T = unknown>(url: string, options: ApiOptions = {}): 
   }
 
   if (response.status === 403) {
-    throw new Error('No tienes permisos para realizar esta acción.');
+    if (isHtml) {
+      throw new Error('No se pudo validar la sesión de seguridad. Recarga el formulario e inténtalo nuevamente.');
+    }
+    // Si es JSON, dejamos que se procese normalmente para extraer el mensaje,
+    // pero disparamos el evento global (excepto en login/registro o csrf).
+    if (!url.includes('/login') && !url.includes('/registro') && !url.includes('/csrf')) {
+      window.dispatchEvent(new CustomEvent('forbidden_access'));
+    }
   }
 
   if (isHtml) {

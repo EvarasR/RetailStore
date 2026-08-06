@@ -4,7 +4,21 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
+from django.views.csrf import csrf_failure as default_csrf_failure
+
+def csrf_failure(request, reason=""):
+    if request.path.startswith("/api/") or request.headers.get("x-requested-with") == "fetch":
+        return JsonResponse(
+            {
+                "ok": False,
+                "mensaje": "No se pudo validar la sesión de seguridad. Recarga el formulario e inténtalo nuevamente.",
+                "razon": reason
+            },
+            status=403
+        )
+    return default_csrf_failure(request, reason=reason)
+
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
