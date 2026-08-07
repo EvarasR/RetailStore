@@ -55,6 +55,8 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
       const msg = err instanceof Error ? err.message : 'No se pudo registrar la tarjeta simulada';
       setError(msg);
     } finally {
+      setNumeroTarjeta('');
+      setCvv('');
       setSubmitting(false);
     }
   };
