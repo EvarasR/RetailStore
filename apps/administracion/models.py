@@ -324,6 +324,16 @@ class PromocionProducto(models.Model):
         managed = False
         db_table = 'promocion_producto'
 
+class PromocionCategoria(models.Model):
+    pk = models.CompositePrimaryKey('cod_promocion', 'cod_categoria')
+    cod_promocion = models.ForeignKey('administracion.Promocion', models.DO_NOTHING, db_column='cod_promocion')
+    cod_categoria = models.ForeignKey('administracion.Categoria', models.DO_NOTHING, db_column='cod_categoria')
+    fecha_creacion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'promocion_categoria'
+
 class LogBusqueda(models.Model):
     cod_log_busqueda = models.BigAutoField(primary_key=True)
     cod_usuario = models.ForeignKey('core.Usuario', models.DO_NOTHING, db_column='cod_usuario', blank=True, null=True)

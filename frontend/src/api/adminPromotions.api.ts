@@ -16,3 +16,7 @@ export async function updateAdminPromotion(codPromocion: number, values: Record<
 export async function associateAdminPromotionProduct(codPromocion: number, values: Record<string, unknown>): Promise<{ mensaje?: string }> {
   return postForm(`/panel/api/promociones/${codPromocion}/productos/`, values);
 }
+
+export async function associateAdminPromotionCategory(codPromocion: number, values: Record<string, unknown>): Promise<{ mensaje?: string }> {
+  return postForm(`/panel/api/promociones/${codPromocion}/categorias/`, values);
+}

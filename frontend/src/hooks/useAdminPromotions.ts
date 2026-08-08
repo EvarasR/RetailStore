@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAdminPromotions } from '../api/adminPromotions.api';
-import type { AdminPromotionAssociation } from '../types/adminPromotion.types';
+import type { AdminPromotionsResponse } from '../types/adminPromotion.types';
 
 export function useAdminPromotions() {
-  const [associations, setAssociations] = useState<AdminPromotionAssociation[]>([]);
+  const [data, setData] = useState<AdminPromotionsResponse>({ promociones: [], productos: [], categorias: [], asociaciones: [], asociaciones_categorias: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,8 +11,7 @@ export function useAdminPromotions() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchAdminPromotions();
-      setAssociations(data.asociaciones || []);
+      setData(await fetchAdminPromotions());
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cargar promociones asociadas en BD.';
       setError(msg);
@@ -25,5 +24,5 @@ export function useAdminPromotions() {
     loadPromotions();
   }, [loadPromotions]);
 
-  return { associations, loading, error, reload: loadPromotions };
+  return { data, loading, error, reload: loadPromotions };
 }

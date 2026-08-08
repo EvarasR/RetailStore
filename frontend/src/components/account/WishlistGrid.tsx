@@ -77,9 +77,9 @@ export const WishlistGrid: React.FC<WishlistGridProps> = ({
                   <span style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--tt-color-text-main)' }}>
                     {p.precio_final || p.precio_actual}
                   </span>
-                  {p.precio_anterior && (
+                  {p.tiene_descuento && (
                     <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--tt-color-text-light)', textDecoration: 'line-through' }}>
-                      {p.precio_anterior}
+                      {p.precio_normal}
                     </span>
                   )}
                 </div>

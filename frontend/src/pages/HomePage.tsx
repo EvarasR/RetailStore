@@ -219,7 +219,7 @@ export const HomePage: React.FC = () => {
 
         {/* 6. Carrusel 2: Ofertas Especiales */}
         <ProductCarousel
-          title="Ofertas Especiales en Hardware"
+          title="Ofertas TechTail"
           products={ofertas}
           loading={loading}
           linkTo="/catalogo?orden=precio"

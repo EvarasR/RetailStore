@@ -32,7 +32,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({ product, onReviewsClic
       <div className="tt-product-info__badges-row">
         <ProductBadges
           es_prime={product.es_prime}
-          descuento={product.descuento}
+          descuento={product.tiene_descuento ? `-${product.descuento_porcentaje}%` : null}
           stock_disponible={product.stock_disponible}
           estado={product.estado}
           isNew={isNew}
@@ -62,13 +62,13 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({ product, onReviewsClic
         <div className="tt-product-info__price-main">
           <span className="tt-product-info__price-label">Precio:</span>
           <span className="tt-product-info__price-val">{product.precio_final || product.precio_actual}</span>
-          {product.descuento && (
-            <span className="tt-product-info__discount-pill">{product.descuento}</span>
+          {product.tiene_descuento && (
+            <span className="tt-product-info__discount-pill">-{product.descuento_porcentaje}%</span>
           )}
         </div>
-        {product.precio_anterior && (
+        {product.tiene_descuento && (
           <div className="tt-product-info__price-old">
-            Precio recomendado: <del>{product.precio_anterior}</del>
+            Precio normal: <del>{product.precio_normal}</del>
           </div>
         )}
         <div className="tt-product-info__tax-note">

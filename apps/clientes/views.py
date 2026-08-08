@@ -20,7 +20,7 @@ from apps.administracion.models import (
     ProductoResena,
 )
 from apps.administracion.services.producto_service import (
-    precio_producto_con_promocion,
+    detalle_precio_producto,
     registrar_busqueda,
     registrar_producto_visto,
     stock_disponible_producto,
@@ -140,11 +140,18 @@ def _imagen_producto(cod_producto):
 
 
 def _producto_json(producto, incluir_detalle=False, user=None):
-    precio_final = None
+    precio = None
     try:
-        precio_final = precio_producto_con_promocion(producto.cod_producto)
+        precio = detalle_precio_producto(producto.cod_producto)
     except Exception:
-        precio_final = producto.precio_actual
+        precio = {
+            "precio_normal": producto.precio_actual,
+            "precio_final": producto.precio_actual,
+            "tiene_descuento": False,
+            "descuento_monto": 0,
+            "descuento_porcentaje": 0,
+            "promocion": {},
+        }
 
     stock = None
     try:
@@ -156,15 +163,10 @@ def _producto_json(producto, incluir_detalle=False, user=None):
     es_prime = estado_cliente == "PRIME"
     autenticado = estado_cliente != "VISITANTE"
 
-    precio_anterior = None
-    descuento = None
-    if precio_final and producto.precio_actual and float(precio_final) < float(producto.precio_actual):
-        precio_anterior = _money(producto.precio_actual)
-        try:
-            pct = int(round((1 - float(precio_final) / float(producto.precio_actual)) * 100))
-            descuento = f"-{pct}%"
-        except Exception:
-            descuento = "-10%"
+    tiene_descuento = bool(precio.get("tiene_descuento"))
+    descuento_porcentaje = precio.get("descuento_porcentaje") or 0
+    precio_normal = precio.get("precio_normal", producto.precio_actual)
+    precio_final = precio.get("precio_final", producto.precio_actual)
 
     resenas_qs = ProductoResena.objects.filter(cod_producto=producto, aprobado=True)
     if resenas_qs.exists():
@@ -180,10 +182,15 @@ def _producto_json(producto, incluir_detalle=False, user=None):
         "sku": producto.sku,
         "nombre": producto.nombre,
         "descripcion": producto.descripcion if incluir_detalle else (producto.descripcion[:180] + "..." if len(producto.descripcion) > 180 else producto.descripcion),
-        "precio_actual": _money(producto.precio_actual),
+        "precio_actual": _money(precio_normal),
+        "precio_normal": _money(precio_normal),
         "precio_final": _money(precio_final),
-        "precio_anterior": precio_anterior,
-        "descuento": descuento,
+        "precio_anterior": _money(precio_normal) if tiene_descuento else None,
+        "tiene_descuento": tiene_descuento,
+        "descuento_monto": _money(precio.get("descuento_monto") or 0),
+        "descuento_porcentaje": _money(descuento_porcentaje),
+        "descuento": f"-{_money(descuento_porcentaje)}%" if tiene_descuento else None,
+        "promocion": precio.get("promocion") or {},
         "rating": rating,
         "num_resenas": num_resenas,
         "categoria": getattr(producto.cod_categoria, "nombre", ""),
@@ -359,12 +366,19 @@ def api_productos_nuevos(request):
 
 @require_GET
 def api_productos_ofertas(request):
-    productos = (
+    candidatos = (
         Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto")
         .filter(cod_estado_producto_id="PUBLICADO")
-        .order_by("precio_actual")[:12]
+        .order_by("nombre")[:300]
     )
-    return _json_ok(productos=[_producto_json(p, user=request.user) for p in productos])
+    productos = []
+    for producto in candidatos:
+        dato = _producto_json(producto, user=request.user)
+        if dato["tiene_descuento"]:
+            productos.append(dato)
+        if len(productos) == 12:
+            break
+    return _json_ok(productos=productos)
 
 
 @require_GET

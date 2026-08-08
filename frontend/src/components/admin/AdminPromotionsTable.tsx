@@ -31,8 +31,6 @@ export const AdminPromotionsTable: React.FC<AdminPromotionsTableProps> = ({ asso
           <tr>
             <th>Código de Promoción</th>
             <th>Producto Asociado en BD</th>
-            <th>ID Promoción</th>
-            <th>ID Producto</th>
           </tr>
         </thead>
         <tbody>
@@ -47,12 +45,6 @@ export const AdminPromotionsTable: React.FC<AdminPromotionsTableProps> = ({ asso
                 </div>
               </td>
               <td style={{ fontWeight: 600 }}>{assoc.producto}</td>
-              <td style={{ fontFamily: 'monospace', color: 'var(--tt-color-text-muted)' }}>
-                #{assoc.cod_promocion}
-              </td>
-              <td style={{ fontFamily: 'monospace', color: 'var(--tt-color-text-muted)' }}>
-                #{assoc.cod_producto}
-              </td>
             </tr>
           ))}
         </tbody>

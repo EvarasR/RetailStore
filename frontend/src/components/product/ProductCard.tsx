@@ -52,13 +52,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     product.stock_disponible <= 5;
 
   const precioMostrar = product.precio_final || product.precio_actual || '0.00';
-  const precioAnterior = product.precio_anterior;
+  const precioAnterior = product.tiene_descuento ? product.precio_normal : null;
 
   return (
     <article className={`tt-product-card ${className}`.trim()}>
       {/* Badges y Etiquetas Superiores (Limpio y sutil) */}
       <div className="tt-product-card__badges">
-        {product.descuento && (
+        {product.tiene_descuento && (
           <span
             style={{
               backgroundColor: '#fef2f2',
@@ -72,7 +72,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               letterSpacing: '0.02em',
             }}
           >
-            {product.descuento}
+            -{product.descuento_porcentaje}%
           </span>
         )}
         {product.es_prime && (

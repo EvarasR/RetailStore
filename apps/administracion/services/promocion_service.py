@@ -76,6 +76,22 @@ def asociar_promocion_producto(cod_promocion, cod_producto):
     )
 
 
+def asociar_promocion_categoria(cod_promocion, cod_categoria):
+    return ejecutar_funcion_void(
+        "fn_asociar_promocion_categoria",
+        [cod_promocion, cod_categoria],
+        ["BIGINT", "BIGINT"],
+    )
+
+
+def desasociar_promocion_categoria(cod_promocion, cod_categoria):
+    return ejecutar_funcion_void(
+        "fn_desasociar_promocion_categoria",
+        [cod_promocion, cod_categoria],
+        ["BIGINT", "BIGINT"],
+    )
+
+
 def actualizar_cupon(cod_cupon, nombre, valor, activo=True):
     return ejecutar_funcion_void(
         "fn_actualizar_cupon",

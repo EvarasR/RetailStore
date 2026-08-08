@@ -100,8 +100,8 @@ export const ProductBuyBox: React.FC<ProductBuyBoxProps> = ({
       {/* Encabezado de Precio del Box */}
       <div className="tt-buy-box__price-header">
         <span className="tt-buy-box__price-value">{product.precio_final || product.precio_actual}</span>
-        {product.precio_anterior && (
-          <span className="tt-buy-box__price-old"><del>{product.precio_anterior}</del></span>
+        {product.tiene_descuento && (
+          <span className="tt-buy-box__price-old"><del>{product.precio_normal}</del></span>
         )}
       </div>
 

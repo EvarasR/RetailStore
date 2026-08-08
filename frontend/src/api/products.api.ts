@@ -7,6 +7,11 @@ export interface ProductItem {
   descripcion: string;
   precio_actual: string;
   precio_final: string;
+  precio_normal: string;
+  tiene_descuento: boolean;
+  descuento_monto: string;
+  descuento_porcentaje: string;
+  promocion?: { cod_promocion?: number; codigo?: string; nombre?: string; tipo?: string } | null;
   precio_anterior?: string | null;
   descuento?: string | null;
   rating?: number;
@@ -54,6 +59,10 @@ export function normalizeProduct(raw: any): ProductItem {
       descripcion: 'Descripción no disponible',
       precio_actual: '$0.00',
       precio_final: '$0.00',
+      precio_normal: '$0.00',
+      tiene_descuento: false,
+      descuento_monto: '$0.00',
+      descuento_porcentaje: '0',
       categoria: 'General',
       marca: 'TechTail',
       imagen: '',
@@ -73,6 +82,11 @@ export function normalizeProduct(raw: any): ProductItem {
     descripcion: String(raw.descripcion || ''),
     precio_actual: String(raw.precio_actual || '$0.00'),
     precio_final: String(raw.precio_final || raw.precio_actual || '$0.00'),
+    precio_normal: String(raw.precio_normal || raw.precio_actual || '$0.00'),
+    tiene_descuento: Boolean(raw.tiene_descuento),
+    descuento_monto: String(raw.descuento_monto || '$0.00'),
+    descuento_porcentaje: String(raw.descuento_porcentaje || '0'),
+    promocion: raw.promocion && typeof raw.promocion === 'object' ? raw.promocion : null,
     precio_anterior: raw.precio_anterior ? String(raw.precio_anterior) : null,
     descuento: raw.descuento ? String(raw.descuento) : null,
     rating: Number(raw.rating) || 4.8,
