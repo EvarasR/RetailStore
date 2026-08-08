@@ -28,7 +28,7 @@ export const SupportPage: React.FC = () => {
 
         {/* Listado conversacional de tickets */}
         <div>
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--tt-color-text)' }}>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--tt-color-text-main)' }}>
             Mis Incidencias y Requerimientos ({tickets.length})
           </h3>
           <SupportTicketList

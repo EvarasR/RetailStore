@@ -33,10 +33,10 @@ export const WarehouseLotsPage: React.FC = () => {
     <WarehouseLayout title="Gestión de Lotes y Vencimientos">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Lotes Activos y Rotación FIFO
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Monitoreo DB-First de lotes de ingreso, existencias disponibles y fechas de vencimiento
           </p>
         </div>
@@ -78,7 +78,7 @@ export const WarehouseLotsPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Layers size={18} color="#f59e0b" />
+            <Layers size={18} color="var(--tt-color-warning)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Registro de Lotes de Almacén ({filteredLots.length})
             </h3>
@@ -102,28 +102,28 @@ export const WarehouseLotsPage: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Cargando lotes registrados en PostgreSQL...
                   </td>
                 </tr>
               ) : filteredLots.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     No se encontraron lotes de almacén con los filtros aplicados
                   </td>
                 </tr>
               ) : (
                 filteredLots.map((lt, idx) => (
                   <tr key={lt.id || lt.cod_lote || idx}>
-                    <td style={{ color: '#94a3b8' }}>#{lt.id || lt.cod_lote || idx + 1}</td>
-                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: '#fbbf24' }}>
+                    <td style={{ color: 'var(--tt-color-text-light)' }}>#{lt.id || lt.cod_lote || idx + 1}</td>
+                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--tt-color-warning)' }}>
                       {lt.codigo_lote || `LOTE-${idx + 1}`}
                     </td>
                     <td style={{ fontWeight: 600 }}>{lt.producto}</td>
                     <td>{lt.almacen || 'Principal'}</td>
-                    <td style={{ fontWeight: 700, color: '#38bdf8' }}>{lt.cantidad}</td>
-                    <td style={{ color: '#cbd5e1' }}>{lt.fecha_recepcion || 'N/A'}</td>
-                    <td style={{ color: lt.fecha_vencimiento ? '#f8fafc' : '#94a3b8' }}>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>{lt.cantidad}</td>
+                    <td style={{ color: 'var(--tt-color-text-muted)' }}>{lt.fecha_recepcion || 'N/A'}</td>
+                    <td style={{ color: lt.fecha_vencimiento ? 'var(--tt-color-text-main)' : 'var(--tt-color-text-light)' }}>
                       {lt.fecha_vencimiento || 'Sin caducidad'}
                     </td>
                     <td>

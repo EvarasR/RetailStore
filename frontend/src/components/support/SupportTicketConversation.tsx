@@ -11,12 +11,12 @@ export const SupportTicketConversation: React.FC<SupportTicketConversationProps>
     return (
       <div
         style={{
-          background: '#0f172a',
-          border: '1px solid #1f2937',
+          background: 'var(--tt-color-text-main)',
+          border: '1px solid var(--tt-color-surface-subtle)',
           padding: '2rem',
           borderRadius: '0.75rem',
           textAlign: 'center',
-          color: '#94a3b8',
+          color: 'var(--tt-color-text-light)',
         }}
       >
         <MessageSquare size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5 }} />
@@ -37,9 +37,9 @@ export const SupportTicketConversation: React.FC<SupportTicketConversationProps>
             style={{
               background: isInternal
                 ? 'rgba(245, 158, 11, 0.08)'
-                : '#0f172a',
+                : 'var(--tt-color-text-main)',
               border: '1px solid',
-              borderColor: isInternal ? '#d97706' : '#1f2937',
+              borderColor: isInternal ? 'var(--tt-color-warning)' : 'var(--tt-color-surface-subtle)',
               borderRadius: '0.75rem',
               padding: '1rem',
             }}
@@ -47,11 +47,11 @@ export const SupportTicketConversation: React.FC<SupportTicketConversationProps>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {isInternal ? (
-                  <Lock size={15} color="#f59e0b" />
+                  <Lock size={15} color="var(--tt-color-warning)" />
                 ) : (
-                  <User size={16} color="#60a5fa" />
+                  <User size={16} color="var(--tt-color-primary)" />
                 )}
-                <strong style={{ color: isInternal ? '#f59e0b' : '#f8fafc', fontSize: '0.9rem' }}>
+                <strong style={{ color: isInternal ? 'var(--tt-color-warning)' : 'var(--tt-color-text-main)', fontSize: '0.9rem' }}>
                   {msg.autor || 'Usuario / Agente'}
                 </strong>
                 {isInternal && (
@@ -60,7 +60,7 @@ export const SupportTicketConversation: React.FC<SupportTicketConversationProps>
                   </span>
                 )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#94a3b8', fontSize: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--tt-color-text-light)', fontSize: '0.75rem' }}>
                 <Clock size={12} />
                 <span>{msg.fecha || 'Reciente'}</span>
               </div>

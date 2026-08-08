@@ -194,7 +194,7 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                   textAlign: 'center',
                   fontSize: '0.8125rem',
                   fontWeight: 700,
-                  color: 'var(--tt-color-accent-hover)',
+                  color: 'var(--tt-color-primary-hover)',
                   cursor: 'pointer',
                   borderTop: '1px solid var(--tt-color-border)',
                 }}

@@ -69,7 +69,7 @@ export const SupportTicketForm: React.FC<SupportTicketFormProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             padding: '0.75rem 1rem',
             borderRadius: '0.5rem',
             marginBottom: '1.25rem',

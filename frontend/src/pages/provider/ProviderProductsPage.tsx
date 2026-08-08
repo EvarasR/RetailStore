@@ -34,10 +34,10 @@ export const ProviderProductsPage: React.FC = () => {
     <ProviderLayout title="Mis Productos y Control de Stock" razonSocial={proveedor?.razon_social}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Actualizar Disponibilidad DB-First en Catálogo
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Ajusta tu stock disponible para que el sistema TechTail pueda emitir nuevas órdenes
           </p>
         </div>
@@ -48,7 +48,7 @@ export const ProviderProductsPage: React.FC = () => {
             target="_blank"
             rel="noreferrer"
             className="tt-btn tt-btn--secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', textDecoration: 'none', color: '#60a5fa' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', textDecoration: 'none', color: 'var(--tt-color-primary)' }}
             title="Abrir portal histórico de proveedores en Django"
           >
             <span>Portal /proveedores/</span>
@@ -96,7 +96,7 @@ export const ProviderProductsPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Package size={18} color="#60a5fa" />
+            <Package size={18} color="var(--tt-color-primary)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Mis SKUs y Saldos en Almacén ({filteredProducts.length})
             </h3>
@@ -120,34 +120,34 @@ export const ProviderProductsPage: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Consultando inventario en PostgreSQL vía /proveedores/api/mi-panel/...
                   </td>
                 </tr>
               ) : filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     No se encontraron productos en el catálogo comercial del proveedor
                   </td>
                 </tr>
               ) : (
                 filteredProducts.map((prod) => (
                   <tr key={prod.cod_producto_proveedor}>
-                    <td style={{ color: '#94a3b8', fontWeight: 600 }}>
+                    <td style={{ color: 'var(--tt-color-text-light)', fontWeight: 600 }}>
                       #{prod.cod_producto_proveedor}
                     </td>
-                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: '#fbbf24' }}>
+                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--tt-color-warning)' }}>
                       {prod.sku_proveedor || `SKU-${prod.cod_producto_proveedor}`}
                     </td>
                     <td style={{ fontWeight: 600 }}>{prod.producto}</td>
-                    <td style={{ fontWeight: 700, color: '#10b981' }}>{prod.costo_unitario}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{prod.costo_unitario}</td>
                     <td>{prod.tiempo_entrega_dias} días</td>
                     <td>
                       <span
                         style={{
                           fontSize: '1.05rem',
                           fontWeight: 700,
-                          color: (prod.stock_disponible || 0) <= 5 ? '#ef4444' : '#38bdf8',
+                          color: (prod.stock_disponible || 0) <= 5 ? 'var(--tt-color-error)' : 'var(--tt-color-primary)',
                         }}
                       >
                         {prod.stock_disponible}
@@ -162,7 +162,7 @@ export const ProviderProductsPage: React.FC = () => {
                       <button
                         onClick={() => setSelectedProduct(prod)}
                         className="tt-btn tt-btn--secondary"
-                        style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38bdf8', borderColor: '#0284c7' }}
+                        style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--tt-color-primary)', borderColor: 'var(--tt-color-primary-hover)' }}
                         title="Modificar stock disponible del proveedor en modal DB-First"
                       >
                         <Edit3 size={13} />

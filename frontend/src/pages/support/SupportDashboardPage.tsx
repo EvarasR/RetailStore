@@ -18,10 +18,10 @@ export const SupportDashboardPage: React.FC = () => {
     <SupportLayout title="Dashboard de Soporte Interno TechTail">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
             Centro Ejecutivo de Atención al Cliente
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Gestión DB-First de tickets de clientes, incidencias en transporte y devoluciones
           </p>
         </div>
@@ -48,40 +48,40 @@ export const SupportDashboardPage: React.FC = () => {
       <div className="ops-metrics-grid">
         <div className="ops-metric-card">
           <span className="ops-metric-title">Tickets Abiertos</span>
-          <span className="ops-metric-value" style={{ color: '#fbbf24' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-warning)' }}>
             {dashboard.tickets_abiertos}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Consultas y reclamos en cola
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Urgentes / Prioridad Alta</span>
-          <span className="ops-metric-value" style={{ color: '#ef4444' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-error)' }}>
             {dashboard.tickets_urgentes}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Atención prioritaria SLA &lt; 2h
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Incidencias Operativas</span>
-          <span className="ops-metric-value" style={{ color: '#f59e0b' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-warning)' }}>
             {dashboard.pedidos_con_incidencia}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Retenciones y problemas logísticos
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Devoluciones Pendientes</span>
-          <span className="ops-metric-value" style={{ color: '#60a5fa' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-primary)' }}>
             {dashboard.devoluciones_pendientes}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Solicitadas por clientes
           </span>
         </div>
@@ -92,14 +92,14 @@ export const SupportDashboardPage: React.FC = () => {
         <div className="ops-table-card" style={{ marginBottom: 0 }}>
           <div className="ops-table-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <MessageSquare size={18} color="#fbbf24" />
+              <MessageSquare size={18} color="var(--tt-color-warning)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Tickets Recientes de Clientes
               </h3>
             </div>
             <Link
               to="/support/tickets"
-              style={{ fontSize: '0.8rem', color: '#fbbf24', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-warning)', textDecoration: 'none', fontWeight: 600 }}
             >
               Ver Todos →
             </Link>
@@ -118,14 +118,14 @@ export const SupportDashboardPage: React.FC = () => {
               <tbody>
                 {tickets.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                       No hay tickets pendientes en el sistema
                     </td>
                   </tr>
                 ) : (
                   tickets.slice(0, 5).map((tk) => (
                     <tr key={tk.cod_ticket}>
-                      <td style={{ fontWeight: 700, color: '#fbbf24' }}>#{tk.cod_ticket}</td>
+                      <td style={{ fontWeight: 700, color: 'var(--tt-color-warning)' }}>#{tk.cod_ticket}</td>
                       <td style={{ fontWeight: 600 }}>{tk.cliente || tk.email || 'Cliente TechTail'}</td>
                       <td>{tk.asunto}</td>
                       <td>
@@ -142,14 +142,14 @@ export const SupportDashboardPage: React.FC = () => {
         <div className="ops-table-card" style={{ marginBottom: 0 }}>
           <div className="ops-table-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <AlertOctagon size={18} color="#ef4444" />
+              <AlertOctagon size={18} color="var(--tt-color-error)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Alertas de Envío e Incidencias
               </h3>
             </div>
             <Link
               to="/support/incidencias"
-              style={{ fontSize: '0.8rem', color: '#fbbf24', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-warning)', textDecoration: 'none', fontWeight: 600 }}
             >
               Ver Incidencias →
             </Link>
@@ -168,14 +168,14 @@ export const SupportDashboardPage: React.FC = () => {
               <tbody>
                 {incidencias.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                       No se registran incidencias operativas activas
                     </td>
                   </tr>
                 ) : (
                   incidencias.slice(0, 5).map((inc, idx) => (
                     <tr key={inc.cod_incidencia || idx}>
-                      <td style={{ fontWeight: 700, color: '#ef4444' }}>
+                      <td style={{ fontWeight: 700, color: 'var(--tt-color-error)' }}>
                         #{inc.cod_pedido || idx + 100}
                       </td>
                       <td style={{ fontWeight: 600 }}>{inc.cliente}</td>
@@ -197,16 +197,16 @@ export const SupportDashboardPage: React.FC = () => {
         <Link
           to="/support/tickets"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #f59e0b', background: 'rgba(245, 158, 11, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-warning)', background: 'rgba(245, 158, 11, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <MessageSquare size={22} color="#fbbf24" />
-            <ArrowRight size={18} color="#fbbf24" />
+            <MessageSquare size={22} color="var(--tt-color-warning)" />
+            <ArrowRight size={18} color="var(--tt-color-warning)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Atención de Tickets
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Responder y cerrar consultas con registro en base de datos
           </span>
         </Link>
@@ -214,16 +214,16 @@ export const SupportDashboardPage: React.FC = () => {
         <Link
           to="/support/incidencias"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-error)', background: 'rgba(239, 68, 68, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <AlertOctagon size={22} color="#ef4444" />
-            <ArrowRight size={18} color="#ef4444" />
+            <AlertOctagon size={22} color="var(--tt-color-error)" />
+            <ArrowRight size={18} color="var(--tt-color-error)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Resolver Incidencias
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Gestión de reclamos en transporte, retrasos y pérdidas
           </span>
         </Link>
@@ -231,16 +231,16 @@ export const SupportDashboardPage: React.FC = () => {
         <Link
           to="/support/pedidos"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-primary)', background: 'rgba(59, 130, 246, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <ClipboardList size={22} color="#60a5fa" />
-            <ArrowRight size={18} color="#60a5fa" />
+            <ClipboardList size={22} color="var(--tt-color-primary)" />
+            <ArrowRight size={18} color="var(--tt-color-primary)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Rastreo de Pedidos
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Consultar datos de despacho, guías y transacciones
           </span>
         </Link>

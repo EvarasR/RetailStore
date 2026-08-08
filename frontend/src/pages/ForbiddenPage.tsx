@@ -30,8 +30,8 @@ export const ForbiddenPage: React.FC = () => {
         style={{
           maxWidth: '520px',
           width: '100%',
-          backgroundColor: '#111827',
-          border: '1px solid #1f2937',
+          backgroundColor: 'var(--tt-color-surface)',
+          border: '1px solid var(--tt-color-surface-subtle)',
           borderRadius: '1rem',
           padding: '2.5rem 2rem',
           textAlign: 'center',
@@ -50,7 +50,7 @@ export const ForbiddenPage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
           }}
         >
           <ShieldAlert size={28} />
@@ -62,12 +62,12 @@ export const ForbiddenPage: React.FC = () => {
               margin: '0 0 0.5rem 0',
               fontSize: '1.35rem',
               fontWeight: 700,
-              color: '#f8fafc',
+              color: 'var(--tt-color-text-main)',
             }}
           >
             Acceso Restringido (403)
           </h2>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.5 }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--tt-color-text-light)', lineHeight: 1.5 }}>
             No tienes los permisos necesarios para acceder a esta funcionalidad con tu rol actual.
           </p>
         </div>
@@ -87,8 +87,8 @@ export const ForbiddenPage: React.FC = () => {
               flex: 1,
               padding: '0.75rem 1rem',
               backgroundColor: 'transparent',
-              color: '#cbd5e1',
-              border: '1px solid #334155',
+              color: 'var(--tt-color-text-muted)',
+              border: '1px solid var(--tt-color-border-dark)',
               borderRadius: '0.5rem',
               cursor: 'pointer',
               fontWeight: 600,
@@ -107,7 +107,7 @@ export const ForbiddenPage: React.FC = () => {
             style={{
               flex: 1,
               padding: '0.75rem 1rem',
-              backgroundColor: '#3b82f6',
+              backgroundColor: 'var(--tt-color-primary)',
               color: '#ffffff',
               borderRadius: '0.5rem',
               textDecoration: 'none',
@@ -130,7 +130,7 @@ export const ForbiddenPage: React.FC = () => {
               marginTop: '1rem',
               padding: '0.75rem 1rem',
               backgroundColor: 'transparent',
-              color: '#ef4444',
+              color: 'var(--tt-color-error)',
               border: 'none',
               cursor: 'pointer',
               fontWeight: 600,

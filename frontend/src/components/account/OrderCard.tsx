@@ -101,7 +101,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
               type="button"
               onClick={() => setShowReturnModal(true)}
               className="tt-btn tt-btn--ghost"
-              style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem', color: 'var(--tt-color-text)' }}
+              style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem', color: 'var(--tt-color-text-main)' }}
             >
               <RotateCcw size={14} />
               <span>Solicitar Devolución</span>

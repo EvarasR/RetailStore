@@ -11,7 +11,7 @@ export const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({ estado, nomb
   const getBadgeStyle = (st: string): { bg: string; color: string; label: string } => {
     switch (st) {
       case 'ENTREGADO':
-        return { bg: 'rgba(16, 185, 129, 0.15)', color: '#10b981', label: nombre || 'Entregado' };
+        return { bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--tt-color-success)', label: nombre || 'Entregado' };
       case 'EN_TRANSITO':
       case 'ENVIADO':
       case 'EN_REPARTO':
@@ -20,12 +20,12 @@ export const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({ estado, nomb
       case 'PREPARANDO':
       case 'ESPERANDO_PROVEEDOR':
       case 'LISTO_ENVIO':
-        return { bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', label: nombre || 'Preparando Pedido' };
+        return { bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--tt-color-warning)', label: nombre || 'Preparando Pedido' };
       case 'CANCELADO':
       case 'DEVOLUCION_SOLICITADA':
       case 'DEVUELTO':
       case 'REEMBOLSADO':
-        return { bg: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', label: nombre || 'Cancelado / Devuelto' };
+        return { bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--tt-color-error)', label: nombre || 'Cancelado / Devuelto' };
       case 'CREADO':
       case 'PENDIENTE_PAGO':
       case 'PAGO_AUTORIZADO':

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import { useProductDetail, useProductQuestions } from '../hooks/useProducts';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
@@ -14,6 +14,7 @@ import { RelatedProducts } from '../components/product/RelatedProducts';
 import { addToCart } from '../api/cart.api';
 
 export const ProductDetailPage: React.FC = () => {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { product, loading, error, refetch } = useProductDetail(id);
   const { questions, loading: loadingQuestions, refetch: refetchQuestions } = useProductQuestions(id);
@@ -34,7 +35,7 @@ export const ProductDetailPage: React.FC = () => {
   const handleMobileAddToCart = async () => {
     if (!product) return;
     if (product.requiere_login) {
-      window.location.href = `/login?next=/producto/${product.cod_producto}`;
+      navigate(`/login?next=${encodeURIComponent(`/producto/${product.cod_producto}`)}`);
       return;
     }
     setMobileAdding(true);

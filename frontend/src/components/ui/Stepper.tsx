@@ -56,11 +56,11 @@ export const Stepper: React.FC<StepperProps> = ({
                     height: '32px',
                     borderRadius: '50%',
                     backgroundColor: isCompleted
-                      ? '#10b981'
+                      ? 'var(--tt-color-success)'
                       : isCurrent
                       ? 'var(--tt-color-primary)'
                       : 'var(--tt-color-surface)',
-                    color: isCompleted || isCurrent ? '#ffffff' : 'var(--tt-color-text)',
+                    color: isCompleted || isCurrent ? '#ffffff' : 'var(--tt-color-text-main)',
                     border: isCompleted || isCurrent
                       ? 'none'
                       : '1px solid var(--tt-color-border)',
@@ -79,10 +79,10 @@ export const Stepper: React.FC<StepperProps> = ({
                     fontSize: '0.875rem',
                     fontWeight: isCurrent ? 700 : 500,
                     color: isCurrent
-                      ? 'var(--tt-color-text)'
+                      ? 'var(--tt-color-text-main)'
                       : step.number < currentStep
-                      ? '#10b981'
-                      : '#64748b',
+                      ? 'var(--tt-color-success)'
+                      : 'var(--tt-color-text-muted)',
                   }}
                 >
                   {step.label}
@@ -97,7 +97,7 @@ export const Stepper: React.FC<StepperProps> = ({
                     minWidth: '20px',
                     margin: '0 0.5rem',
                     backgroundColor: step.number < currentStep
-                      ? '#10b981'
+                      ? 'var(--tt-color-success)'
                       : 'var(--tt-color-border)',
                     transition: 'background-color 0.2s ease',
                   }}

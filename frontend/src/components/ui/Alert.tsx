@@ -22,29 +22,29 @@ export const Alert: React.FC<AlertProps> = ({
         return {
           bg: 'rgba(239, 68, 68, 0.08)',
           border: 'rgba(239, 68, 68, 0.3)',
-          color: '#ef4444',
-          icon: <AlertCircle size={20} color="#ef4444" />,
+          color: 'var(--tt-color-error)',
+          icon: <AlertCircle size={20} color="var(--tt-color-error)" />,
         };
       case 'warning':
         return {
           bg: 'rgba(245, 158, 11, 0.08)',
           border: 'rgba(245, 158, 11, 0.3)',
-          color: '#f59e0b',
-          icon: <AlertTriangle size={20} color="#f59e0b" />,
+          color: 'var(--tt-color-warning)',
+          icon: <AlertTriangle size={20} color="var(--tt-color-warning)" />,
         };
       case 'success':
         return {
           bg: 'rgba(16, 185, 129, 0.08)',
           border: 'rgba(16, 185, 129, 0.3)',
-          color: '#10b981',
-          icon: <CheckCircle size={20} color="#10b981" />,
+          color: 'var(--tt-color-success)',
+          icon: <CheckCircle size={20} color="var(--tt-color-success)" />,
         };
       default:
         return {
           bg: 'rgba(59, 130, 246, 0.08)',
           border: 'rgba(59, 130, 246, 0.3)',
-          color: '#3b82f6',
-          icon: <Info size={20} color="#3b82f6" />,
+          color: 'var(--tt-color-primary)',
+          icon: <Info size={20} color="var(--tt-color-primary)" />,
         };
     }
   };
@@ -79,7 +79,7 @@ export const Alert: React.FC<AlertProps> = ({
             {title}
           </h4>
         )}
-        <div style={{ fontSize: '0.875rem', color: 'var(--tt-color-text)', lineHeight: '1.5' }}>
+        <div style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-main)', lineHeight: '1.5' }}>
           {children}
         </div>
       </div>

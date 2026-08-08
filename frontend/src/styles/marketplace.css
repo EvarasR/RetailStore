@@ -720,9 +720,33 @@ body,
   align-items: start;
 }
 
+.tt-mobile-filter-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  color: var(--tt-color-text-main);
+  background: var(--tt-color-surface);
+  border: 1px solid var(--tt-color-border);
+  border-radius: var(--tt-radius-md);
+  font-weight: 700;
+}
+
 @media (max-width: 900px) {
   .tt-catalog-layout {
     grid-template-columns: 1fr;
+  }
+  .tt-mobile-filter-toggle {
+    display: inline-flex;
+  }
+  .tt-sidebar {
+    display: none;
+    position: static;
+  }
+  .tt-sidebar--open {
+    display: block;
   }
 }
 
@@ -1042,6 +1066,38 @@ body,
   }
 }
 
+@media (max-width: 480px) {
+  .tt-header__logo img {
+    width: 112px !important;
+    height: auto !important;
+  }
+  .tt-header__nav {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .tt-header__nav > .tt-nav-item {
+    display: none;
+  }
+  .tt-header__nav .tt-nav-item {
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.3rem;
+  }
+  .tt-theme-toggle span {
+    display: none;
+  }
+  .tt-theme-toggle {
+    padding-inline: 0.45rem !important;
+  }
+  .tt-cart-button {
+    gap: 0.25rem;
+    padding: 0.4rem 0.5rem;
+  }
+}
+
 /* =========================================================
    10. FASE 3 — DETALLE DE PRODUCTO MARKETPLACE / AMAZON
    ========================================================= */
@@ -1187,6 +1243,13 @@ body,
   justify-content: center;
   cursor: zoom-in;
   overflow: hidden;
+}
+@media (max-width: 640px) {
+  .tt-product-gallery__main {
+    flex: 0 0 auto;
+    width: 100%;
+    height: min(78vw, 340px);
+  }
 }
 .tt-product-gallery__main-img {
   max-width: 100%;
@@ -1375,7 +1438,7 @@ body,
   letter-spacing: -0.03em;
 }
 .tt-product-info__discount-pill {
-  background: var(--tt-color-action);
+  background: var(--tt-color-cta);
   color: #0f172a;
   font-size: 0.75rem;
   font-weight: 800;
@@ -2351,7 +2414,7 @@ body,
 .tt-account-layout__title {
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
   margin: 0 0 0.5rem 0;
   letter-spacing: -0.02em;
 }
@@ -2403,7 +2466,7 @@ body,
 .tt-account-sidebar__name {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -2434,7 +2497,7 @@ body,
   gap: 0.75rem;
   padding: 0.65rem 0.85rem;
   border-radius: 0.5rem;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
@@ -2452,19 +2515,6 @@ body,
   font-weight: 700;
 }
 
-.tt-account-sidebar__fallback {
-  padding-top: 1rem;
-  border-top: 1px dashed var(--tt-color-border);
-}
-
-.tt-account-sidebar__fallback-title {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--tt-color-text-light);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
 .tt-account-sidebar__logout {
   width: 100%;
   display: flex;
@@ -2480,6 +2530,44 @@ body,
   cursor: pointer;
   transition: background-color 0.15s ease;
   text-align: left;
+}
+
+.tt-account-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.tt-account-empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--tt-color-text-muted);
+}
+
+.tt-recurring-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.tt-recurring-card { padding: 1.25rem; }
+.tt-recurring-card header,
+.tt-recurring-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.tt-recurring-card h2 { margin: 0; font-size: 1rem; }
+.tt-recurring-card p { margin: 0.25rem 0 0; color: var(--tt-color-text-muted); font-size: 0.825rem; }
+.tt-recurring-card ul { margin: 1rem 0; padding: 0; list-style: none; }
+.tt-recurring-card li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--tt-color-border); }
+.tt-recurring-inline { display: grid; grid-template-columns: repeat(2, minmax(110px, 1fr)) auto; align-items: end; gap: 0.75rem; margin: 1rem 0; }
+.tt-recurring-inline label { display: flex; flex-direction: column; gap: 0.25rem; color: var(--tt-color-text-muted); font-size: 0.75rem; font-weight: 700; }
+.tt-recurring-inline input { min-height: 2.35rem; padding: 0.5rem; color: var(--tt-color-text-main); background: var(--tt-color-surface-subtle); border: 1px solid var(--tt-color-border); border-radius: var(--tt-radius-md); }
+
+@media (max-width: 640px) {
+  .tt-recurring-inline { grid-template-columns: 1fr; }
 }
 
 .tt-account-sidebar__logout:hover {
@@ -2540,7 +2628,7 @@ body,
 .tt-account-summary-card__value {
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
 }
 
 .tt-account-summary-card__subtitle {
@@ -2589,7 +2677,7 @@ body,
   font-size: 0.9375rem;
   font-weight: 700;
   margin: 0;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
 }
 
 .tt-address-card__body {
@@ -2635,14 +2723,14 @@ body,
 .tt-order-card__id {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
   display: block;
 }
 
 .tt-order-card__total {
   font-size: 1.1rem;
   font-weight: 800;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
 }
 
 .tt-order-card__body {
@@ -2728,7 +2816,7 @@ body,
 .tt-notification-card__title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--tt-color-text);
+  color: var(--tt-color-text-main);
   margin: 0;
 }
 

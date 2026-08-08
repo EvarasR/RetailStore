@@ -15,7 +15,7 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ tracking }) => {
       <div className="tt-order-timeline__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--tt-color-border)' }}>
         <div>
           <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)', display: 'block' }}>NÚMERO DE GUÍA LOGÍSTICA</span>
-          <strong style={{ fontSize: '1.1rem', color: 'var(--tt-color-text)' }}>
+          <strong style={{ fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
             {envio.numero_tracking || 'Asignación Logística en Progreso'}
           </strong>
         </div>
@@ -75,7 +75,7 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ tracking }) => {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap' }}>
-                    <strong style={{ fontSize: '0.9375rem', color: 'var(--tt-color-text)' }}>{evt.nombre}</strong>
+                    <strong style={{ fontSize: '0.9375rem', color: 'var(--tt-color-text-main)' }}>{evt.nombre}</strong>
                     <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>{evt.fecha}</span>
                   </div>
                   <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>

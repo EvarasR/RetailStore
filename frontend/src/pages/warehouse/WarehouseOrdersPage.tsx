@@ -28,10 +28,10 @@ export const WarehouseOrdersPage: React.FC = () => {
     <WarehouseLayout title="Despacho y Pedidos Operativos">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Cola de Preparación, Picking y Despacho
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Auditoría de picking DB-First y control de transiciones operativas (PREPARANDO, LISTO_ENVIO)
           </p>
         </div>
@@ -80,7 +80,7 @@ export const WarehouseOrdersPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ClipboardList size={18} color="#60a5fa" />
+            <ClipboardList size={18} color="var(--tt-color-primary)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Órdenes Asignadas a Logística de Almacén ({filteredOrders.length})
             </h3>
@@ -103,29 +103,29 @@ export const WarehouseOrdersPage: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Consultando cola logística en PostgreSQL...
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     No hay pedidos que coincidan con los criterios de filtro seleccionados
                   </td>
                 </tr>
               ) : (
                 filteredOrders.map((o) => (
                   <tr key={o.cod_pedido}>
-                    <td style={{ color: '#94a3b8' }}>#{o.cod_pedido}</td>
+                    <td style={{ color: 'var(--tt-color-text-light)' }}>#{o.cod_pedido}</td>
                     <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>
                       {`ORD-${o.cod_pedido}`}
                     </td>
                     <td style={{ fontWeight: 600 }}>{o.cliente}</td>
-                    <td style={{ color: '#cbd5e1' }}>{o.fecha}</td>
+                    <td style={{ color: 'var(--tt-color-text-muted)' }}>{o.fecha}</td>
                     <td>
                       <span className="ops-badge ops-badge--media">{o.estado}</span>
                     </td>
-                    <td style={{ fontWeight: 700, color: '#10b981' }}>{o.total}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{o.total}</td>
                     <td>
                       <button
                         onClick={() => setSelectedOrder(o)}

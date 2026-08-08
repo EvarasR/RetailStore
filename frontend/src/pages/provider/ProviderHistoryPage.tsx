@@ -18,10 +18,10 @@ export const ProviderHistoryPage: React.FC = () => {
     <ProviderLayout title="Historial y Relación Comercial" razonSocial={proveedor?.razon_social}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Registro Completo de Auditoría y Eventos
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Trazabilidad DB-First de contratos, entregas anteriores y renovaciones
           </p>
         </div>
@@ -30,7 +30,7 @@ export const ProviderHistoryPage: React.FC = () => {
           <div style={{ position: 'relative' }}>
             <Search
               size={16}
-              color="#94a3b8"
+              color="var(--tt-color-text-light)"
               style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }}
             />
             <input
@@ -63,7 +63,7 @@ export const ProviderHistoryPage: React.FC = () => {
       )}
 
       <div className="prov-table-box">
-        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--tt-color-surface)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <History size={18} color="#a855f7" />
           <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
             Bitácora de Eventos ({filteredHistory.length})
@@ -83,20 +83,20 @@ export const ProviderHistoryPage: React.FC = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                   Cargando bitácora comercial...
                 </td>
               </tr>
             ) : filteredHistory.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                   No se encontraron eventos comerciales recientes
                 </td>
               </tr>
             ) : (
               filteredHistory.map((hs, idx) => (
                 <tr key={idx}>
-                  <td style={{ color: '#94a3b8' }}>#{idx + 1}</td>
+                  <td style={{ color: 'var(--tt-color-text-light)' }}>#{idx + 1}</td>
                   <td style={{ fontWeight: 700, color: '#a855f7' }}>
                     {hs.evento || 'RECEPCIÓN OK'}
                   </td>

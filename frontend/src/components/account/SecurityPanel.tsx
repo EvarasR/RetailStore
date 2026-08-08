@@ -63,7 +63,7 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({
                 className="tt-badge"
                 style={{
                   backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                  color: '#10b981',
+                  color: 'var(--tt-color-success)',
                   fontSize: '0.7rem',
                   fontWeight: 700,
                   padding: '0.2rem 0.55rem',
@@ -73,7 +73,7 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({
                 AUTENTICADO DB
               </span>
             </div>
-            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0.2rem 0 0 0', color: 'var(--tt-color-text)' }}>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0.2rem 0 0 0', color: 'var(--tt-color-text-main)' }}>
               {userFullName || 'Usuario TechTail'} ({userRole || 'CUSTOMER'})
             </h4>
           </div>
@@ -88,7 +88,7 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({
               }
             }}
             className="tt-btn tt-btn--secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', padding: '0.5rem 1.1rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--tt-color-error)', borderColor: 'rgba(239, 68, 68, 0.3)', padding: '0.5rem 1.1rem' }}
           >
             <LogOut size={16} />
             <span>Cerrar Sesión Segura</span>
@@ -98,7 +98,7 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({
 
       {/* Tarjeta de verificación de correo */}
       <div>
-        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--tt-color-text)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--tt-color-text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <UserCheck size={18} color="var(--tt-color-primary)" />
           <span>Verificación Fiscal / Email</span>
         </h4>
@@ -111,7 +111,7 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({
 
       {/* Formulario de cambio de contraseña */}
       <div>
-        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--tt-color-text)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--tt-color-text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <Key size={18} color="var(--tt-color-primary)" />
           <span>Credenciales de Acceso</span>
         </h4>

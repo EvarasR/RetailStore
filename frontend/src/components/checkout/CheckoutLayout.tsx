@@ -22,7 +22,7 @@ export const CheckoutLayout: React.FC<CheckoutLayoutProps> = ({
       <div className="tt-page-header" style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
           <span className="tt-badge tt-badge--primary">CHECKOUT DB-FIRST • MOTOR ACID</span>
-          <span style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-success)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}>
             <Lock size={12} /> Cifrado y validado en backend
           </span>
         </div>
@@ -68,11 +68,11 @@ export const CheckoutLayout: React.FC<CheckoutLayoutProps> = ({
           flexWrap: 'wrap',
           gap: '1rem',
           fontSize: '0.8125rem',
-          color: '#64748b',
+          color: 'var(--tt-color-text-muted)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <ShieldCheck size={18} color="#10b981" />
+          <ShieldCheck size={18} color="var(--tt-color-success)" />
           <span>TechTail Marketplace — Integración Transaccional DB-First con Django 5 y PostgreSQL</span>
         </div>
         <div>Soporte B2B y Consultas de Despacho: soporte@techtail.com</div>

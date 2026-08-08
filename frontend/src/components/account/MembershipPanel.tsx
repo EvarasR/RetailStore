@@ -96,7 +96,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
                 <span
                   className="tt-badge"
                   style={{
-                    backgroundColor: isPrimeActive ? '#10b981' : 'rgba(100, 116, 139, 0.2)',
+                    backgroundColor: isPrimeActive ? 'var(--tt-color-success)' : 'rgba(100, 116, 139, 0.2)',
                     color: '#ffffff',
                     fontSize: '0.7rem',
                     padding: '0.2rem 0.6rem',
@@ -107,7 +107,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
                   {isPrimeActive ? 'ACTIVA (PREMIUM_CUSTOMER)' : 'INACTIVA (CUSTOMER)'}
                 </span>
               </div>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0.3rem 0 0 0', color: 'var(--tt-color-text)' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0.3rem 0 0 0', color: 'var(--tt-color-text-main)' }}>
                 {isPrimeActive ? membership?.plan || 'TechTail Prime Enterprise' : 'Cuenta Estándar TechTail'}
               </h2>
             </div>
@@ -130,7 +130,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
                 onClick={handleCancelMembership}
                 className="tt-btn tt-btn--secondary"
                 disabled={loadingCancel}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--tt-color-error)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
               >
                 <XCircle size={16} />
                 <span>{loadingCancel ? 'Cancelando...' : 'Cancelar Membresía'}</span>
@@ -140,7 +140,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
         </div>
 
         {cancelError && (
-          <p style={{ color: '#ef4444', fontSize: '0.875rem', margin: 0 }}>
+          <p style={{ color: 'var(--tt-color-error)', fontSize: '0.875rem', margin: 0 }}>
             {cancelError}
           </p>
         )}
@@ -160,7 +160,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
               <Calendar size={18} color="var(--tt-color-text-light)" />
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', display: 'block' }}>Fecha de Inicio</span>
-                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--tt-color-text)' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--tt-color-text-main)' }}>
                   {membership.fecha_inicio || 'N/D'}
                 </span>
               </div>
@@ -170,7 +170,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
               <Calendar size={18} color="var(--tt-color-text-light)" />
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', display: 'block' }}>Vencimiento Oficial</span>
-                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--tt-color-text)' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--tt-color-text-main)' }}>
                   {membership.fecha_fin || 'N/D'}
                 </span>
               </div>
@@ -180,7 +180,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
               <RefreshCw size={18} color="var(--tt-color-text-light)" />
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', display: 'block' }}>Renovación</span>
-                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--tt-color-text)' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--tt-color-text-main)' }}>
                   {membership.renovacion_automatica ? 'Automática activa' : 'Manual'}
                 </span>
               </div>
@@ -247,7 +247,7 @@ export const MembershipPanel: React.FC<MembershipPanelProps> = ({
                     <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.875rem', color: 'var(--tt-color-text-light)' }}>{p.fecha}</td>
                     <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700, color: 'var(--tt-color-primary)' }}>{p.monto}</td>
                     <td style={{ padding: '0.75rem 0.5rem' }}>
-                      <span className="tt-badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 700 }}>
+                      <span className="tt-badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--tt-color-success)', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 700 }}>
                         <CheckCircle2 size={13} style={{ display: 'inline', marginRight: '4px' }} />
                         Registrado ACID
                       </span>

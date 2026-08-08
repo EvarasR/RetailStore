@@ -18,7 +18,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({ product, onReviewsClic
       <div className="tt-product-info__meta-header">
         {product.marca && (
           <span className="tt-product-info__brand">
-            Visitar la tienda de <strong style={{ color: 'var(--tt-color-brand)' }}>{product.marca}</strong>
+            Visitar la tienda de <strong style={{ color: 'var(--tt-color-primary)' }}>{product.marca}</strong>
           </span>
         )}
         {product.categoria && (

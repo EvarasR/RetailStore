@@ -24,10 +24,10 @@ export const SupplierManagerMissingPage: React.FC = () => {
   return (
     <SupplierManagerLayout title="Asignación para Faltantes de Stock">
       <div style={{ marginBottom: '1.5rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+        <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
           Consultar Proveedores con Disponibilidad
         </h2>
-        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
           Busca en tiempo real qué proveedores disponen del SKU requerido usando el endpoint de faltante
         </p>
       </div>
@@ -35,7 +35,7 @@ export const SupplierManagerMissingPage: React.FC = () => {
       <div className="ops-metric-card" style={{ marginBottom: '1.75rem', padding: '1.5rem' }}>
         <form onSubmit={onBuscarFaltante} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ flex: '1 1 240px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.4rem', fontWeight: 600 }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--tt-color-text-muted)', marginBottom: '0.4rem', fontWeight: 600 }}>
               Seleccionar Producto
             </label>
             <select
@@ -55,7 +55,7 @@ export const SupplierManagerMissingPage: React.FC = () => {
           </div>
 
           <div style={{ width: '150px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.4rem', fontWeight: 600 }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--tt-color-text-muted)', marginBottom: '0.4rem', fontWeight: 600 }}>
               Cantidad Req.
             </label>
             <input
@@ -92,7 +92,7 @@ export const SupplierManagerMissingPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle size={18} color="#f59e0b" />
+            <AlertCircle size={18} color="var(--tt-color-warning)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Proveedores Recomendados ({missingSuppliers.length})
             </h3>
@@ -114,24 +114,24 @@ export const SupplierManagerMissingPage: React.FC = () => {
             <tbody>
               {searchingMissing ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Consultando costos y plazos en proveedores...
                   </td>
                 </tr>
               ) : missingSuppliers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Selecciona un producto y presiona 'Buscar Proveedor' para ver disponibilidad
                   </td>
                 </tr>
               ) : (
                 missingSuppliers.map((sup, idx) => (
                   <tr key={sup.cod_proveedor || idx}>
-                    <td style={{ fontWeight: 700, color: '#f8fafc' }}>{sup.razon_social}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-text-main)' }}>{sup.razon_social}</td>
                     <td>
                       <span className="ops-badge ops-badge--ok">{sup.calificacion || '4.8'} ⭐</span>
                     </td>
-                    <td style={{ fontWeight: 700, color: '#10b981' }}>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>
                       ${sup.costo_unitario || '0.00'}
                     </td>
                     <td>{sup.tiempo_entrega_dias || 3} días</td>
@@ -142,7 +142,7 @@ export const SupplierManagerMissingPage: React.FC = () => {
                         target="_blank"
                         rel="noreferrer"
                         className="tt-btn tt-btn--secondary"
-                        style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none', color: '#60a5fa' }}
+                        style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none', color: 'var(--tt-color-primary)' }}
                         title="Crear orden de abastecimiento en panel Django"
                       >
                         <Truck size={14} />

@@ -14,7 +14,7 @@ export const SupportSidebar: React.FC = () => {
     <aside className="ops-sidebar" aria-label="Navegación Soporte Interno">
       <div className="ops-sidebar-header">
         <Link to="/support" className="ops-brand" title="Inicio Soporte Interno">
-          <Headphones size={24} color="#f59e0b" />
+          <Headphones size={24} color="var(--tt-color-warning)" />
           <span>TechTail Soporte</span>
         </Link>
       </div>
@@ -58,7 +58,7 @@ export const SupportSidebar: React.FC = () => {
         <Link
           to="/"
           className="ops-nav-item"
-          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#cbd5e1' }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: 'var(--tt-color-text-muted)' }}
         >
           <Store size={17} />
           <span>Tienda Pública</span>

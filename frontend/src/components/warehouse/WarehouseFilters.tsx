@@ -29,7 +29,7 @@ export const WarehouseFilters: React.FC<WarehouseFiltersProps> = ({
   return (
     <div className="ops-filter-bar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '220px', position: 'relative' }}>
-        <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '0.75rem' }} />
+        <Search size={18} color="var(--tt-color-text-light)" style={{ position: 'absolute', left: '0.75rem' }} />
         <input
           type="text"
           value={searchTerm}
@@ -42,7 +42,7 @@ export const WarehouseFilters: React.FC<WarehouseFiltersProps> = ({
 
       {almacenesDisponibles.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Filter size={16} color="#94a3b8" />
+          <Filter size={16} color="var(--tt-color-text-light)" />
           <select
             value={selectedAlmacen}
             onChange={(e) => onAlmacenChange(e.target.value)}
@@ -79,8 +79,8 @@ export const WarehouseFilters: React.FC<WarehouseFiltersProps> = ({
           onClick={onReset}
           style={{
             background: 'transparent',
-            border: '1px solid #334155',
-            color: '#94a3b8',
+            border: '1px solid var(--tt-color-border-dark)',
+            color: 'var(--tt-color-text-light)',
             padding: '0.5rem 0.75rem',
             borderRadius: '0.5rem',
             cursor: 'pointer',

@@ -15,7 +15,7 @@ export const SupplierManagerSidebar: React.FC = () => {
     <aside className="ops-sidebar" aria-label="Navegación Supplier Manager">
       <div className="ops-sidebar-header">
         <Link to="/supplier-manager" className="ops-brand" title="Inicio Supplier Manager">
-          <Truck size={24} color="#10b981" />
+          <Truck size={24} color="var(--tt-color-success)" />
           <span>TechTail Compras</span>
         </Link>
       </div>
@@ -67,7 +67,7 @@ export const SupplierManagerSidebar: React.FC = () => {
         <Link
           to="/"
           className="ops-nav-item"
-          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#cbd5e1' }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: 'var(--tt-color-text-muted)' }}
         >
           <Store size={17} />
           <span>Tienda Pública</span>

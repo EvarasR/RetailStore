@@ -59,14 +59,14 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
           margin: '0 auto 1.5rem',
         }}
       >
-        <CheckCircle2 size={44} color="#10b981" />
+        <CheckCircle2 size={44} color="var(--tt-color-success)" />
       </div>
 
       <span
         style={{
           fontSize: '0.75rem',
           fontWeight: 800,
-          backgroundColor: '#10b981',
+          backgroundColor: 'var(--tt-color-success)',
           color: '#ffffff',
           padding: '0.25rem 0.75rem',
           borderRadius: '9999px',
@@ -80,7 +80,7 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
         ¡Gracias por tu pedido, TechTail!
       </h2>
 
-      <p style={{ fontSize: '1rem', color: '#64748b', marginBottom: '2rem', lineHeight: '1.6' }}>
+      <p style={{ fontSize: '1rem', color: 'var(--tt-color-text-muted)', marginBottom: '2rem', lineHeight: '1.6' }}>
         El pedido <strong>#{orderNum}</strong> ha sido registrado formalmente en nuestro motor de órdenes y el pago simulado fue capturado con éxito.
       </p>
 
@@ -95,12 +95,12 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
         }}
       >
         <div className="tt-card" style={{ padding: '1rem', backgroundColor: 'var(--tt-color-surface)' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', marginBottom: '0.25rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-muted)', marginBottom: '0.25rem' }}>
             NÚMERO DE PEDIDO
           </div>
           <div style={{ fontSize: '1.125rem', fontWeight: 800 }}>#{orderNum}</div>
           {facturaNum && (
-            <div style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-success)', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
               <FileText size={14} /> Factura: {facturaNum}
             </div>
           )}
@@ -108,11 +108,11 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
 
         {address && (
           <div className="tt-card" style={{ padding: '1rem', backgroundColor: 'var(--tt-color-surface)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-muted)', marginBottom: '0.25rem' }}>
               ENTREGA EN
             </div>
             <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>{address.receptor}</div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
               {address.ciudad}, {address.provincia}
             </div>
           </div>
@@ -120,13 +120,13 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
 
         {paymentMethod && (
           <div className="tt-card" style={{ padding: '1rem', backgroundColor: 'var(--tt-color-surface)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-muted)', marginBottom: '0.25rem' }}>
               MÉTODO DE PAGO
             </div>
             <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>
               {paymentMethod.marca || paymentMethod.tipo} *{paymentMethod.ultimos4}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#10b981' }}>Autorizado en pasarela</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-success)' }}>Autorizado en pasarela</div>
           </div>
         )}
       </div>
@@ -150,7 +150,7 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
             <span>${cap.factura.subtotal}</span>
           </div>
           {Number(cap.factura.descuento) > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#10b981', marginBottom: '0.375rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--tt-color-success)', marginBottom: '0.375rem' }}>
               <span>Descuento:</span>
               <span>-${cap.factura.descuento}</span>
             </div>
@@ -187,7 +187,7 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
             marginBottom: '2.5rem',
             backgroundColor: 'rgba(100, 116, 139, 0.05)',
             border: '1px solid rgba(100, 116, 139, 0.2)',
-            color: '#64748b',
+            color: 'var(--tt-color-text-muted)',
             fontSize: '0.875rem',
           }}
         >
@@ -216,7 +216,7 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
           to="/perfil"
           style={{
             backgroundColor: 'var(--tt-color-surface)',
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
             border: '1px solid var(--tt-color-border)',
             padding: '0.875rem 1.75rem',
             borderRadius: '0.5rem',

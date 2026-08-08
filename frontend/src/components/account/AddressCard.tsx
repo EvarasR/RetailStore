@@ -32,7 +32,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
       </div>
 
       <div className="tt-address-card__body">
-        <p style={{ fontWeight: 600, color: 'var(--tt-color-text)', margin: '0 0 0.25rem 0' }}>{address.receptor}</p>
+        <p style={{ fontWeight: 600, color: 'var(--tt-color-text-main)', margin: '0 0 0.25rem 0' }}>{address.receptor}</p>
         <p style={{ margin: '0 0 0.2rem 0', color: 'var(--tt-color-text-muted)', fontSize: '0.875rem' }}>
           {address.linea1} {address.linea2 ? `• ${address.linea2}` : ''}
         </p>

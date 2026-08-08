@@ -36,12 +36,12 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
     >
       {isDark ? (
         <>
-          <Sun size={15} color="#F59E0B" style={{ flexShrink: 0 }} />
+          <Sun size={15} color="var(--tt-color-warning)" style={{ flexShrink: 0 }} />
           <span>Claro</span>
         </>
       ) : (
         <>
-          <Moon size={15} color="#0EA5E9" style={{ flexShrink: 0 }} />
+          <Moon size={15} color="var(--tt-color-primary)" style={{ flexShrink: 0 }} />
           <span>Oscuro</span>
         </>
       )}

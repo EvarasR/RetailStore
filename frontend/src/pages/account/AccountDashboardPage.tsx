@@ -151,7 +151,7 @@ export const AccountDashboardPage: React.FC = () => {
         ) : (
           <div className="tt-empty-state" style={{ padding: '2.5rem 1.5rem', textAlign: 'center', backgroundColor: 'var(--tt-color-surface)', borderRadius: '0.75rem', border: '1px dashed var(--tt-color-border)' }}>
             <ShoppingBag size={36} color="var(--tt-color-text-light)" style={{ margin: '0 auto 0.75rem' }} />
-            <p style={{ fontWeight: 600, color: 'var(--tt-color-text)', margin: '0 0 0.5rem 0' }}>Aún no tienes pedidos registrados</p>
+            <p style={{ fontWeight: 600, color: 'var(--tt-color-text-main)', margin: '0 0 0.5rem 0' }}>Aún no tienes pedidos registrados</p>
             <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)', margin: '0 0 1.25rem 0' }}>
               Descubre los mejores productos corporativos y realiza tu primera compra.
             </p>
@@ -189,7 +189,7 @@ export const AccountDashboardPage: React.FC = () => {
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-primary)', display: 'block' }}>
                     {notif.titulo}
                   </span>
-                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8125rem', color: 'var(--tt-color-text)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8125rem', color: 'var(--tt-color-text-main)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {notif.mensaje}
                   </p>
                 </div>
@@ -228,7 +228,7 @@ export const AccountDashboardPage: React.FC = () => {
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-light)', display: 'block' }}>
                       #{tic.cod_ticket} • {tic.categoria}
                     </span>
-                    <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--tt-color-text)' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--tt-color-text-main)' }}>
                       {tic.asunto}
                     </span>
                   </div>
@@ -246,12 +246,12 @@ export const AccountDashboardPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Banner de Fallback Temporal Clásico */}
+      {/* Accesos rápidos de cuenta */}
       <div style={{ backgroundColor: 'var(--tt-color-surface)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <strong style={{ fontSize: '0.9375rem', color: 'var(--tt-color-text)', display: 'block' }}>¿Buscas la vista clásica de Django?</strong>
+          <strong style={{ fontSize: '0.9375rem', color: 'var(--tt-color-text-main)', display: 'block' }}>Gestiona tu cuenta desde React</strong>
           <span style={{ fontSize: '0.8125rem', color: 'var(--tt-color-text-muted)' }}>
-            Puedes acceder en cualquier momento al portal heredado de perfil o historial de devoluciones.
+            Accede a tu perfil, pedidos, seguimiento y solicitudes de devolución sin salir de la aplicación.
           </span>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>

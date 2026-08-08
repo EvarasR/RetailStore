@@ -54,7 +54,7 @@ export const EmailVerificationCard: React.FC<EmailVerificationCardProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: verifiedState ? '#10b981' : '#f59e0b',
+            color: verifiedState ? 'var(--tt-color-success)' : 'var(--tt-color-warning)',
           }}
         >
           <Mail size={22} />
@@ -62,14 +62,14 @@ export const EmailVerificationCard: React.FC<EmailVerificationCardProps> = ({
 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: 'var(--tt-color-text)' }}>
+            <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: 'var(--tt-color-text-main)' }}>
               Correo Electrónico Registrado
             </h4>
             <span
               className="tt-badge"
               style={{
                 backgroundColor: verifiedState ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                color: verifiedState ? '#10b981' : '#f59e0b',
+                color: verifiedState ? 'var(--tt-color-success)' : 'var(--tt-color-warning)',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 padding: '0.2rem 0.6rem',
@@ -82,13 +82,13 @@ export const EmailVerificationCard: React.FC<EmailVerificationCardProps> = ({
           <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
             {email || 'usuario@techtail.ec'}
           </p>
-          {error && <p style={{ color: '#ef4444', fontSize: '0.8125rem', margin: '0.4rem 0 0 0' }}>{error}</p>}
+          {error && <p style={{ color: 'var(--tt-color-error)', fontSize: '0.8125rem', margin: '0.4rem 0 0 0' }}>{error}</p>}
         </div>
       </div>
 
       <div>
         {verifiedState ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 700, fontSize: '0.875rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--tt-color-success)', fontWeight: 700, fontSize: '0.875rem' }}>
             <CheckCircle2 size={18} />
             <span>Cuenta protegida y confirmada</span>
           </div>

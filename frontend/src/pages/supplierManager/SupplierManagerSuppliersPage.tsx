@@ -34,10 +34,10 @@ export const SupplierManagerSuppliersPage: React.FC = () => {
     <SupplierManagerLayout title="Directorio Oficial de Proveedores">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Empresas y Socios Registrados en BD
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Directorio corporativo importado desde PostgreSQL con detalle y enlace de edición
           </p>
         </div>
@@ -76,7 +76,7 @@ export const SupplierManagerSuppliersPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Users size={18} color="#60a5fa" />
+            <Users size={18} color="var(--tt-color-primary)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Proveedores Habilitados en TechTail ({filteredSuppliers.length})
             </h3>
@@ -100,21 +100,21 @@ export const SupplierManagerSuppliersPage: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Consultando proveedores en base de datos...
                   </td>
                 </tr>
               ) : filteredSuppliers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     No se encontraron proveedores que coincidan con los filtros aplicados
                   </td>
                 </tr>
               ) : (
                 filteredSuppliers.map((prov) => (
                   <tr key={prov.cod_proveedor}>
-                    <td style={{ color: '#94a3b8' }}>#{prov.cod_proveedor}</td>
-                    <td style={{ fontFamily: 'monospace', color: '#cbd5e1' }}>
+                    <td style={{ color: 'var(--tt-color-text-light)' }}>#{prov.cod_proveedor}</td>
+                    <td style={{ fontFamily: 'monospace', color: 'var(--tt-color-text-muted)' }}>
                       {prov.ruc || 'N/D'}
                     </td>
                     <td style={{ fontWeight: 600 }}>{prov.razon_social}</td>
@@ -123,7 +123,7 @@ export const SupplierManagerSuppliersPage: React.FC = () => {
                     </td>
                     <td style={{ fontSize: '0.85rem' }}>
                       <div>{prov.email || 'sin@correo.com'}</div>
-                      <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{prov.telefono || 'sin teléfono'}</div>
+                      <div style={{ color: 'var(--tt-color-text-light)', fontSize: '0.75rem' }}>{prov.telefono || 'sin teléfono'}</div>
                     </td>
                     <td>
                       <span className="ops-badge ops-badge--media" style={{ fontWeight: 700 }}>

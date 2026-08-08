@@ -19,13 +19,14 @@ import { ProductGrid } from '../components/product/ProductGrid';
 export const CatalogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const qParam = searchParams.get('q') || '';
   const catParam = searchParams.get('categoria') || '';
   const ordenParam = searchParams.get('orden') || '';
   const pageParam = parseInt(searchParams.get('page') || '1', 10) || 1;
 
-  const { products, paginacion, loading, error } = useProducts({
+  const { products, paginacion, loading, error, refetch } = useProducts({
     q: qParam,
     categoria: catParam,
     orden: ordenParam,
@@ -50,6 +51,7 @@ export const CatalogPage: React.FC = () => {
     }
     next.set('page', '1');
     setSearchParams(next);
+    setFiltersOpen(false);
   };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -92,7 +94,7 @@ export const CatalogPage: React.FC = () => {
             <button
               type="button"
               className="tt-btn--amazon"
-              onClick={() => window.location.reload()}
+              onClick={refetch}
             >
               Reintentar
             </button>
@@ -157,9 +159,20 @@ export const CatalogPage: React.FC = () => {
           )}
         </div>
 
+        <button
+          type="button"
+          className="tt-mobile-filter-toggle"
+          onClick={() => setFiltersOpen((open) => !open)}
+          aria-expanded={filtersOpen}
+          aria-controls="catalog-filters"
+        >
+          {filtersOpen ? <X size={18} /> : <Filter size={18} />}
+          {filtersOpen ? 'Cerrar filtros' : 'Mostrar filtros'}
+        </button>
+
         <div className="tt-catalog-layout">
           {/* BARRA LATERAL DE FILTROS ENTERPRISE */}
-          <aside className="tt-sidebar" aria-label="Filtros de Catálogo">
+          <aside id="catalog-filters" className={`tt-sidebar ${filtersOpen ? 'tt-sidebar--open' : ''}`} aria-label="Filtros de Catálogo">
             <h2 className="tt-sidebar__title">
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Filter size={18} color="var(--tt-color-primary)" />
@@ -251,17 +264,17 @@ export const CatalogPage: React.FC = () => {
             <div className="tt-sidebar__section" style={{ marginTop: '1.75rem' }}>
               <h3 className="tt-sidebar__subtitle">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Star size={16} fill="#f59e0b" color="#f59e0b" />
+                  <Star size={16} fill="var(--tt-color-warning)" color="var(--tt-color-warning)" />
                   <span>Opinión del cliente</span>
                 </span>
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8125rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: '#090e17' }}>
-                  <span style={{ color: '#f59e0b' }}>★★★★☆</span>
+                  <span style={{ color: 'var(--tt-color-warning)' }}>★★★★☆</span>
                   <span>4 estrellas o más</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: '#64748b' }}>
-                  <span style={{ color: '#f59e0b' }}>★★★☆☆</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: 'var(--tt-color-text-muted)' }}>
+                  <span style={{ color: 'var(--tt-color-warning)' }}>★★★☆☆</span>
                   <span>3 estrellas o más</span>
                 </div>
               </div>
@@ -304,7 +317,7 @@ export const CatalogPage: React.FC = () => {
                       alignItems: 'center',
                       gap: '0.35rem',
                       backgroundColor: '#e0f2fe',
-                      color: '#0369a1',
+                      color: 'var(--tt-color-primary-dark)',
                       padding: '0.2rem 0.6rem',
                       borderRadius: '999px',
                       fontSize: '0.75rem',
@@ -319,7 +332,7 @@ export const CatalogPage: React.FC = () => {
                         next.delete('q');
                         setSearchParams(next);
                       }}
-                      style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#0369a1' }}
+                      style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--tt-color-primary-dark)' }}
                       title="Quitar filtro de búsqueda"
                     >
                       <X size={14} />
@@ -355,8 +368,8 @@ export const CatalogPage: React.FC = () => {
                     onClick={() => setViewMode('grid')}
                     style={{
                       padding: '0.4rem 0.6rem',
-                      background: viewMode === 'grid' ? '#0ea5e9' : '#ffffff',
-                      color: viewMode === 'grid' ? '#ffffff' : '#64748b',
+                      background: viewMode === 'grid' ? 'var(--tt-color-primary)' : '#ffffff',
+                      color: viewMode === 'grid' ? '#ffffff' : 'var(--tt-color-text-muted)',
                       border: 'none',
                       cursor: 'pointer',
                     }}
@@ -370,8 +383,8 @@ export const CatalogPage: React.FC = () => {
                     onClick={() => setViewMode('list')}
                     style={{
                       padding: '0.4rem 0.6rem',
-                      background: viewMode === 'list' ? '#0ea5e9' : '#ffffff',
-                      color: viewMode === 'list' ? '#ffffff' : '#64748b',
+                      background: viewMode === 'list' ? 'var(--tt-color-primary)' : '#ffffff',
+                      color: viewMode === 'list' ? '#ffffff' : 'var(--tt-color-text-muted)',
                       border: 'none',
                       cursor: 'pointer',
                     }}

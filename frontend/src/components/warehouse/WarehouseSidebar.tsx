@@ -15,7 +15,7 @@ export const WarehouseSidebar: React.FC = () => {
     <aside className="ops-sidebar" aria-label="Navegación Almacén Operativo">
       <div className="ops-sidebar-header">
         <Link to="/warehouse" className="ops-brand" title="Inicio Bodega y Almacén">
-          <Boxes size={24} color="#3b82f6" />
+          <Boxes size={24} color="var(--tt-color-primary)" />
           <span>TechTail Bodega</span>
         </Link>
       </div>
@@ -67,7 +67,7 @@ export const WarehouseSidebar: React.FC = () => {
         <Link
           to="/"
           className="ops-nav-item"
-          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#cbd5e1' }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: 'var(--tt-color-text-muted)' }}
         >
           <Store size={17} />
           <span>Tienda Pública</span>

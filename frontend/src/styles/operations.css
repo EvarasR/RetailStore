@@ -6,8 +6,8 @@
 .ops-app-container {
   display: flex;
   min-height: 100vh;
-  background-color: var(--tt-color-background, #0b0f19);
-  color: var(--tt-color-text, #e2e8f0);
+  background-color: var(--tt-color-bg, #0b0f19);
+  color: var(--tt-color-text-main, #e2e8f0);
   font-family: inherit;
 }
 
@@ -40,7 +40,7 @@
   text-decoration: none;
   font-weight: 700;
   font-size: 1.1rem;
-  color: var(--tt-color-text, #f8fafc);
+  color: var(--tt-color-text-main, #f8fafc);
 }
 
 .ops-sidebar-nav {
@@ -67,7 +67,7 @@
 
 .ops-nav-item:hover {
   background-color: rgba(255, 255, 255, 0.05);
-  color: var(--tt-color-text, #f8fafc);
+  color: var(--tt-color-text-main, #f8fafc);
 }
 
 .ops-nav-item.active {
@@ -131,7 +131,7 @@
 .ops-metric-value {
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--tt-color-text, #f8fafc);
+  color: var(--tt-color-text-main, #f8fafc);
 }
 
 /* Tablas Operativas */
@@ -176,7 +176,7 @@
   padding: 0.9rem 1.25rem;
   font-size: 0.875rem;
   border-bottom: 1px solid var(--tt-color-border, #1f2937);
-  color: var(--tt-color-text, #e2e8f0);
+  color: var(--tt-color-text-main, #e2e8f0);
 }
 
 .ops-table tr:last-child td {

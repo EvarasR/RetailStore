@@ -59,8 +59,8 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
       <div className="ops-drawer-panel" onClick={(e) => e.stopPropagation()}>
         <div className="ops-drawer-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <PackageCheck size={20} color="#3b82f6" />
-            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+            <PackageCheck size={20} color="var(--tt-color-primary)" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
               Bitácora y Picking de Pedido
             </h3>
           </div>
@@ -69,7 +69,7 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94a3b8',
+              color: 'var(--tt-color-text-light)',
               cursor: 'pointer',
               padding: '0.25rem',
             }}
@@ -79,32 +79,32 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
         </div>
 
         <div className="ops-drawer-body">
-          <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
+          <div style={{ background: 'var(--tt-color-text-main)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)', fontWeight: 600 }}>
                 ORDEN #{order.cod_pedido}
               </span>
               <span className="ops-badge ops-badge--media">
                 {order.estado}
               </span>
             </div>
-            <h4 style={{ margin: '0.5rem 0 0.25rem', fontSize: '1.1rem', color: '#f8fafc' }}>
+            <h4 style={{ margin: '0.5rem 0 0.25rem', fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
               Cliente: {order.cliente}
             </h4>
-            <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-              Total Pedido: <strong style={{ color: '#10b981' }}>{order.total}</strong> &bull; {order.fecha}
+            <div style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
+              Total Pedido: <strong style={{ color: 'var(--tt-color-success)' }}>{order.total}</strong> &bull; {order.fecha}
             </div>
           </div>
 
           {loadingDetail && (
-            <div style={{ textAlign: 'center', padding: '2rem 0', color: '#94a3b8' }}>
+            <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--tt-color-text-light)' }}>
               <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 0.5rem' }} />
               <span>Consultando líneas y lotes en PostgreSQL...</span>
             </div>
           )}
 
           {errorDetail && (
-            <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', color: '#ef4444', padding: '1rem', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid var(--tt-color-error)', color: 'var(--tt-color-error)', padding: '1rem', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <AlertCircle size={18} />
               <span>{errorDetail}</span>
             </div>
@@ -121,8 +121,8 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
                     <div
                       key={idx}
                       style={{
-                        background: '#0f172a',
-                        border: '1px solid #1f2937',
+                        background: 'var(--tt-color-text-main)',
+                        border: '1px solid var(--tt-color-surface-subtle)',
                         borderRadius: '0.5rem',
                         padding: '0.75rem 1rem',
                         display: 'flex',
@@ -131,18 +131,18 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
                       }}
                     >
                       <div>
-                        <strong style={{ color: '#f8fafc', fontSize: '0.95rem', display: 'block' }}>
+                        <strong style={{ color: 'var(--tt-color-text-main)', fontSize: '0.95rem', display: 'block' }}>
                           {d.producto}
                         </strong>
-                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
                           Unitario: {d.precio_final}
                         </span>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ background: '#1e293b', color: '#38bdf8', padding: '0.25rem 0.6rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}>
+                        <span style={{ background: 'var(--tt-color-surface)', color: 'var(--tt-color-primary)', padding: '0.25rem 0.6rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}>
                           x{d.cantidad} unid.
                         </span>
-                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.2rem' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)', marginTop: '0.2rem' }}>
                           {d.subtotal}
                         </div>
                       </div>
@@ -153,7 +153,7 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
 
               {detail.lotes.length > 0 && (
                 <div>
-                  <h5 style={{ margin: '1rem 0 0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>
+                  <h5 style={{ margin: '1rem 0 0.5rem', fontSize: '0.9rem', color: 'var(--tt-color-text-light)' }}>
                     Lotes Asignados en Despacho:
                   </h5>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -161,8 +161,8 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
                       <div
                         key={i}
                         style={{
-                          background: '#111827',
-                          border: '1px dashed #334155',
+                          background: 'var(--tt-color-surface)',
+                          border: '1px dashed var(--tt-color-border-dark)',
                           padding: '0.6rem 0.85rem',
                           borderRadius: '0.5rem',
                           fontSize: '0.85rem',
@@ -171,7 +171,7 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
                         }}
                       >
                         <span>
-                          <strong style={{ color: '#fbbf24' }}>Lote #{l.lote}</strong> — {l.producto}
+                          <strong style={{ color: 'var(--tt-color-warning)' }}>Lote #{l.lote}</strong> — {l.producto}
                         </span>
                         <span style={{ fontWeight: 600, color: '#e2e8f0' }}>
                           x{l.cantidad}
@@ -202,8 +202,8 @@ export const WarehouseOrderDrawer: React.FC<WarehouseOrderDrawerProps> = ({
             style={{
               padding: '0.6rem 1.25rem',
               borderRadius: '0.5rem',
-              background: '#334155',
-              color: '#f8fafc',
+              background: 'var(--tt-color-border-dark)',
+              color: 'var(--tt-color-text-main)',
               border: 'none',
               fontWeight: 600,
               cursor: 'pointer',

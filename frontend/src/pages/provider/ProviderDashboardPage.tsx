@@ -7,9 +7,7 @@ import {
   History,
   AlertTriangle,
   RefreshCw,
-  Building2,
   ArrowRight,
-  ExternalLink,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -23,10 +21,10 @@ export const ProviderDashboardPage: React.FC = () => {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
             Panel Principal de Abastecimiento y Stock
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Acceso seguro y diferenciado DB-First para socios comerciales externos de TechTail
           </p>
         </div>
@@ -53,30 +51,30 @@ export const ProviderDashboardPage: React.FC = () => {
       <div className="prov-metrics">
         <div className="prov-metric-card">
           <span className="prov-metric-title">Productos Asociados</span>
-          <span className="prov-metric-value" style={{ color: '#38bdf8' }}>
+          <span className="prov-metric-value" style={{ color: 'var(--tt-color-primary)' }}>
             {productos.length}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             SKUs activos con TechTail
           </span>
         </div>
 
         <div className="prov-metric-card">
           <span className="prov-metric-title">Órdenes Abastecimiento</span>
-          <span className="prov-metric-value" style={{ color: '#34d399' }}>
+          <span className="prov-metric-value" style={{ color: 'var(--tt-color-success)' }}>
             {ordenes.length}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Solicitudes de compra
           </span>
         </div>
 
         <div className="prov-metric-card">
           <span className="prov-metric-title">Calificación Actual</span>
-          <span className="prov-metric-value" style={{ color: '#f59e0b' }}>
+          <span className="prov-metric-value" style={{ color: 'var(--tt-color-warning)' }}>
             {proveedor?.calificacion || '4.9'} ⭐
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Reputación comercial
           </span>
         </div>
@@ -86,7 +84,7 @@ export const ProviderDashboardPage: React.FC = () => {
           <span className="prov-metric-value" style={{ color: '#a855f7' }}>
             {historial.length}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Eventos y entregas pasadas
           </span>
         </div>
@@ -95,16 +93,16 @@ export const ProviderDashboardPage: React.FC = () => {
       {/* Sección Doble: Órdenes Activas y Productos */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div className="prov-table-box" style={{ marginBottom: 0 }}>
-          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--tt-color-surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ClipboardCheck size={18} color="#38bdf8" />
+              <ClipboardCheck size={18} color="var(--tt-color-primary)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Órdenes Pendientes o Recientes
               </h3>
             </div>
             <Link
               to="/proveedor/ordenes"
-              style={{ fontSize: '0.8rem', color: '#38bdf8', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-primary)', textDecoration: 'none', fontWeight: 600 }}
             >
               Ver Órdenes →
             </Link>
@@ -122,14 +120,14 @@ export const ProviderDashboardPage: React.FC = () => {
             <tbody>
               {ordenes.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                  <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                     Sin órdenes de abastecimiento pendientes
                   </td>
                 </tr>
               ) : (
                 ordenes.slice(0, 5).map((ord) => (
                   <tr key={ord.cod_orden_abastecimiento}>
-                    <td style={{ fontWeight: 700, color: '#38bdf8' }}>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>
                       #{ord.cod_orden_abastecimiento}
                     </td>
                     <td>{ord.almacen || 'Central'}</td>
@@ -145,16 +143,16 @@ export const ProviderDashboardPage: React.FC = () => {
         </div>
 
         <div className="prov-table-box" style={{ marginBottom: 0 }}>
-          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--tt-color-surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Package size={18} color="#34d399" />
+              <Package size={18} color="var(--tt-color-success)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Mis Productos Destacados
               </h3>
             </div>
             <Link
               to="/proveedor/productos"
-              style={{ fontSize: '0.8rem', color: '#34d399', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-success)', textDecoration: 'none', fontWeight: 600 }}
             >
               Actualizar Stock →
             </Link>
@@ -172,7 +170,7 @@ export const ProviderDashboardPage: React.FC = () => {
             <tbody>
               {productos.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                  <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                     No tienes productos vinculados aún
                   </td>
                 </tr>
@@ -180,7 +178,7 @@ export const ProviderDashboardPage: React.FC = () => {
                 productos.slice(0, 5).map((p, idx) => (
                   <tr key={p.cod_producto_proveedor || idx}>
                     <td style={{ fontWeight: 600 }}>{p.producto}</td>
-                    <td style={{ fontWeight: 700, color: '#34d399' }}>${p.costo_unitario}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>${p.costo_unitario}</td>
                     <td style={{ fontWeight: 700 }}>{p.stock_disponible ?? 100}</td>
                     <td>{p.tiempo_entrega_dias || 3}d</td>
                   </tr>
@@ -196,16 +194,16 @@ export const ProviderDashboardPage: React.FC = () => {
         <Link
           to="/proveedor/productos"
           className="prov-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #38bdf8' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-primary)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Package size={22} color="#38bdf8" />
-            <ArrowRight size={18} color="#38bdf8" />
+            <Package size={22} color="var(--tt-color-primary)" />
+            <ArrowRight size={18} color="var(--tt-color-primary)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem', display: 'block' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem', display: 'block' }}>
             Mis Productos y Stock
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Actualiza tus existencias disponibles para compra en BD
           </span>
         </Link>
@@ -213,16 +211,16 @@ export const ProviderDashboardPage: React.FC = () => {
         <Link
           to="/proveedor/ordenes"
           className="prov-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #34d399' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-success)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <ClipboardCheck size={22} color="#34d399" />
-            <ArrowRight size={18} color="#34d399" />
+            <ClipboardCheck size={22} color="var(--tt-color-success)" />
+            <ArrowRight size={18} color="var(--tt-color-success)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem', display: 'block' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem', display: 'block' }}>
             Órdenes de Abastecimiento
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Revisa solicitudes de entrega y fechas de recepción
           </span>
         </Link>
@@ -236,51 +234,13 @@ export const ProviderDashboardPage: React.FC = () => {
             <History size={22} color="#a855f7" />
             <ArrowRight size={18} color="#a855f7" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem', display: 'block' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem', display: 'block' }}>
             Historial de Relación
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Auditoría de despachos completados y eventos
           </span>
         </Link>
-      </div>
-
-      {/* Banner informativo de Fallback clásico Django */}
-      <div
-        style={{
-          marginTop: '2rem',
-          padding: '1rem 1.25rem',
-          backgroundColor: 'rgba(56, 189, 248, 0.08)',
-          border: '1px solid rgba(56, 189, 248, 0.25)',
-          borderRadius: '0.75rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Building2 size={24} color="#38bdf8" />
-          <div>
-            <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
-              ¿Prefieres la interfaz clásica de Proveedores en Django?
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-              Accede al portal tradicional sin perder tus sesiones ni datos en tiempo real
-            </div>
-          </div>
-        </div>
-        <a
-          href="/proveedores/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tt-btn tt-btn--secondary"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
-        >
-          <ExternalLink size={15} />
-          <span>Ir a /proveedores/</span>
-        </a>
       </div>
     </ProviderLayout>
   );

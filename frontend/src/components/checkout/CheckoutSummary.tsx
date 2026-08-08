@@ -32,24 +32,24 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
       </h3>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#64748b' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
           <span>Subtotal ({cart.cantidad_items} ítems):</span>
-          <span style={{ fontWeight: 600, color: 'var(--tt-color-text)' }}>
+          <span style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>
             ${desglose?.subtotal_carrito || cart.total}
           </span>
         </div>
 
         {desglose?.descuento && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#10b981' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--tt-color-success)' }}>
             <span>Descuento aplicado:</span>
             <span style={{ fontWeight: 600 }}>-${desglose.descuento}</span>
           </div>
         )}
 
         {selectedShippingMethod && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#64748b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
             <span>Envío estimado ({selectedShippingMethod.nombre}):</span>
-            <span style={{ fontWeight: 600, color: 'var(--tt-color-text)' }}>
+            <span style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>
               ${selectedShippingMethod.costo_base}
             </span>
           </div>
@@ -70,14 +70,14 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
             alignItems: 'baseline',
             fontSize: '1.125rem',
             fontWeight: 800,
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
           }}
         >
           <span>Total del Carrito:</span>
           <span>${cart.total}</span>
         </div>
 
-        <p style={{ fontSize: '0.7rem', color: '#64748b', fontStyle: 'italic', lineHeight: '1.4', marginTop: '0.25rem' }}>
+        <p style={{ fontSize: '0.7rem', color: 'var(--tt-color-text-muted)', fontStyle: 'italic', lineHeight: '1.4', marginTop: '0.25rem' }}>
           * El cálculo tributario e importes finales de despacho se asientan formalmente al autorizar el pedido en PostgreSQL.
         </p>
       </div>
@@ -89,7 +89,7 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
           backgroundColor: 'rgba(59, 130, 246, 0.05)',
           border: '1px solid rgba(59, 130, 246, 0.15)',
           fontSize: '0.75rem',
-          color: '#64748b',
+          color: 'var(--tt-color-text-muted)',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
@@ -106,10 +106,10 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
           gap: '0.5rem',
           marginTop: '1rem',
           fontSize: '0.7rem',
-          color: '#64748b',
+          color: 'var(--tt-color-text-muted)',
         }}
       >
-        <ShieldCheck size={14} color="#10b981" />
+        <ShieldCheck size={14} color="var(--tt-color-success)" />
         <span>Garantía Prime / Soporte corporativo B2B TechTail</span>
       </div>
     </div>

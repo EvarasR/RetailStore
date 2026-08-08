@@ -32,31 +32,31 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
       </h3>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: '#64748b' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: 'var(--tt-color-text-muted)' }}>
           <span>Subtotal ({cart.cantidad_items} ítems):</span>
-          <span style={{ fontWeight: 600, color: 'var(--tt-color-text)' }}>
+          <span style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>
             ${desglose?.subtotal_carrito || cart.total}
           </span>
         </div>
 
         {desglose?.descuento && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: '#10b981' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: 'var(--tt-color-success)' }}>
             <span>Descuento aplicado:</span>
             <span style={{ fontWeight: 600 }}>-${desglose.descuento}</span>
           </div>
         )}
 
         {desglose?.impuesto && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: '#64748b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: 'var(--tt-color-text-muted)' }}>
             <span>Impuesto estimado:</span>
-            <span style={{ fontWeight: 600, color: 'var(--tt-color-text)' }}>${desglose.impuesto}</span>
+            <span style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>${desglose.impuesto}</span>
           </div>
         )}
 
         {desglose?.costo_envio && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: '#64748b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', color: 'var(--tt-color-text-muted)' }}>
             <span>Envío estimado:</span>
-            <span style={{ fontWeight: 600, color: 'var(--tt-color-text)' }}>${desglose.costo_envio}</span>
+            <span style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>${desglose.costo_envio}</span>
           </div>
         )}
 
@@ -75,7 +75,7 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
             alignItems: 'baseline',
             fontSize: '1.25rem',
             fontWeight: 800,
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
           }}
         >
           <span>Total:</span>
@@ -83,7 +83,7 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
         </div>
 
         {desglose?.mensaje && (
-          <p style={{ fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic', lineHeight: '1.4', marginTop: '0.25rem' }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', fontStyle: 'italic', lineHeight: '1.4', marginTop: '0.25rem' }}>
             * {desglose.mensaje}
           </p>
         )}
@@ -123,7 +123,7 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
             borderRadius: '0.5rem',
             border: '1px solid var(--tt-color-border)',
             backgroundColor: 'var(--tt-color-surface)',
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
             fontWeight: 600,
             textDecoration: 'none',
             fontSize: '0.9375rem',
@@ -140,10 +140,10 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
           gap: '0.5rem',
           marginTop: '1.25rem',
           fontSize: '0.75rem',
-          color: '#64748b',
+          color: 'var(--tt-color-text-muted)',
         }}
       >
-        <ShieldCheck size={16} color="#10b981" />
+        <ShieldCheck size={16} color="var(--tt-color-success)" />
         <span>Garantía de cotización DB-First supervisada por el motor transaccional TechTail</span>
       </div>
     </div>

@@ -6,8 +6,8 @@
 .prov-app-container {
   display: flex;
   min-height: 100vh;
-  background-color: var(--tt-color-background, #0b0f19);
-  color: var(--tt-color-text, #e2e8f0);
+  background-color: var(--tt-color-bg, #0b0f19);
+  color: var(--tt-color-text-main, #e2e8f0);
   font-family: inherit;
 }
 

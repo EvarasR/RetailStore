@@ -18,10 +18,10 @@ export const SupplierManagerDashboardPage: React.FC = () => {
     <SupplierManagerLayout title="Dashboard de Compras y Abastecimiento">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
             Control del Panel Interno de Compras
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Gestión ejecutiva de proveedores activos, órdenes de compra y monitoreo de quiebres
           </p>
         </div>
@@ -48,40 +48,40 @@ export const SupplierManagerDashboardPage: React.FC = () => {
       <div className="ops-metrics-grid">
         <div className="ops-metric-card">
           <span className="ops-metric-title">Proveedores Activos</span>
-          <span className="ops-metric-value" style={{ color: '#34d399' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-success)' }}>
             {dashboard.proveedores_activos}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Asociados comerciales en catálogo
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Órdenes Abastecimiento</span>
-          <span className="ops-metric-value" style={{ color: '#60a5fa' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-primary)' }}>
             {dashboard.ordenes_pendientes}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Órdenes en curso o pendientes
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">SKUs con Stock Faltante</span>
-          <span className="ops-metric-value" style={{ color: '#f59e0b' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-warning)' }}>
             {dashboard.productos_con_faltante}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Prioridad alta de reposición
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Cumplimiento de Entrega</span>
-          <span className="ops-metric-value" style={{ color: '#10b981' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-success)' }}>
             {dashboard.cumplimiento_promedio}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Promedio 4 días de entrega
           </span>
         </div>
@@ -92,14 +92,14 @@ export const SupplierManagerDashboardPage: React.FC = () => {
         <div className="ops-table-card" style={{ marginBottom: 0 }}>
           <div className="ops-table-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Users size={18} color="#34d399" />
+              <Users size={18} color="var(--tt-color-success)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Proveedores Destacados
               </h3>
             </div>
             <Link
               to="/supplier-manager/proveedores"
-              style={{ fontSize: '0.8rem', color: '#34d399', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-success)', textDecoration: 'none', fontWeight: 600 }}
             >
               Ver Directorio →
             </Link>
@@ -117,7 +117,7 @@ export const SupplierManagerDashboardPage: React.FC = () => {
               <tbody>
                 {proveedores.length === 0 ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                       No hay proveedores registrados
                     </td>
                   </tr>
@@ -140,14 +140,14 @@ export const SupplierManagerDashboardPage: React.FC = () => {
         <div className="ops-table-card" style={{ marginBottom: 0 }}>
           <div className="ops-table-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShoppingCart size={18} color="#60a5fa" />
+              <ShoppingCart size={18} color="var(--tt-color-primary)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Últimas Órdenes de Abastecimiento
               </h3>
             </div>
             <Link
               to="/supplier-manager/abastecimiento"
-              style={{ fontSize: '0.8rem', color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-primary)', textDecoration: 'none', fontWeight: 600 }}
             >
               Ver Historial →
             </Link>
@@ -166,14 +166,14 @@ export const SupplierManagerDashboardPage: React.FC = () => {
               <tbody>
                 {ordenes.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                       Ninguna orden de abastecimiento pendiente
                     </td>
                   </tr>
                 ) : (
                   ordenes.slice(0, 5).map((o) => (
                     <tr key={o.cod_orden_abastecimiento}>
-                      <td style={{ fontWeight: 700, color: '#38bdf8' }}>
+                      <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>
                         #{o.cod_orden_abastecimiento}
                       </td>
                       <td>{o.almacen || 'Principal'}</td>
@@ -195,16 +195,16 @@ export const SupplierManagerDashboardPage: React.FC = () => {
         <Link
           to="/supplier-manager/proveedores"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #10b981', background: 'rgba(16, 185, 129, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-success)', background: 'rgba(16, 185, 129, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Users size={22} color="#34d399" />
-            <ArrowRight size={18} color="#34d399" />
+            <Users size={22} color="var(--tt-color-success)" />
+            <ArrowRight size={18} color="var(--tt-color-success)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Directorio de Proveedores
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Consultar datos de contacto, RUC y reputación
           </span>
         </Link>
@@ -212,16 +212,16 @@ export const SupplierManagerDashboardPage: React.FC = () => {
         <Link
           to="/supplier-manager/abastecimiento"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-primary)', background: 'rgba(59, 130, 246, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <ShoppingCart size={22} color="#60a5fa" />
-            <ArrowRight size={18} color="#60a5fa" />
+            <ShoppingCart size={22} color="var(--tt-color-primary)" />
+            <ArrowRight size={18} color="var(--tt-color-primary)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Órdenes de Abastecimiento
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Creación y control del flujo de compra y recepción
           </span>
         </Link>
@@ -229,16 +229,16 @@ export const SupplierManagerDashboardPage: React.FC = () => {
         <Link
           to="/supplier-manager/faltantes"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #f59e0b', background: 'rgba(245, 158, 11, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-warning)', background: 'rgba(245, 158, 11, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <TrendingUp size={22} color="#fbbf24" />
-            <ArrowRight size={18} color="#fbbf24" />
+            <TrendingUp size={22} color="var(--tt-color-warning)" />
+            <ArrowRight size={18} color="var(--tt-color-warning)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Reabastecimiento de Stock
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Asignar compra a proveedores por producto con faltante
           </span>
         </Link>

@@ -141,11 +141,11 @@ export const CheckoutPage: React.FC = () => {
           className="tt-card"
           style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}
         >
-          <ShieldAlert size={48} color="#f59e0b" />
+          <ShieldAlert size={48} color="var(--tt-color-warning)" />
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
             Tu Carrito Corporativo está Vacío
           </h2>
-          <p style={{ color: '#64748b', fontSize: '0.9375rem', maxWidth: '440px', lineHeight: '1.6' }}>
+          <p style={{ color: 'var(--tt-color-text-muted)', fontSize: '0.9375rem', maxWidth: '440px', lineHeight: '1.6' }}>
             Para iniciar un proceso de compra o solicitar equipamiento al almacén de TechTail, debes tener productos activos en tu carrito de PostgreSQL.
           </p>
           <Link
@@ -277,7 +277,7 @@ export const CheckoutPage: React.FC = () => {
                 onClick={() => setStep('ADDRESS')}
                 style={{
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   border: '1px solid var(--tt-color-border)',
                   padding: '0.875rem 1.5rem',
                   borderRadius: '0.5rem',
@@ -343,7 +343,7 @@ export const CheckoutPage: React.FC = () => {
                 onClick={() => setStep('SHIPPING')}
                 style={{
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   border: '1px solid var(--tt-color-border)',
                   padding: '0.875rem 1.5rem',
                   borderRadius: '0.5rem',
@@ -413,7 +413,7 @@ export const CheckoutPage: React.FC = () => {
                 disabled={processing}
                 style={{
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   border: '1px solid var(--tt-color-border)',
                   padding: '0.875rem 1.5rem',
                   borderRadius: '0.5rem',
@@ -451,10 +451,10 @@ export const CheckoutPage: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="tt-card" style={{ padding: '2rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <CheckCircle2 size={32} color="#10b981" />
+                <CheckCircle2 size={32} color="var(--tt-color-success)" />
                 <div>
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>Pedido Oficial #{createdOrder?.cod_pedido} Creado</h3>
-                  <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>El pedido ha sido materializado en PostgreSQL. Ya no puedes alterar su contenido directamente.</p>
+                  <p style={{ color: 'var(--tt-color-text-muted)', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>El pedido ha sido materializado en PostgreSQL. Ya no puedes alterar su contenido directamente.</p>
                 </div>
               </div>
               
@@ -471,7 +471,7 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Descuento:</span>
-                    <span style={{ color: '#10b981' }}>{createdOrder?.descuento}</span>
+                    <span style={{ color: 'var(--tt-color-success)' }}>{createdOrder?.descuento}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.125rem', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--tt-color-border)' }}>
                     <span>Total Final:</span>
@@ -509,7 +509,7 @@ export const CheckoutPage: React.FC = () => {
               onClick={handlePay}
               disabled={processing || applyingCoupon}
               style={{
-                backgroundColor: '#10b981',
+                backgroundColor: 'var(--tt-color-success)',
                 color: '#ffffff',
                 border: 'none',
                 padding: '1rem 2rem',

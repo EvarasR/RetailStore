@@ -41,8 +41,8 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
       <div className="ops-drawer-panel" onClick={(e) => e.stopPropagation()}>
         <div className="ops-drawer-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Search size={20} color="#3b82f6" />
-            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+            <Search size={20} color="var(--tt-color-primary)" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
               Consulta DB-First de Proveedores
             </h3>
           </div>
@@ -51,7 +51,7 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94a3b8',
+              color: 'var(--tt-color-text-light)',
               cursor: 'pointer',
               padding: '0.25rem',
             }}
@@ -61,20 +61,20 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
         </div>
 
         <div className="ops-drawer-body">
-          <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase' }}>
+          <div style={{ background: 'var(--tt-color-text-main)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)', textTransform: 'uppercase' }}>
               PRODUCTO / SKU REQUERIDO
             </span>
-            <h4 style={{ margin: '0.4rem 0 0', fontSize: '1.15rem', color: '#f8fafc' }}>
+            <h4 style={{ margin: '0.4rem 0 0', fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
               {nombreProducto} (ID #{cod_producto})
             </h4>
           </div>
 
           <form
             onSubmit={handleQuery}
-            style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid #334155' }}
+            style={{ background: 'var(--tt-color-text-main)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-border-dark)' }}
           >
-            <label style={{ display: 'block', fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '0.4rem' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--tt-color-text-muted)', marginBottom: '0.4rem' }}>
               Cantidad o Lote Requerido para Abastecimiento:
             </label>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -92,7 +92,7 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
                 style={{
                   padding: '0.55rem 1.25rem',
                   borderRadius: '0.5rem',
-                  background: '#3b82f6',
+                  background: 'var(--tt-color-primary)',
                   color: '#ffffff',
                   border: 'none',
                   fontWeight: 600,
@@ -106,13 +106,13 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
                 <span>Consultar BD</span>
               </button>
             </div>
-            <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
+            <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
               Consulta en tiempo real a /proveedores/api/producto/id/faltante/ (escala de precios y saldos en almacén de proveedor).
             </p>
           </form>
 
           {errorMsg && (
-            <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', color: '#ef4444', padding: '0.85rem', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid var(--tt-color-error)', color: 'var(--tt-color-error)', padding: '0.85rem', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <AlertCircle size={18} />
               <span>{errorMsg}</span>
             </div>
@@ -125,7 +125,7 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
               </h5>
 
               {results.length === 0 ? (
-                <div style={{ background: '#0f172a', padding: '2rem', textAlign: 'center', borderRadius: '0.5rem', color: '#94a3b8' }}>
+                <div style={{ background: 'var(--tt-color-text-main)', padding: '2rem', textAlign: 'center', borderRadius: '0.5rem', color: 'var(--tt-color-text-light)' }}>
                   Ningún proveedor con stock suficiente registrado en la base de datos para esta cantidad.
                 </div>
               ) : (
@@ -134,8 +134,8 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
                     <div
                       key={prov.cod_proveedor}
                       style={{
-                        background: '#0f172a',
-                        border: '1px solid #334155',
+                        background: 'var(--tt-color-text-main)',
+                        border: '1px solid var(--tt-color-border-dark)',
                         borderRadius: '0.65rem',
                         padding: '1rem',
                         display: 'flex',
@@ -145,27 +145,27 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
                     >
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Building2 size={16} color="#60a5fa" />
-                          <strong style={{ color: '#f8fafc', fontSize: '1rem' }}>
+                          <Building2 size={16} color="var(--tt-color-primary)" />
+                          <strong style={{ color: 'var(--tt-color-text-main)', fontSize: '1rem' }}>
                             {prov.razon_social}
                           </strong>
                         </div>
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.35rem', fontSize: '0.85rem', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.35rem', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
                           <span>
-                            Costo Unitario: <strong style={{ color: '#10b981' }}>{prov.costo_unitario}</strong>
+                            Costo Unitario: <strong style={{ color: 'var(--tt-color-success)' }}>{prov.costo_unitario}</strong>
                           </span>
                           <span>
-                            Stock Disp: <strong style={{ color: '#38bdf8' }}>{prov.stock_disponible}</strong>
+                            Stock Disp: <strong style={{ color: 'var(--tt-color-primary)' }}>{prov.stock_disponible}</strong>
                           </span>
                         </div>
                       </div>
 
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ background: '#1e293b', color: '#fbbf24', padding: '0.25rem 0.6rem', borderRadius: '9999px', fontWeight: 600, fontSize: '0.75rem' }}>
+                        <span style={{ background: 'var(--tt-color-surface)', color: 'var(--tt-color-warning)', padding: '0.25rem 0.6rem', borderRadius: '9999px', fontWeight: 600, fontSize: '0.75rem' }}>
                           {prov.tiempo_entrega_dias} días entrega
                         </span>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem', color: '#fbbf24', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                          <Star size={13} fill="#fbbf24" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem', color: 'var(--tt-color-warning)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                          <Star size={13} fill="var(--tt-color-warning)" />
                           <span>{prov.calificacion}</span>
                         </div>
                       </div>
@@ -183,8 +183,8 @@ export const SupplierProductAvailabilityPanel: React.FC<SupplierProductAvailabil
             style={{
               padding: '0.6rem 1.25rem',
               borderRadius: '0.5rem',
-              background: '#334155',
-              color: '#f8fafc',
+              background: 'var(--tt-color-border-dark)',
+              color: 'var(--tt-color-text-main)',
               border: 'none',
               fontWeight: 600,
               cursor: 'pointer',

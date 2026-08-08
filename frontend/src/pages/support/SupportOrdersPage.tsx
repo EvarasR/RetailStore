@@ -28,10 +28,10 @@ export const SupportOrdersPage: React.FC = () => {
     <SupportLayout title="Consulta General de Pedidos">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Buscador Oficial de Órdenes del Sistema
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Acceso en tiempo real a ítems, totales, tracking y resoluciones para reclamos (DB-First)
           </p>
         </div>
@@ -42,7 +42,7 @@ export const SupportOrdersPage: React.FC = () => {
             target="_blank"
             rel="noreferrer"
             className="tt-btn tt-btn--secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', textDecoration: 'none', color: '#60a5fa' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', textDecoration: 'none', color: 'var(--tt-color-primary)' }}
             title="Abrir gestión de órdenes y reembolsos en Django Admin"
           >
             <span>Gestión Avanzada /panel/</span>
@@ -83,7 +83,7 @@ export const SupportOrdersPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ClipboardList size={18} color="#60a5fa" />
+            <ClipboardList size={18} color="var(--tt-color-primary)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Órdenes y Envíos Registrados ({filteredOrders.length})
             </h3>
@@ -106,22 +106,22 @@ export const SupportOrdersPage: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Consultando órdenes y tracking desde el servidor Django...
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     No se encontraron pedidos con los criterios de búsqueda aplicados
                   </td>
                 </tr>
               ) : (
                 filteredOrders.map((ord) => (
                   <tr key={ord.cod_pedido}>
-                    <td style={{ color: '#94a3b8', fontWeight: 600 }}>#{ord.cod_pedido}</td>
+                    <td style={{ color: 'var(--tt-color-text-light)', fontWeight: 600 }}>#{ord.cod_pedido}</td>
                     <td style={{ fontWeight: 600 }}>{ord.cliente}</td>
-                    <td style={{ color: '#cbd5e1' }}>{ord.fecha}</td>
+                    <td style={{ color: 'var(--tt-color-text-muted)' }}>{ord.fecha}</td>
                     <td>
                       <span
                         className={
@@ -135,10 +135,10 @@ export const SupportOrdersPage: React.FC = () => {
                         {ord.estado}
                       </span>
                     </td>
-                    <td style={{ fontFamily: 'monospace', color: '#38bdf8' }}>
+                    <td style={{ fontFamily: 'monospace', color: 'var(--tt-color-primary)' }}>
                       {ord.tracking || 'TRK-' + ord.cod_pedido}
                     </td>
-                    <td style={{ fontWeight: 700, color: '#10b981' }}>{ord.total}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{ord.total}</td>
                     <td>
                       <button
                         onClick={() => setSelectedOrder(ord)}

@@ -28,7 +28,7 @@ export const SupportTicketCard: React.FC<SupportTicketCardProps> = ({
       case 'RESPONDIDO':
         return { bg: 'rgba(14, 165, 233, 0.15)', color: 'var(--tt-color-primary)', label: 'En Proceso / Respondido' };
       default:
-        return { bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', label: 'Abierto / Pendiente' };
+        return { bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--tt-color-warning)', label: 'Abierto / Pendiente' };
     }
   };
 
@@ -36,9 +36,9 @@ export const SupportTicketCard: React.FC<SupportTicketCardProps> = ({
     switch (prio?.toUpperCase()) {
       case 'ALTA':
       case 'URGENTE':
-        return '#ef4444';
+        return 'var(--tt-color-error)';
       case 'MEDIA':
-        return '#f59e0b';
+        return 'var(--tt-color-warning)';
       default:
         return 'var(--tt-color-text-light)';
     }
@@ -101,7 +101,7 @@ export const SupportTicketCard: React.FC<SupportTicketCardProps> = ({
                 • {ticket.categoria || 'GENERAL'}
               </span>
             </div>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--tt-color-text)', margin: '0.2rem 0 0 0' }}>
+            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--tt-color-text-main)', margin: '0.2rem 0 0 0' }}>
               {ticket.asunto}
             </h4>
           </div>
@@ -155,13 +155,13 @@ export const SupportTicketCard: React.FC<SupportTicketCardProps> = ({
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', gap: '1rem', fontSize: '0.75rem' }}>
-                      <span style={{ fontWeight: 700, color: esEquipo ? 'var(--tt-color-primary)' : 'var(--tt-color-text)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <span style={{ fontWeight: 700, color: esEquipo ? 'var(--tt-color-primary)' : 'var(--tt-color-text-main)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                         {esEquipo ? <ShieldCheck size={13} /> : <User size={13} />}
                         {msg.autor}
                       </span>
                       {msg.fecha && <span style={{ color: 'var(--tt-color-text-light)' }}>{msg.fecha}</span>}
                     </div>
-                    <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--tt-color-text)', lineHeight: 1.4, whiteSpace: 'pre-wrap' }}>
+                    <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--tt-color-text-main)', lineHeight: 1.4, whiteSpace: 'pre-wrap' }}>
                       {msg.mensaje}
                     </p>
                   </div>

@@ -25,7 +25,7 @@ import { PromoBanner } from '../components/ui/PromoBanner';
 import { ProductCarousel } from '../components/product/ProductCarousel';
 
 export const HomePage: React.FC = () => {
-  const { destacados, masVendidos, nuevos, ofertas, loading, error } =
+  const { destacados, masVendidos, nuevos, ofertas, loading, error, refetch } =
     useProductCarousels();
 
   return (
@@ -43,7 +43,7 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               className="tt-btn--secondary"
-              onClick={() => window.location.reload()}
+              onClick={refetch}
             >
               Reintentar
             </button>
@@ -223,7 +223,7 @@ export const HomePage: React.FC = () => {
           products={ofertas}
           loading={loading}
           linkTo="/catalogo?orden=precio"
-          icon={<Flame size={20} color="#0ea5e9" />}
+          icon={<Flame size={20} color="var(--tt-color-primary)" />}
         />
 
         {/* 7. Bloque de Beneficios TechTail (Clean, Blanco y Grises Suaves) */}

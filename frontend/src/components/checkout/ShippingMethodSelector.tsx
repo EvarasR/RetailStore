@@ -20,7 +20,7 @@ export const ShippingMethodSelector: React.FC<ShippingMethodSelectorProps> = ({
         <h3 style={{ fontSize: '1.125rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Truck size={20} color="var(--tt-color-primary)" /> Selecciona el Método de Envío
         </h3>
-        <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+        <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
           Tiempos estimados de despacho corporativo según la cotización oficial de PostgreSQL.
         </p>
       </div>
@@ -55,7 +55,7 @@ export const ShippingMethodSelector: React.FC<ShippingMethodSelectorProps> = ({
                     height: '44px',
                     borderRadius: '0.5rem',
                     backgroundColor: isSelected ? 'var(--tt-color-primary)' : 'rgba(100, 116, 139, 0.1)',
-                    color: isSelected ? '#ffffff' : '#64748b',
+                    color: isSelected ? '#ffffff' : 'var(--tt-color-text-muted)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -66,7 +66,7 @@ export const ShippingMethodSelector: React.FC<ShippingMethodSelectorProps> = ({
 
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--tt-color-text)' }}>
+                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--tt-color-text-main)' }}>
                       {method.nombre}
                     </span>
                     {method.es_premium_gratis && (
@@ -74,7 +74,7 @@ export const ShippingMethodSelector: React.FC<ShippingMethodSelectorProps> = ({
                         style={{
                           fontSize: '0.7rem',
                           fontWeight: 700,
-                          backgroundColor: '#f59e0b',
+                          backgroundColor: 'var(--tt-color-warning)',
                           color: '#ffffff',
                           padding: '0.125rem 0.375rem',
                           borderRadius: '0.25rem',
@@ -91,7 +91,7 @@ export const ShippingMethodSelector: React.FC<ShippingMethodSelectorProps> = ({
                   <div
                     style={{
                       fontSize: '0.8125rem',
-                      color: '#64748b',
+                      color: 'var(--tt-color-text-muted)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.375rem',
@@ -105,10 +105,10 @@ export const ShippingMethodSelector: React.FC<ShippingMethodSelectorProps> = ({
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--tt-color-text)' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--tt-color-text-main)' }}>
                     ${method.costo_base}
                   </span>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Tarifa base DB</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--tt-color-text-muted)' }}>Tarifa base DB</div>
                 </div>
                 {isSelected && <CheckCircle2 size={20} color="var(--tt-color-primary)" />}
               </div>

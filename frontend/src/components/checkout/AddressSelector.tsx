@@ -26,7 +26,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
           <h3 style={{ fontSize: '1.125rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <MapPin size={20} color="var(--tt-color-primary)" /> Selecciona una Dirección de Entrega
           </h3>
-          <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
             Tus direcciones guardadas y verificadas por la base de datos de Ecuador en PostgreSQL.
           </p>
         </div>
@@ -36,7 +36,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
           disabled={loading}
           style={{
             backgroundColor: 'var(--tt-color-surface)',
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
             border: '1px solid var(--tt-color-primary)',
             padding: '0.625rem 1rem',
             borderRadius: '0.5rem',
@@ -62,11 +62,11 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
             backgroundColor: 'rgba(59, 130, 246, 0.03)',
           }}
         >
-          <MapPin size={36} color="#94a3b8" style={{ margin: '0 auto 0.75rem' }} />
+          <MapPin size={36} color="var(--tt-color-text-light)" style={{ margin: '0 auto 0.75rem' }} />
           <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.375rem' }}>
             No tienes direcciones registradas
           </h4>
-          <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '1rem' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)', marginBottom: '1rem' }}>
             Agrega tu primera dirección corporativa para calcular zonas de entrega.
           </p>
           <button
@@ -119,7 +119,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
                       style={{
                         fontSize: '0.75rem',
                         fontWeight: 700,
-                        backgroundColor: isSelected ? 'var(--tt-color-primary)' : '#0f172a',
+                        backgroundColor: isSelected ? 'var(--tt-color-primary)' : 'var(--tt-color-text-main)',
                         color: '#ffffff',
                         padding: '0.125rem 0.5rem',
                         borderRadius: '0.25rem',
@@ -128,7 +128,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
                       {addr.alias || 'Empresa'}
                     </span>
                     {addr.es_predeterminada && (
-                      <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-success)', fontWeight: 600 }}>
                         ★ Principal
                       </span>
                     )}
@@ -140,15 +140,15 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
                 <div style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '0.25rem' }}>
                   {addr.receptor}
                 </div>
-                <div style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: '1.4' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)', lineHeight: '1.4' }}>
                   {addr.linea1}
                   {addr.linea2 && ` — ${addr.linea2}`}
                 </div>
-                <div style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)', marginTop: '0.25rem' }}>
                   {addr.ciudad}, {addr.provincia} ({addr.pais})
                 </div>
                 {addr.telefono_contacto && (
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)', marginTop: '0.5rem' }}>
                     Tel: {addr.telefono_contacto}
                   </div>
                 )}
@@ -166,7 +166,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
                       right: '0.75rem',
                       background: 'none',
                       border: 'none',
-                      color: '#ef4444',
+                      color: 'var(--tt-color-error)',
                       cursor: 'pointer',
                       padding: '0.25rem',
                       opacity: 0.7,

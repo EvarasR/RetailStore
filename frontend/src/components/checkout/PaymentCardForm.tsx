@@ -91,7 +91,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
           <button
             type="button"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tt-color-text-muted)' }}
           >
             <X size={20} />
           </button>
@@ -103,7 +103,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
             borderRadius: '0.5rem',
             backgroundColor: 'rgba(245, 158, 11, 0.1)',
             border: '1px solid rgba(245, 158, 11, 0.3)',
-            color: '#f59e0b',
+            color: 'var(--tt-color-warning)',
             fontSize: '0.75rem',
             fontWeight: 600,
             display: 'flex',
@@ -122,7 +122,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
               padding: '0.75rem 1rem',
               borderRadius: '0.5rem',
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              color: '#ef4444',
+              color: 'var(--tt-color-error)',
               fontSize: '0.875rem',
               marginBottom: '1rem',
             }}
@@ -148,7 +148,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 fontSize: '0.875rem',
               }}
             />
@@ -171,7 +171,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 fontSize: '0.9375rem',
                 letterSpacing: '1px',
                 fontFamily: 'monospace',
@@ -193,7 +193,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
                   borderRadius: '0.5rem',
                   border: '1px solid var(--tt-color-border)',
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   fontSize: '0.875rem',
                 }}
               >
@@ -218,7 +218,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
                   borderRadius: '0.5rem',
                   border: '1px solid var(--tt-color-border)',
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   fontSize: '0.875rem',
                 }}
               >
@@ -247,7 +247,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
                   borderRadius: '0.5rem',
                   border: '1px solid var(--tt-color-border)',
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   fontSize: '0.9375rem',
                   textAlign: 'center',
                 }}
@@ -261,7 +261,7 @@ export const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
               onClick={onClose}
               style={{
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 border: '1px solid var(--tt-color-border)',
                 padding: '0.75rem 1.25rem',
                 borderRadius: '0.5rem',

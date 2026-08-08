@@ -10,8 +10,8 @@ export const MembershipBenefits: React.FC<MembershipBenefitsProps> = ({ benefici
   const getIconForBenefit = (code: string) => {
     const c = code ? code.toUpperCase() : '';
     if (c.includes('ENVIO') || c.includes('FREE')) return <Truck size={22} color="var(--tt-color-primary)" />;
-    if (c.includes('DESCUENTO') || c.includes('PRICE')) return <DollarSign size={22} color="#10b981" />;
-    if (c.includes('GARANTIA') || c.includes('PRIORIDAD')) return <Shield size={22} color="#f59e0b" />;
+    if (c.includes('DESCUENTO') || c.includes('PRICE')) return <DollarSign size={22} color="var(--tt-color-success)" />;
+    if (c.includes('GARANTIA') || c.includes('PRIORIDAD')) return <Shield size={22} color="var(--tt-color-warning)" />;
     if (c.includes('SOPORTE')) return <Zap size={22} color="var(--tt-color-primary)" />;
     return <Gift size={22} color="#eab308" />;
   };
@@ -61,7 +61,7 @@ export const MembershipBenefits: React.FC<MembershipBenefitsProps> = ({ benefici
               >
                 {getIconForBenefit(item.codigo)}
               </div>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--tt-color-text)' }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--tt-color-text-main)' }}>
                 {item.nombre}
               </h4>
             </div>

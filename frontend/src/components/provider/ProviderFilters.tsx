@@ -23,7 +23,7 @@ export const ProviderFilters: React.FC<ProviderFiltersProps> = ({
   return (
     <div className="ops-filter-bar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '220px', position: 'relative' }}>
-        <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '0.75rem' }} />
+        <Search size={18} color="var(--tt-color-text-light)" style={{ position: 'absolute', left: '0.75rem' }} />
         <input
           type="text"
           value={searchTerm}
@@ -55,8 +55,8 @@ export const ProviderFilters: React.FC<ProviderFiltersProps> = ({
           onClick={onReset}
           style={{
             background: 'transparent',
-            border: '1px solid #334155',
-            color: '#94a3b8',
+            border: '1px solid var(--tt-color-border-dark)',
+            color: 'var(--tt-color-text-light)',
             padding: '0.5rem 0.75rem',
             borderRadius: '0.5rem',
             cursor: 'pointer',

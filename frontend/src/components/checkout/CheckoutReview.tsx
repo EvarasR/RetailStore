@@ -28,7 +28,7 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
         <h3 style={{ fontSize: '1.125rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <CheckCircle2 size={20} color="var(--tt-color-primary)" /> Revisión Final del Pedido TechTail
         </h3>
-        <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+        <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
           Verifica tus productos, dirección y método antes de crear la orden formal en PostgreSQL.
         </p>
       </div>
@@ -45,19 +45,19 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
           className="tt-card"
           style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}
         >
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
             <MapPin size={14} /> DIRECCIÓN DE ENTREGA
           </div>
           {address ? (
             <>
               <div style={{ fontWeight: 700, fontSize: '0.9375rem' }}>{address.receptor}</div>
-              <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>{address.linea1}</div>
-              <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--tt-color-text-muted)' }}>{address.linea1}</div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--tt-color-text-muted)' }}>
                 {address.ciudad}, {address.provincia}
               </div>
             </>
           ) : (
-            <div style={{ fontSize: '0.8125rem', color: '#ef4444' }}>Falta seleccionar dirección</div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--tt-color-error)' }}>Falta seleccionar dirección</div>
           )}
         </div>
 
@@ -66,13 +66,13 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
           className="tt-card"
           style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}
         >
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
             <Truck size={14} /> MÉTODO DE ENVÍO
           </div>
           {shippingMethod ? (
             <>
               <div style={{ fontWeight: 700, fontSize: '0.9375rem' }}>{shippingMethod.nombre}</div>
-              <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--tt-color-text-muted)' }}>
                 Entrega estimada: {shippingMethod.dias_min}-{shippingMethod.dias_max} días
               </div>
               <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--tt-color-primary)' }}>
@@ -80,7 +80,7 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
               </div>
             </>
           ) : (
-            <div style={{ fontSize: '0.8125rem', color: '#ef4444' }}>Falta seleccionar método de envío</div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--tt-color-error)' }}>Falta seleccionar método de envío</div>
           )}
         </div>
 
@@ -89,7 +89,7 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
           className="tt-card"
           style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}
         >
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
             <CreditCard size={14} /> PAGO CORPORATIVO
           </div>
           {paymentMethod ? (
@@ -97,13 +97,13 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
               <div style={{ fontWeight: 700, fontSize: '0.9375rem' }}>
                 {paymentMethod.marca || paymentMethod.tipo} •••• {paymentMethod.ultimos4}
               </div>
-              <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>Titular: {paymentMethod.titular}</div>
-              <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--tt-color-text-muted)' }}>Titular: {paymentMethod.titular}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-success)', fontWeight: 600 }}>
                 Idempotency garantizada DB-First
               </div>
             </>
           ) : (
-            <div style={{ fontSize: '0.8125rem', color: '#ef4444' }}>Falta seleccionar tarjeta</div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--tt-color-error)' }}>Falta seleccionar tarjeta</div>
           )}
         </div>
       </div>
@@ -134,7 +134,7 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
                 />
                 <div>
                   <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>{item.nombre}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
                     Cant: {item.cantidad} x ${item.precio_unitario}
                   </div>
                 </div>
@@ -159,8 +159,8 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
             alignItems: 'flex-start',
           }}
         >
-          <AlertTriangle size={20} color="#f59e0b" style={{ flexShrink: 0 }} />
-          <div style={{ fontSize: '0.875rem', color: '#f59e0b' }}>
+          <AlertTriangle size={20} color="var(--tt-color-warning)" style={{ flexShrink: 0 }} />
+          <div style={{ fontSize: '0.875rem', color: 'var(--tt-color-warning)' }}>
             <strong>Nota importante de inventario:</strong> Algunos productos de tu carrito reportan backorder o despacho especial por proveedor. El pedido se creará formalmente en PostgreSQL respetando esta cotización.
           </div>
         </div>
@@ -192,8 +192,8 @@ export const CheckoutReview: React.FC<CheckoutReviewProps> = ({
           {processing ? 'Autorizando con pasarela y creando pedido en BD...' : 'Confirmar y Autorizar Pedido en PostgreSQL'}
         </button>
 
-        <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-          <ShieldCheck size={16} color="#10b981" />
+        <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+          <ShieldCheck size={16} color="var(--tt-color-success)" />
           <span>Al confirmar, el pedido y la transacción quedan registrados mediante procedimientos transaccionales ACID.</span>
         </div>
       </div>

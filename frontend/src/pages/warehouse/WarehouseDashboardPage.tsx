@@ -19,10 +19,10 @@ export const WarehouseDashboardPage: React.FC = () => {
     <WarehouseLayout title="Dashboard de Bodega y Logística">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
             Estado Operativo en Tiempo Real
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Control DB-First del inventario físico, lotes activos y preparación de pedidos
           </p>
         </div>
@@ -49,40 +49,40 @@ export const WarehouseDashboardPage: React.FC = () => {
       <div className="ops-metrics-grid">
         <div className="ops-metric-card">
           <span className="ops-metric-title">Stock Crítico o Agotado</span>
-          <span className="ops-metric-value" style={{ color: '#ef4444' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-error)' }}>
             {dashboard.stock_critico}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Requieren reabastecimiento inmediato
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Alertas de Almacén</span>
-          <span className="ops-metric-value" style={{ color: '#f59e0b' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-warning)' }}>
             {dashboard.alertas_pendientes}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Umbrales de stock detectados
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Lotes Activos en Bodega</span>
-          <span className="ops-metric-value" style={{ color: '#60a5fa' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-primary)' }}>
             {dashboard.lotes_proximos}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Recepcionados y con trazabilidad
           </span>
         </div>
 
         <div className="ops-metric-card">
           <span className="ops-metric-title">Pedidos por Preparar</span>
-          <span className="ops-metric-value" style={{ color: '#10b981' }}>
+          <span className="ops-metric-value" style={{ color: 'var(--tt-color-success)' }}>
             {dashboard.pedidos_por_preparar}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
             Listos para picking y packing
           </span>
         </div>
@@ -93,14 +93,14 @@ export const WarehouseDashboardPage: React.FC = () => {
         <div className="ops-table-card" style={{ marginBottom: 0 }}>
           <div className="ops-table-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <AlertTriangle size={18} color="#f59e0b" />
+              <AlertTriangle size={18} color="var(--tt-color-warning)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Alertas Activas en Almacén
               </h3>
             </div>
             <Link
               to="/warehouse/alertas"
-              style={{ fontSize: '0.8rem', color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-primary)', textDecoration: 'none', fontWeight: 600 }}
             >
               Ver Todas →
             </Link>
@@ -118,7 +118,7 @@ export const WarehouseDashboardPage: React.FC = () => {
               <tbody>
                 {alertas.length === 0 ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                       No hay alertas de inventario activas
                     </td>
                   </tr>
@@ -143,14 +143,14 @@ export const WarehouseDashboardPage: React.FC = () => {
         <div className="ops-table-card" style={{ marginBottom: 0 }}>
           <div className="ops-table-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <TrendingDown size={18} color="#ef4444" />
+              <TrendingDown size={18} color="var(--tt-color-error)" />
               <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                 Productos con Stock Crítico
               </h3>
             </div>
             <Link
               to="/warehouse/inventario"
-              style={{ fontSize: '0.8rem', color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '0.8rem', color: 'var(--tt-color-primary)', textDecoration: 'none', fontWeight: 600 }}
             >
               Inventario Completo →
             </Link>
@@ -168,7 +168,7 @@ export const WarehouseDashboardPage: React.FC = () => {
               <tbody>
                 {productos.filter((p) => p.estado === 'SIN_STOCK' || p.estado === 'STOCK_CRITICO').length === 0 ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-light)' }}>
                       Ningún producto con stock crítico en este momento
                     </td>
                   </tr>
@@ -179,7 +179,7 @@ export const WarehouseDashboardPage: React.FC = () => {
                     .map((p) => (
                       <tr key={p.cod_producto}>
                         <td style={{ fontWeight: 600 }}>{p.nombre}</td>
-                        <td style={{ fontWeight: 700, color: p.stock_disponible === 0 ? '#ef4444' : '#f59e0b' }}>
+                        <td style={{ fontWeight: 700, color: p.stock_disponible === 0 ? 'var(--tt-color-error)' : 'var(--tt-color-warning)' }}>
                           {p.stock_disponible} unid.
                         </td>
                         <td>
@@ -201,16 +201,16 @@ export const WarehouseDashboardPage: React.FC = () => {
         <Link
           to="/warehouse/inventario"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-primary)', background: 'rgba(59, 130, 246, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Boxes size={22} color="#60a5fa" />
-            <ArrowRight size={18} color="#60a5fa" />
+            <Boxes size={22} color="var(--tt-color-primary)" />
+            <ArrowRight size={18} color="var(--tt-color-primary)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Gestión de Inventario
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Consultar stock de almacenes y niveles de seguridad
           </span>
         </Link>
@@ -218,16 +218,16 @@ export const WarehouseDashboardPage: React.FC = () => {
         <Link
           to="/warehouse/lotes"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #10b981', background: 'rgba(16, 185, 129, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-success)', background: 'rgba(16, 185, 129, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Layers size={22} color="#34d399" />
-            <ArrowRight size={18} color="#34d399" />
+            <Layers size={22} color="var(--tt-color-success)" />
+            <ArrowRight size={18} color="var(--tt-color-success)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Lotes y Vencimientos
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Registros de lotes entrantes y rotación FEFO/FIFO
           </span>
         </Link>
@@ -235,16 +235,16 @@ export const WarehouseDashboardPage: React.FC = () => {
         <Link
           to="/warehouse/pedidos"
           className="ops-metric-card"
-          style={{ textDecoration: 'none', border: '1px solid #f59e0b', background: 'rgba(245, 158, 11, 0.05)' }}
+          style={{ textDecoration: 'none', border: '1px solid var(--tt-color-warning)', background: 'rgba(245, 158, 11, 0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <ClipboardList size={22} color="#fbbf24" />
-            <ArrowRight size={18} color="#fbbf24" />
+            <ClipboardList size={22} color="var(--tt-color-warning)" />
+            <ArrowRight size={18} color="var(--tt-color-warning)" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc', marginTop: '0.5rem' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--tt-color-text-main)', marginTop: '0.5rem' }}>
             Despacho y Pedidos
           </span>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>
             Cola operativa para preparación y empaque
           </span>
         </Link>

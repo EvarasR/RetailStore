@@ -14,7 +14,7 @@ export const ProviderSidebar: React.FC = () => {
     <aside className="prov-sidebar" aria-label="Navegación Portal Proveedor Externo">
       <div className="prov-header">
         <Link to="/proveedor" className="prov-brand" title="Portal del Proveedor">
-          <Building2 size={24} color="#38bdf8" />
+          <Building2 size={24} color="var(--tt-color-primary)" />
           <span>TechTail Proveedor</span>
         </Link>
       </div>
@@ -54,11 +54,11 @@ export const ProviderSidebar: React.FC = () => {
         </NavLink>
       </nav>
 
-      <div style={{ padding: '1rem', borderTop: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div style={{ padding: '1rem', borderTop: '1px solid var(--tt-color-surface)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         <Link
           to="/"
           className="prov-nav-item"
-          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#cbd5e1' }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: 'var(--tt-color-text-muted)' }}
         >
           <Store size={17} />
           <span>Volver a la Tienda</span>

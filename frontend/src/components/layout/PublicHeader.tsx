@@ -96,7 +96,7 @@ export const PublicHeader: React.FC = () => {
                   style={{ backgroundColor: 'var(--tt-color-surface)', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}
                   title="Portal Proveedor React"
                 >
-                  <span style={{ fontSize: '0.6875rem', color: '#0284c7', fontWeight: 700 }}>EXTERNO</span>
+                  <span style={{ fontSize: '0.6875rem', color: 'var(--tt-color-primary-hover)', fontWeight: 700 }}>EXTERNO</span>
                   <span className="tt-nav-item__strong">/proveedor</span>
                 </Link>
               )}

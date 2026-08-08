@@ -41,6 +41,11 @@ button {
   background: none;
 }
 
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--tt-color-primary);
+  outline-offset: 2px;
+}
+
 .tt-container {
   width: 100%;
   max-width: 1440px;

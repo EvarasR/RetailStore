@@ -32,7 +32,7 @@ export const CartEmptyState: React.FC<CartEmptyStateProps> = ({ isAuthenticated 
 
       <p
         style={{
-          color: '#64748b',
+          color: 'var(--tt-color-text-muted)',
           fontSize: '0.9375rem',
           marginBottom: '2rem',
           lineHeight: '1.6',
@@ -85,7 +85,7 @@ export const CartEmptyState: React.FC<CartEmptyStateProps> = ({ isAuthenticated 
               to="/catalogo"
               style={{
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 border: '1px solid var(--tt-color-border)',
                 padding: '0.875rem 1.75rem',
                 borderRadius: '0.5rem',

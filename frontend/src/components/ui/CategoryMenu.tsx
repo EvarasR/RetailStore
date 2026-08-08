@@ -9,12 +9,12 @@ export interface CategoryMenuProps {
 
 const getCategoryIcon = (name: string) => {
   const lower = name.toLowerCase();
-  if (lower.includes('servidor')) return <Server size={20} color="#38bdf8" />;
+  if (lower.includes('servidor')) return <Server size={20} color="var(--tt-color-primary)" />;
   if (lower.includes('red') || lower.includes('switch')) return <Network size={20} color="#2dd4bf" />;
   if (lower.includes('almacen') || lower.includes('disco') || lower.includes('nvme')) return <HardDrive size={20} color="#818cf8" />;
-  if (lower.includes('ups') || lower.includes('energ')) return <Zap size={20} color="#fbbf24" />;
+  if (lower.includes('ups') || lower.includes('energ')) return <Zap size={20} color="var(--tt-color-warning)" />;
   if (lower.includes('segur') || lower.includes('firewall')) return <Lock size={20} color="#e879f9" />;
-  return <Cpu size={20} color="#64748b" />;
+  return <Cpu size={20} color="var(--tt-color-text-muted)" />;
 };
 
 export const CategoryMenu: React.FC<CategoryMenuProps> = ({ className = '' }) => {

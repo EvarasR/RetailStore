@@ -24,7 +24,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           <h3 style={{ fontSize: '1.125rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CreditCard size={20} color="var(--tt-color-primary)" /> Método de Pago Corporativo (Simulado)
           </h3>
-          <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
             Pasarela de pago simulada corporativa conectada a /operaciones/api/.
           </p>
         </div>
@@ -34,7 +34,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           disabled={loading}
           style={{
             backgroundColor: 'var(--tt-color-surface)',
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
             border: '1px solid var(--tt-color-primary)',
             padding: '0.625rem 1rem',
             borderRadius: '0.5rem',
@@ -60,11 +60,11 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
             backgroundColor: 'rgba(59, 130, 246, 0.03)',
           }}
         >
-          <CreditCard size={36} color="#94a3b8" style={{ margin: '0 auto 0.75rem' }} />
+          <CreditCard size={36} color="var(--tt-color-text-light)" style={{ margin: '0 auto 0.75rem' }} />
           <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.375rem' }}>
             No tienes tarjetas corporativas asociadas
           </h4>
-          <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '1rem' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)', marginBottom: '1rem' }}>
             Registra una tarjeta simulada para autorizar y capturar el pedido en PostgreSQL.
           </p>
           <button
@@ -116,7 +116,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                     style={{
                       fontSize: '0.75rem',
                       fontWeight: 700,
-                      backgroundColor: '#0f172a',
+                      backgroundColor: 'var(--tt-color-text-main)',
                       color: '#ffffff',
                       padding: '0.125rem 0.5rem',
                       borderRadius: '0.25rem',
@@ -132,7 +132,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 <div style={{ fontSize: '1.125rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.5rem' }}>
                   •••• •••• •••• {method.ultimos4}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
                   <span>TITULAR: {method.titular}</span>
                   <span>
                     EXP: {String(method.exp_mes).padStart(2, '0')}/{method.exp_anio}
@@ -140,7 +140,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 </div>
 
                 {method.saldo_disponible && (
-                  <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600, marginTop: '0.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-success)', fontWeight: 600, marginTop: '0.5rem' }}>
                     Saldo de prueba: ${method.saldo_disponible}
                   </div>
                 )}
@@ -156,11 +156,11 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           alignItems: 'center',
           gap: '0.5rem',
           fontSize: '0.75rem',
-          color: '#64748b',
+          color: 'var(--tt-color-text-muted)',
           marginTop: '0.5rem',
         }}
       >
-        <ShieldCheck size={16} color="#10b981" />
+        <ShieldCheck size={16} color="var(--tt-color-success)" />
         <span>Pago protegido por pasarela simulada con idempotency key. No procesa transacciones bancarias reales.</span>
       </div>
     </div>

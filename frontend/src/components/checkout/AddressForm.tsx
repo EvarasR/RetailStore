@@ -127,7 +127,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
           <button
             type="button"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tt-color-text-muted)' }}
           >
             <X size={20} />
           </button>
@@ -139,7 +139,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
               padding: '0.75rem 1rem',
               borderRadius: '0.5rem',
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              color: '#ef4444',
+              color: 'var(--tt-color-error)',
               fontSize: '0.875rem',
               marginBottom: '1rem',
             }}
@@ -164,7 +164,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 fontSize: '0.875rem',
               }}
             />
@@ -185,7 +185,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 fontSize: '0.875rem',
               }}
             />
@@ -205,7 +205,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                   borderRadius: '0.5rem',
                   border: '1px solid var(--tt-color-border)',
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   fontSize: '0.875rem',
                 }}
               >
@@ -232,7 +232,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                   borderRadius: '0.5rem',
                   border: '1px solid var(--tt-color-border)',
                   backgroundColor: 'var(--tt-color-surface)',
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   fontSize: '0.875rem',
                 }}
               >
@@ -264,7 +264,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 fontSize: '0.875rem',
               }}
             />
@@ -285,7 +285,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 fontSize: '0.875rem',
               }}
             />
@@ -306,7 +306,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 fontSize: '0.875rem',
               }}
             />
@@ -331,7 +331,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
               onClick={onClose}
               style={{
                 backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text)',
+                color: 'var(--tt-color-text-main)',
                 border: '1px solid var(--tt-color-border)',
                 padding: '0.75rem 1.25rem',
                 borderRadius: '0.5rem',

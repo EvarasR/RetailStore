@@ -23,10 +23,10 @@ export const SupportIncidentsPage: React.FC = () => {
     <SupportLayout title="Incidencias y Retenciones Operativas">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Alertas en Transporte, Retenciones y Devoluciones
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Derivación expositiva de órdenes que requieren intervención del equipo de soporte (DB-First)
           </p>
         </div>
@@ -37,7 +37,7 @@ export const SupportIncidentsPage: React.FC = () => {
             target="_blank"
             rel="noreferrer"
             className="tt-btn tt-btn--secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', textDecoration: 'none', color: '#60a5fa' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', textDecoration: 'none', color: 'var(--tt-color-primary)' }}
             title="Escalar incidencia a nivel administrativo en Django /panel/"
           >
             <span>Escalar a /panel/</span>
@@ -77,7 +77,7 @@ export const SupportIncidentsPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertOctagon size={18} color="#ef4444" />
+            <AlertOctagon size={18} color="var(--tt-color-error)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Incidencias y Retenciones Activas ({filteredIncidents.length})
             </h3>
@@ -100,23 +100,23 @@ export const SupportIncidentsPage: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Consultando incidencias logísticas desde PostgreSQL...
                   </td>
                 </tr>
               ) : filteredIncidents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     No hay incidencias que coincidan con la búsqueda actual
                   </td>
                 </tr>
               ) : (
                 filteredIncidents.map((inc, idx) => (
                   <tr key={inc.cod_incidencia || idx}>
-                    <td style={{ color: '#94a3b8' }}>
+                    <td style={{ color: 'var(--tt-color-text-light)' }}>
                       #{inc.cod_incidencia || idx + 1}
                     </td>
-                    <td style={{ fontWeight: 700, color: '#38bdf8' }}>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>
                       #{inc.cod_pedido || idx + 100}
                     </td>
                     <td style={{ fontWeight: 600 }}>{inc.cliente || 'Cliente TechTail'}</td>
@@ -124,7 +124,7 @@ export const SupportIncidentsPage: React.FC = () => {
                     <td>
                       <span className="ops-badge ops-badge--critica">{inc.estado}</span>
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
                       {inc.fecha || 'Reciente'}
                     </td>
                     <td>
@@ -143,7 +143,7 @@ export const SupportIncidentsPage: React.FC = () => {
                           target="_blank"
                           rel="noreferrer"
                           className="tt-btn tt-btn--secondary"
-                          style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#60a5fa' }}
+                          style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--tt-color-primary)' }}
                           title="Abrir incidencia en panel corporativo /panel/"
                         >
                           <ExternalLink size={13} />

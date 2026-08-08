@@ -28,8 +28,8 @@ export const SupportTicketDrawer: React.FC<SupportTicketDrawerProps> = ({
       <div className="ops-drawer-panel" onClick={(e) => e.stopPropagation()}>
         <div className="ops-drawer-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <MessageSquare size={20} color="#3b82f6" />
-            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+            <MessageSquare size={20} color="var(--tt-color-primary)" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
               Bitácora DB-First de Atención al Cliente
             </h3>
           </div>
@@ -38,7 +38,7 @@ export const SupportTicketDrawer: React.FC<SupportTicketDrawerProps> = ({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94a3b8',
+              color: 'var(--tt-color-text-light)',
               cursor: 'pointer',
               padding: '0.25rem',
             }}
@@ -48,9 +48,9 @@ export const SupportTicketDrawer: React.FC<SupportTicketDrawerProps> = ({
         </div>
 
         <div className="ops-drawer-body">
-          <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
+          <div style={{ background: 'var(--tt-color-text-main)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)', textTransform: 'uppercase' }}>
                 TICKET #{ticket.cod_ticket}
               </span>
               <span
@@ -66,7 +66,7 @@ export const SupportTicketDrawer: React.FC<SupportTicketDrawerProps> = ({
               </span>
             </div>
 
-            <h4 style={{ margin: '0.5rem 0 0.5rem', fontSize: '1.25rem', color: '#f8fafc' }}>
+            <h4 style={{ margin: '0.5rem 0 0.5rem', fontSize: '1.25rem', color: 'var(--tt-color-text-main)' }}>
               {ticket.asunto}
             </h4>
 
@@ -81,18 +81,18 @@ export const SupportTicketDrawer: React.FC<SupportTicketDrawerProps> = ({
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <div style={{ background: 'var(--tt-color-text-main)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <User size={15} />
                 <span>Cliente Solicitante</span>
               </span>
-              <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#f8fafc', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--tt-color-text-main)', marginTop: '0.25rem' }}>
                 {ticket.cliente || `Usuario #${ticket.cod_usuario || 'N/A'}`}
               </div>
             </div>
 
-            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <div style={{ background: 'var(--tt-color-text-main)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Calendar size={15} />
                 <span>Fecha Apertura</span>
               </span>
@@ -124,8 +124,8 @@ export const SupportTicketDrawer: React.FC<SupportTicketDrawerProps> = ({
             style={{
               padding: '0.6rem 1.25rem',
               borderRadius: '0.5rem',
-              background: '#334155',
-              color: '#f8fafc',
+              background: 'var(--tt-color-border-dark)',
+              color: 'var(--tt-color-text-main)',
               border: 'none',
               fontWeight: 600,
               cursor: 'pointer',

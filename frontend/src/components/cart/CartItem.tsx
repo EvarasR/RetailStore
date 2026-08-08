@@ -49,7 +49,7 @@ export const CartItem: React.FC<CartItemProps> = ({
 
       {/* Información principal */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tt-color-text-muted)', textTransform: 'uppercase' }}>
           {item.marca}
         </span>
         <Link
@@ -57,7 +57,7 @@ export const CartItem: React.FC<CartItemProps> = ({
           style={{
             fontSize: '1rem',
             fontWeight: 700,
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
             textDecoration: 'none',
             lineHeight: '1.4',
           }}
@@ -66,7 +66,7 @@ export const CartItem: React.FC<CartItemProps> = ({
         </Link>
 
         {/* Precio unitario */}
-        <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+        <div style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
           Precio unitario: <strong>${item.precio_unitario}</strong>
         </div>
 
@@ -74,22 +74,22 @@ export const CartItem: React.FC<CartItemProps> = ({
         {cot && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.5rem' }}>
             {cot.requiere_proveedor && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: '#f59e0b', fontWeight: 600 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--tt-color-warning)', fontWeight: 600 }}>
                 <Package size={14} /> Despacho de proveedor especializado
               </span>
             )}
             {typeof cot.tiempo_estimado_dias === 'number' && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--tt-color-success)', fontWeight: 600 }}>
                 <Clock size={14} /> Tiempo estimado de entrega: {cot.tiempo_estimado_dias} días
               </span>
             )}
             {cot.cantidad_faltante > 0 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--tt-color-error)', fontWeight: 600 }}>
                 <ShieldAlert size={14} /> Stock en almacén: {cot.cantidad_cubierta} u. (Faltan {cot.cantidad_faltante} en backorder)
               </span>
             )}
             {cot.mensajes && cot.mensajes.length > 0 && (
-              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', marginTop: '0.25rem' }}>
                 {cot.mensajes.map((m, idx) => (
                   <div key={idx}>• {m}</div>
                 ))}
@@ -111,7 +111,7 @@ export const CartItem: React.FC<CartItemProps> = ({
             borderRadius: '0.375rem',
             border: '1px solid var(--tt-color-border)',
             backgroundColor: 'var(--tt-color-surface)',
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
             cursor: item.cantidad > 1 ? 'pointer' : 'not-allowed',
             fontWeight: 700,
           }}
@@ -132,7 +132,7 @@ export const CartItem: React.FC<CartItemProps> = ({
             borderRadius: '0.375rem',
             border: '1px solid var(--tt-color-border)',
             backgroundColor: 'var(--tt-color-surface)',
-            color: 'var(--tt-color-text)',
+            color: 'var(--tt-color-text-main)',
             cursor: 'pointer',
             fontWeight: 700,
           }}
@@ -144,7 +144,7 @@ export const CartItem: React.FC<CartItemProps> = ({
 
       {/* Subtotal y Eliminar */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-        <div style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--tt-color-text)' }}>
+        <div style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--tt-color-text-main)' }}>
           ${item.subtotal}
         </div>
         <button
@@ -154,7 +154,7 @@ export const CartItem: React.FC<CartItemProps> = ({
           style={{
             background: 'none',
             border: 'none',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             cursor: 'pointer',
             padding: '0.375rem',
             display: 'flex',

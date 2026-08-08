@@ -62,7 +62,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <span
             style={{
               backgroundColor: '#fef2f2',
-              color: '#dc2626',
+              color: 'var(--tt-color-error)',
               fontSize: '0.75rem',
               fontWeight: 700,
               padding: '0.25rem 0.5rem',
@@ -79,7 +79,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <span
             style={{
               backgroundColor: '#e0f2fe',
-              color: '#0369a1',
+              color: 'var(--tt-color-primary-dark)',
               fontSize: '0.7rem',
               fontWeight: 700,
               padding: '0.2rem 0.5rem',
@@ -90,7 +90,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               border: '1px solid #bae6fd',
             }}
           >
-            <ShieldCheck size={12} color="#0284c7" />
+            <ShieldCheck size={12} color="var(--tt-color-primary-hover)" />
             <span>PRIME</span>
           </span>
         )}
@@ -106,8 +106,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       >
         <Heart
           size={16}
-          fill={wishlistVisual ? '#dc2626' : 'none'}
-          color={wishlistVisual ? '#dc2626' : '#64748b'}
+          fill={wishlistVisual ? 'var(--tt-color-error)' : 'none'}
+          color={wishlistVisual ? 'var(--tt-color-error)' : 'var(--tt-color-text-muted)'}
         />
       </button>
 
@@ -151,13 +151,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 size={13}
                 fill={
                   product.rating && i < Math.floor(product.rating)
-                    ? '#f59e0b'
+                    ? 'var(--tt-color-warning)'
                     : 'none'
                 }
                 color={
                   product.rating && i < Math.floor(product.rating)
-                    ? '#f59e0b'
-                    : '#cbd5e1'
+                    ? 'var(--tt-color-warning)'
+                    : 'var(--tt-color-text-muted)'
                 }
               />
             ))}
@@ -191,10 +191,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               style={{
                 fontWeight: 600,
                 color: isOutOfStock
-                  ? '#dc2626'
+                  ? 'var(--tt-color-error)'
                   : isLowStock
-                  ? '#d97706'
-                  : '#059669',
+                  ? 'var(--tt-color-warning)'
+                  : 'var(--tt-color-success)',
               }}
             >
               {isOutOfStock
@@ -204,7 +204,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 : 'En stock'}
             </span>
             {product.sku && (
-              <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>
+              <span style={{ color: 'var(--tt-color-text-light)', fontSize: '0.7rem' }}>
                 SKU: {product.sku}
               </span>
             )}
@@ -228,9 +228,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 className="tt-btn--secondary"
                 style={{
                   width: '100%',
-                  backgroundColor: '#059669',
+                  backgroundColor: 'var(--tt-color-success)',
                   color: '#ffffff',
-                  borderColor: '#059669',
+                  borderColor: 'var(--tt-color-success)',
                 }}
               >
                 <CheckCircle2 size={15} />

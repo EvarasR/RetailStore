@@ -49,7 +49,7 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
 
         <p
           style={{
-            color: '#64748b',
+            color: 'var(--tt-color-text-muted)',
             fontSize: '0.9375rem',
             lineHeight: '1.6',
             marginBottom: '2rem',
@@ -83,7 +83,7 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
             to="/catalogo"
             style={{
               backgroundColor: 'var(--tt-color-surface)',
-              color: 'var(--tt-color-text)',
+              color: 'var(--tt-color-text-main)',
               border: '1px solid var(--tt-color-border)',
               padding: '0.875rem 1.75rem',
               borderRadius: '0.5rem',
@@ -108,8 +108,8 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
         <h3 style={{ fontSize: '1.125rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <UserCheck size={20} color="var(--tt-color-primary)" /> Sesión Activa de Checkout
         </h3>
-        <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
-          Validada directamente en PostgreSQL mediante /api/session/.
+        <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)' }}>
+          Sesión segura verificada para continuar con la compra.
         </p>
       </div>
 
@@ -129,7 +129,7 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
               style={{
                 fontSize: '0.75rem',
                 fontWeight: 700,
-                color: '#64748b',
+                color: 'var(--tt-color-text-muted)',
                 textTransform: 'uppercase',
                 display: 'block',
                 marginBottom: '0.25rem',
@@ -137,11 +137,11 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
             >
               TITULAR DE LA CUENTA
             </span>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--tt-color-text)' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--tt-color-text-main)' }}>
               {nombreMostrar}
             </div>
             {usuario?.email && (
-              <div style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.125rem' }}>
+              <div style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)', marginTop: '0.125rem' }}>
                 Email de facturación: {usuario.email}
               </div>
             )}
@@ -154,7 +154,7 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.375rem',
-                  backgroundColor: '#f59e0b',
+                  backgroundColor: 'var(--tt-color-warning)',
                   color: '#ffffff',
                   padding: '0.375rem 0.75rem',
                   borderRadius: '9999px',
@@ -170,7 +170,7 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.375rem',
-                  backgroundColor: '#64748b',
+                  backgroundColor: 'var(--tt-color-text-muted)',
                   color: '#ffffff',
                   padding: '0.375rem 0.75rem',
                   borderRadius: '9999px',
@@ -186,7 +186,7 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
 
         {roles && roles.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Roles asignados en DB:</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', fontWeight: 600 }}>Roles asignados en DB:</span>
             {roles.map((r, idx) => (
               <span
                 key={idx}
@@ -215,7 +215,7 @@ export const CheckoutSessionStep: React.FC<CheckoutSessionStepProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             fontSize: '0.8125rem',
-            color: '#10b981',
+            color: 'var(--tt-color-success)',
           }}
         >
           <ShieldCheck size={18} style={{ flexShrink: 0 }} />

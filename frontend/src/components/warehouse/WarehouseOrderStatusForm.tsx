@@ -57,36 +57,36 @@ export const WarehouseOrderStatusForm: React.FC<WarehouseOrderStatusFormProps> =
     <form
       onSubmit={handleSubmit}
       style={{
-        background: '#0f172a',
-        border: '1px solid #334155',
+        background: 'var(--tt-color-text-main)',
+        border: '1px solid var(--tt-color-border-dark)',
         borderRadius: '0.75rem',
         padding: '1.25rem',
         marginTop: '1rem',
       }}
     >
-      <h5 style={{ margin: '0 0 0.75rem', fontSize: '0.95rem', color: '#f8fafc' }}>
+      <h5 style={{ margin: '0 0 0.75rem', fontSize: '0.95rem', color: 'var(--tt-color-text-main)' }}>
         Progresión Operativa de Despacho (DB-First)
       </h5>
-      <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#94a3b8' }}>
-        Estado actual en PostgreSQL: <strong style={{ color: '#3b82f6' }}>{estadoActual}</strong>
+      <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
+        Estado actual en PostgreSQL: <strong style={{ color: 'var(--tt-color-primary)' }}>{estadoActual}</strong>
       </p>
 
       {errorMsg && (
-        <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', color: '#ef4444', padding: '0.65rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid var(--tt-color-error)', color: 'var(--tt-color-error)', padding: '0.65rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <AlertTriangle size={16} />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#10b981', padding: '0.65rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid var(--tt-color-success)', color: 'var(--tt-color-success)', padding: '0.65rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <CheckCircle2 size={16} />
           <span>{successMsg}</span>
         </div>
       )}
 
       <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '0.35rem' }}>
+        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--tt-color-text-muted)', marginBottom: '0.35rem' }}>
           Seleccionar Nuevo Estado de Bodega:
         </label>
         <select
@@ -105,7 +105,7 @@ export const WarehouseOrderStatusForm: React.FC<WarehouseOrderStatusFormProps> =
       </div>
 
       <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '0.35rem' }}>
+        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--tt-color-text-muted)', marginBottom: '0.35rem' }}>
           Nota o Bitácora de Despacho (obligatorio):
         </label>
         <textarea
@@ -116,9 +116,9 @@ export const WarehouseOrderStatusForm: React.FC<WarehouseOrderStatusFormProps> =
           rows={2}
           style={{
             width: '100%',
-            background: '#111827',
-            border: '1px solid #334155',
-            color: '#f8fafc',
+            background: 'var(--tt-color-surface)',
+            border: '1px solid var(--tt-color-border-dark)',
+            color: 'var(--tt-color-text-main)',
             padding: '0.65rem',
             borderRadius: '0.5rem',
             fontSize: '0.9rem',
@@ -134,7 +134,7 @@ export const WarehouseOrderStatusForm: React.FC<WarehouseOrderStatusFormProps> =
           style={{
             padding: '0.6rem 1.25rem',
             borderRadius: '0.5rem',
-            background: loading || !comentario.trim() ? '#475569' : '#3b82f6',
+            background: loading || !comentario.trim() ? '#475569' : 'var(--tt-color-primary)',
             color: '#ffffff',
             border: 'none',
             fontWeight: 600,

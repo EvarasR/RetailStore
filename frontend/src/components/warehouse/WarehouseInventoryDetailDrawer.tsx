@@ -23,8 +23,8 @@ export const WarehouseInventoryDetailDrawer: React.FC<WarehouseInventoryDetailDr
       <div className="ops-drawer-panel" onClick={(e) => e.stopPropagation()}>
         <div className="ops-drawer-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Package size={20} color="#3b82f6" />
-            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+            <Package size={20} color="var(--tt-color-primary)" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
               Detalle Técnico de Inventario
             </h3>
           </div>
@@ -33,7 +33,7 @@ export const WarehouseInventoryDetailDrawer: React.FC<WarehouseInventoryDetailDr
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94a3b8',
+              color: 'var(--tt-color-text-light)',
               cursor: 'pointer',
               padding: '0.25rem',
             }}
@@ -43,11 +43,11 @@ export const WarehouseInventoryDetailDrawer: React.FC<WarehouseInventoryDetailDr
         </div>
 
         <div className="ops-drawer-body">
-          <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div style={{ background: 'var(--tt-color-text-main)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {item.sku || `SKU #${item.cod_producto}`}
             </span>
-            <h4 style={{ margin: '0.5rem 0 0.75rem', fontSize: '1.25rem', color: '#f8fafc' }}>
+            <h4 style={{ margin: '0.5rem 0 0.75rem', fontSize: '1.25rem', color: 'var(--tt-color-text-main)' }}>
               {item.nombre}
             </h4>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -61,38 +61,38 @@ export const WarehouseInventoryDetailDrawer: React.FC<WarehouseInventoryDetailDr
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Stock Físico (DB)</span>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', marginTop: '0.25rem' }}>
+            <div style={{ background: 'var(--tt-color-text-main)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>Stock Físico (DB)</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--tt-color-text-main)', marginTop: '0.25rem' }}>
                 {stockFisico}
               </div>
             </div>
-            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Reservado Pedidos</span>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b', marginTop: '0.25rem' }}>
+            <div style={{ background: 'var(--tt-color-text-main)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>Reservado Pedidos</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--tt-color-warning)', marginTop: '0.25rem' }}>
                 {stockRes}
               </div>
             </div>
-            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Disponible Oficial</span>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981', marginTop: '0.25rem' }}>
+            <div style={{ background: 'var(--tt-color-text-main)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>Disponible Oficial</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--tt-color-success)', marginTop: '0.25rem' }}>
                 {stockDisp}
               </div>
             </div>
-            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Umbral Reorden</span>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444', marginTop: '0.25rem' }}>
+            <div style={{ background: 'var(--tt-color-text-main)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>Umbral Reorden</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--tt-color-error)', marginTop: '0.25rem' }}>
                 {stockMin}
               </div>
             </div>
           </div>
 
-          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #1f2937' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', fontSize: '0.85rem' }}>
+          <div style={{ background: 'var(--tt-color-text-main)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--tt-color-surface-subtle)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--tt-color-text-light)', fontSize: '0.85rem' }}>
               <ShieldCheck size={16} />
               <span>Fuente Oficial de Datos</span>
             </div>
-            <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+            <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-muted)', lineHeight: 1.5 }}>
               Las cantidades publicadas reflejan directamente los saldos oficiales calculados por el motor logístico de Django en PostgreSQL.
             </p>
           </div>
@@ -104,8 +104,8 @@ export const WarehouseInventoryDetailDrawer: React.FC<WarehouseInventoryDetailDr
             style={{
               padding: '0.6rem 1.25rem',
               borderRadius: '0.5rem',
-              background: '#334155',
-              color: '#f8fafc',
+              background: 'var(--tt-color-border-dark)',
+              color: 'var(--tt-color-text-main)',
               border: 'none',
               fontWeight: 600,
               cursor: 'pointer',

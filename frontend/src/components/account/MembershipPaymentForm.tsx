@@ -87,7 +87,7 @@ export const MembershipPaymentForm: React.FC<MembershipPaymentFormProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             padding: '0.75rem 1rem',
             borderRadius: '0.5rem',
             marginBottom: '1.25rem',
@@ -106,7 +106,7 @@ export const MembershipPaymentForm: React.FC<MembershipPaymentFormProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            color: '#10b981',
+            color: 'var(--tt-color-success)',
             padding: '0.75rem 1rem',
             borderRadius: '0.5rem',
             marginBottom: '1.25rem',
@@ -139,7 +139,7 @@ export const MembershipPaymentForm: React.FC<MembershipPaymentFormProps> = ({
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--tt-color-text)' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--tt-color-text-main)' }}>
                     {p.nombre}
                   </span>
                   {isSelected && <CheckCircle2 size={18} color="var(--tt-color-primary)" />}
@@ -176,7 +176,7 @@ export const MembershipPaymentForm: React.FC<MembershipPaymentFormProps> = ({
             ))}
           </select>
         ) : (
-          <div style={{ padding: '0.85rem 1rem', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderRadius: '0.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ padding: '0.85rem 1rem', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--tt-color-warning)', borderRadius: '0.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CreditCard size={18} />
             <span>
               No tienes tarjetas corporativas guardadas. Agrega tu primer método simulado en el proceso de Checkout o en la plataforma.
@@ -186,7 +186,7 @@ export const MembershipPaymentForm: React.FC<MembershipPaymentFormProps> = ({
       </div>
 
       <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--tt-color-text)' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--tt-color-text-main)' }}>
           <input
             type="checkbox"
             checked={renovacion}

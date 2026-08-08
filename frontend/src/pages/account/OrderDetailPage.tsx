@@ -81,7 +81,7 @@ export const OrderDetailPage: React.FC = () => {
           >
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)', display: 'block' }}>NÚMERO DE COMPRA</span>
-              <strong style={{ fontSize: '1.25rem', color: 'var(--tt-color-text)' }}>
+              <strong style={{ fontSize: '1.25rem', color: 'var(--tt-color-text-main)' }}>
                 #{pedido.numero_pedido || pedido.cod_pedido}
               </strong>
             </div>
@@ -125,10 +125,10 @@ export const OrderDetailPage: React.FC = () => {
                 <tbody>
                   {items.map((item, index) => (
                     <tr key={index} style={{ borderTop: '1px solid var(--tt-color-border)' }}>
-                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--tt-color-text)' }}>{item.producto}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--tt-color-text-main)' }}>{item.producto}</td>
                       <td style={{ padding: '1rem 1.5rem', textAlign: 'center', fontWeight: 600 }}>{item.cantidad}</td>
                       <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: 'var(--tt-color-text-muted)' }}>{item.precio_unitario}</td>
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--tt-color-text)' }}>{item.subtotal}</td>
+                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--tt-color-text-main)' }}>{item.subtotal}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -169,7 +169,7 @@ export const OrderDetailPage: React.FC = () => {
                   justifyContent: 'space-between',
                   fontSize: '1.15rem',
                   fontWeight: 800,
-                  color: 'var(--tt-color-text)',
+                  color: 'var(--tt-color-text-main)',
                   paddingTop: '0.75rem',
                   borderTop: '1px solid var(--tt-color-border)',
                   marginTop: '0.25rem',

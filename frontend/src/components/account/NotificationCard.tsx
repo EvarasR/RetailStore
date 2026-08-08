@@ -17,13 +17,13 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     switch (tipo?.toUpperCase()) {
       case 'ALERTA':
       case 'WARNING':
-        return <AlertTriangle size={20} color="#f59e0b" />;
+        return <AlertTriangle size={20} color="var(--tt-color-warning)" />;
       case 'SEGURIDAD':
       case 'ERROR':
-        return <ShieldAlert size={20} color="#ef4444" />;
+        return <ShieldAlert size={20} color="var(--tt-color-error)" />;
       case 'EXIF':
       case 'SUCCESS':
-        return <CheckCircle size={20} color="#10b981" />;
+        return <CheckCircle size={20} color="var(--tt-color-success)" />;
       default:
         return <Info size={20} color="var(--tt-color-primary)" />;
     }

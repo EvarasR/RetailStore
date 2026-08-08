@@ -29,10 +29,10 @@ export const WarehouseAlertsPage: React.FC = () => {
     <WarehouseLayout title="Alertas Operativas de Inventario">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--tt-color-text-main)' }}>
             Notificaciones de Umbrales y Quiebre de Stock
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--tt-color-text-light)' }}>
             Monitoreo en tiempo real de niveles mínimos y alertas operativas generadas por PostgreSQL
           </p>
         </div>
@@ -81,7 +81,7 @@ export const WarehouseAlertsPage: React.FC = () => {
       <div className="ops-table-card">
         <div className="ops-table-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertTriangle size={18} color="#ef4444" />
+            <AlertTriangle size={18} color="var(--tt-color-error)" />
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
               Bitácora de Alertas Pendientes de Bodega ({filteredAlerts.length})
             </h3>
@@ -105,21 +105,21 @@ export const WarehouseAlertsPage: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     Cargando alertas de almacén registradas en el servidor...
                   </td>
                 </tr>
               ) : filteredAlerts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--tt-color-text-light)' }}>
                     No se detectaron alertas operativas pendientes en el sistema
                   </td>
                 </tr>
               ) : (
                 filteredAlerts.map((alt) => (
                   <tr key={alt.id || alt.cod_alerta}>
-                    <td style={{ color: '#94a3b8' }}>#{alt.id || alt.cod_alerta}</td>
-                    <td style={{ fontWeight: 700, color: '#f8fafc' }}>{alt.tipo}</td>
+                    <td style={{ color: 'var(--tt-color-text-light)' }}>#{alt.id || alt.cod_alerta}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-text-main)' }}>{alt.tipo}</td>
                     <td>
                       <span
                         className={
@@ -138,13 +138,13 @@ export const WarehouseAlertsPage: React.FC = () => {
                     <td>
                       <span className="ops-badge ops-badge--media">{alt.estado}</span>
                     </td>
-                    <td style={{ color: '#cbd5e1' }}>{alt.fecha || 'Reciente'}</td>
+                    <td style={{ color: 'var(--tt-color-text-muted)' }}>{alt.fecha || 'Reciente'}</td>
                     <td>
                       <button
                         onClick={() => setSelectedAlert(alt)}
                         disabled={actionLoading}
                         className="tt-btn tt-btn--secondary"
-                        style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#10b981', borderColor: '#047857' }}
+                        style={{ padding: '0.25rem 0.55rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--tt-color-success)', borderColor: 'var(--tt-color-success)' }}
                         title="Atender y resolver alerta con nota logística"
                       >
                         <CheckSquare size={13} />
