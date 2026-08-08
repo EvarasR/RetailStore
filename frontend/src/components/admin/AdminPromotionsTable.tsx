@@ -10,7 +10,7 @@ interface AdminPromotionsTableProps {
 export const AdminPromotionsTable: React.FC<AdminPromotionsTableProps> = ({ associations, loading }) => {
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando asociaciones de promociones en el catálogo...
       </div>
     );
@@ -18,7 +18,7 @@ export const AdminPromotionsTable: React.FC<AdminPromotionsTableProps> = ({ asso
 
   if (associations.length === 0) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         No hay asociaciones de promociones activas registradas en PostgreSQL.
       </div>
     );
@@ -40,17 +40,17 @@ export const AdminPromotionsTable: React.FC<AdminPromotionsTableProps> = ({ asso
             <tr key={`${assoc.cod_promocion}-${assoc.cod_producto}-${idx}`}>
               <td>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Tag size={15} color="var(--color-primary)" />
-                  <span style={{ fontWeight: 700, color: 'var(--color-text)' }}>
+                  <Tag size={15} color="var(--tt-color-primary)" />
+                  <span style={{ fontWeight: 700, color: 'var(--tt-color-text-main)' }}>
                     {assoc.promocion}
                   </span>
                 </div>
               </td>
               <td style={{ fontWeight: 600 }}>{assoc.producto}</td>
-              <td style={{ fontFamily: 'monospace', color: 'var(--color-text-muted)' }}>
+              <td style={{ fontFamily: 'monospace', color: 'var(--tt-color-text-muted)' }}>
                 #{assoc.cod_promocion}
               </td>
-              <td style={{ fontFamily: 'monospace', color: 'var(--color-text-muted)' }}>
+              <td style={{ fontFamily: 'monospace', color: 'var(--tt-color-text-muted)' }}>
                 #{assoc.cod_producto}
               </td>
             </tr>

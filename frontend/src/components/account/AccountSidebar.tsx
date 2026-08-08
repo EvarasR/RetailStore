@@ -11,6 +11,8 @@ import {
   HelpCircle,
   Award,
   Shield,
+  ReceiptText,
+  CalendarClock,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -22,10 +24,12 @@ export const AccountSidebar: React.FC = () => {
     { to: '/cuenta/perfil', label: 'Datos Personales', icon: User, end: false },
     { to: '/cuenta/direcciones', label: 'Mis Direcciones', icon: MapPin, end: false },
     { to: '/cuenta/pedidos', label: 'Mis Pedidos', icon: ShoppingBag, end: false },
+    { to: '/cuenta/facturas', label: 'Mis Facturas', icon: ReceiptText, end: false },
     { to: '/cuenta/wishlist', label: 'Wishlist Favoritos', icon: Heart, end: false },
     { to: '/cuenta/notificaciones', label: 'Notificaciones', icon: Bell, end: false },
     { to: '/cuenta/soporte', label: 'Soporte y Tickets', icon: HelpCircle, end: false },
     { to: '/cuenta/membresia', label: 'Membresía Prime', icon: Award, end: false },
+    { to: '/cuenta/recurrentes', label: 'Compras Recurrentes', icon: CalendarClock, end: false },
     { to: '/cuenta/seguridad', label: 'Seguridad y Acceso', icon: Shield, end: false },
   ];
 
@@ -46,7 +50,7 @@ export const AccountSidebar: React.FC = () => {
               className="tt-badge"
               style={{
                 backgroundColor: es_prime ? 'rgba(217, 119, 6, 0.15)' : 'rgba(14, 165, 233, 0.12)',
-                color: es_prime ? '#d97706' : 'var(--tt-color-primary)',
+                color: es_prime ? 'var(--tt-color-warning)' : 'var(--tt-color-primary)',
                 fontSize: '0.6875rem',
                 fontWeight: 700,
               }}

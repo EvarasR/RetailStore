@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { AdminModuleHeader } from '../../components/admin/AdminModuleHeader';
 import { AdminTrackingTimeline } from '../../components/admin/AdminTrackingTimeline';
-import { AdminFallbackCard } from '../../components/admin/AdminFallbackCard';
 import { useAdminTracking } from '../../hooks/useAdminTracking';
 
 export const AdminTrackingPage: React.FC = () => {
@@ -34,14 +33,6 @@ export const AdminTrackingPage: React.FC = () => {
           subtitle="Envíos registrados, guías de transporte e hitos logísticos oficiales de PostgreSQL."
           onReload={reload}
           loading={loading}
-          classicPath="/panel/tracking/"
-        />
-
-        <AdminFallbackCard
-          title="¿Deseas asignar un transportista o generar guías de despacho manuales?"
-          description="El despacho avanzado con guías de transporte e impresión térmica está disponible en el módulo clásico de logística."
-          classicPath="/panel/tracking/"
-          actionText="Centro Logístico (Panel Clásico)"
         />
 
         {msg ? (

@@ -26,7 +26,7 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
 
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando gestión corporativa de membresías Prime...
       </div>
     );
@@ -38,7 +38,7 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
         style={{
           display: 'flex',
           gap: '0.5rem',
-          borderBottom: '1px solid var(--color-border)',
+          borderBottom: '1px solid var(--tt-color-border)',
           marginBottom: '1.5rem',
           flexWrap: 'wrap',
         }}
@@ -51,10 +51,10 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'membresias' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'membresias' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'membresias' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'membresias' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'membresias' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'membresias' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -72,10 +72,10 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'planes' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'planes' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'planes' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'planes' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'planes' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'planes' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -93,10 +93,10 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'beneficios' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'beneficios' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'beneficios' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'beneficios' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'beneficios' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'beneficios' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -114,10 +114,10 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'usos' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'usos' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'usos' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'usos' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'usos' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'usos' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -143,7 +143,7 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
             <tbody>
               {membresias.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-muted)' }}>
                     No se encontraron membresías de usuarios activas.
                   </td>
                 </tr>
@@ -160,7 +160,7 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
                           padding: '0.25rem 0.6rem',
                           background: 'rgba(234, 179, 8, 0.12)',
                           color: '#b45309',
-                          borderRadius: 'var(--radius-sm)',
+                          borderRadius: 'var(--tt-radius-sm)',
                           fontWeight: 700,
                           fontSize: '0.8rem',
                         }}
@@ -172,8 +172,8 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
                     <td>
                       <span className="status-badge status-active">{m.estado}</span>
                     </td>
-                    <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{m.inicio}</td>
-                    <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{m.fin}</td>
+                    <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{m.inicio}</td>
+                    <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{m.fin}</td>
                   </tr>
                 ))
               )}
@@ -199,7 +199,7 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
                 <tr key={p.cod_plan}>
                   <td style={{ fontFamily: 'monospace', fontWeight: 700 }}>{p.codigo}</td>
                   <td style={{ fontWeight: 600 }}>{p.nombre}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{p.precio}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>{p.precio}</td>
                   <td>{p.duracion_dias} días</td>
                   <td>
                     <span className={`status-badge ${p.activo ? 'status-active' : 'status-inactive'}`}>
@@ -232,8 +232,8 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
                   <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{b.codigo}</td>
                   <td style={{ fontWeight: 600 }}>{b.nombre}</td>
                   <td>{b.plan}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--color-success)' }}>{b.valor}</td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{b.descripcion}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{b.valor}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{b.descripcion}</td>
                   <td>
                     <span className={`status-badge ${b.activo ? 'status-active' : 'status-inactive'}`}>
                       {b.activo ? 'ACTIVO' : 'INACTIVO'}
@@ -261,7 +261,7 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
             <tbody>
               {usos.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-muted)' }}>
                     No hay registro reciente de uso de beneficios Prime en pedidos.
                   </td>
                 </tr>
@@ -271,8 +271,8 @@ export const AdminPrimePanel: React.FC<AdminPrimePanelProps> = ({
                     <td style={{ fontWeight: 600 }}>{u.usuario}</td>
                     <td>{u.beneficio}</td>
                     <td style={{ fontWeight: 700 }}>#{u.pedido}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--color-success)' }}>{u.valor}</td>
-                    <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{u.fecha}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{u.valor}</td>
+                    <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{u.fecha}</td>
                   </tr>
                 ))
               )}

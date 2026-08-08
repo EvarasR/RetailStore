@@ -29,7 +29,7 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
 
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando transacciones contables en BD...
       </div>
     );
@@ -41,7 +41,7 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
         style={{
           display: 'flex',
           gap: '0.5rem',
-          borderBottom: '1px solid var(--color-border)',
+          borderBottom: '1px solid var(--tt-color-border)',
           marginBottom: '1.5rem',
           flexWrap: 'wrap',
         }}
@@ -54,10 +54,10 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'tx' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'tx' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'tx' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'tx' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'tx' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'tx' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -75,10 +75,10 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'auth' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'auth' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'auth' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'auth' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'auth' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'auth' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -96,10 +96,10 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'facturas' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'facturas' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'facturas' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'facturas' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'facturas' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'facturas' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -117,10 +117,10 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'reembolsos' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'reembolsos' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'reembolsos' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'reembolsos' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'reembolsos' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'reembolsos' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -138,10 +138,10 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: activeTab === 'devoluciones' ? 'var(--color-surface)' : 'transparent',
+            background: activeTab === 'devoluciones' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'devoluciones' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: activeTab === 'devoluciones' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: activeTab === 'devoluciones' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: activeTab === 'devoluciones' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -169,11 +169,11 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
                 <tr key={tx.cod_transaccion}>
                   <td style={{ fontWeight: 700 }}>#{tx.cod_transaccion}</td>
                   <td style={{ fontWeight: 600 }}>#{tx.pedido}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{tx.monto}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>{tx.monto}</td>
                   <td>
                     <span className="status-badge status-active">{tx.estado}</span>
                   </td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{tx.fecha}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{tx.fecha}</td>
                 </tr>
               ))}
             </tbody>
@@ -197,8 +197,8 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
                 <tr key={auth.cod_autorizacion}>
                   <td style={{ fontWeight: 700 }}>#{auth.cod_autorizacion}</td>
                   <td>#{auth.transaccion}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--color-success)' }}>{auth.monto}</td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{auth.fecha}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{auth.monto}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{auth.fecha}</td>
                 </tr>
               ))}
             </tbody>
@@ -225,11 +225,11 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
                   <td style={{ fontWeight: 700 }}>#{fac.cod_factura}</td>
                   <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{fac.numero_factura}</td>
                   <td>#{fac.pedido}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{fac.total}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>{fac.total}</td>
                   <td>
                     <span className="status-badge status-active">{fac.estado}</span>
                   </td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{fac.fecha}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{fac.fecha}</td>
                 </tr>
               ))}
             </tbody>
@@ -254,11 +254,11 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
                 <tr key={reem.cod_reembolso}>
                   <td style={{ fontWeight: 700 }}>#{reem.cod_reembolso}</td>
                   <td>#{reem.transaccion}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--color-error)' }}>{reem.monto}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--tt-color-error)' }}>{reem.monto}</td>
                   <td>
                     <span className="status-badge status-pending">{reem.estado}</span>
                   </td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{reem.fecha}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{reem.fecha}</td>
                 </tr>
               ))}
             </tbody>
@@ -289,7 +289,7 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
                   <td>
                     <span className="status-badge status-pending">{dev.estado}</span>
                   </td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{dev.fecha}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{dev.fecha}</td>
                 </tr>
               ))}
             </tbody>

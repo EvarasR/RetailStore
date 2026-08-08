@@ -35,8 +35,8 @@ export const AdminOrdersPage: React.FC = () => {
               onChange={(e) => setEstadoFilter(e.target.value)}
               style={{
                 padding: '0.45rem 0.75rem',
-                backgroundColor: '#1e293b',
-                color: '#f8fafc',
+                backgroundColor: 'var(--tt-color-surface)',
+                color: 'var(--tt-color-text-main)',
                 border: '1px solid var(--tt-color-border)',
                 borderRadius: '0.5rem',
               }}
@@ -56,7 +56,7 @@ export const AdminOrdersPage: React.FC = () => {
             style={{
               padding: '0.5rem 0.85rem',
               background: 'rgba(255,255,255,0.05)',
-              color: '#cbd5e1',
+              color: 'var(--tt-color-text-muted)',
               border: '1px solid var(--tt-color-border)',
               borderRadius: '0.5rem',
               cursor: 'pointer',
@@ -76,7 +76,7 @@ export const AdminOrdersPage: React.FC = () => {
           style={{
             padding: '1rem',
             background: 'rgba(239, 68, 68, 0.15)',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             borderRadius: '0.5rem',
             marginBottom: '1.5rem',
           }}
@@ -86,7 +86,7 @@ export const AdminOrdersPage: React.FC = () => {
       )}
 
       {loading ? (
-        <div style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--tt-color-text-light)' }}>
           Consultando pedidos en PostgreSQL...
         </div>
       ) : orders.length === 0 ? (

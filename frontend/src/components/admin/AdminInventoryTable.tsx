@@ -32,7 +32,7 @@ export const AdminInventoryTable: React.FC<AdminInventoryTableProps> = ({
           style={{
             padding: '0.5rem 1rem',
             background: activeTab === 'stock' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-            color: activeTab === 'stock' ? '#3b82f6' : '#94a3b8',
+            color: activeTab === 'stock' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-light)',
             border: 'none',
             borderRadius: '0.375rem',
             fontWeight: 600,
@@ -47,7 +47,7 @@ export const AdminInventoryTable: React.FC<AdminInventoryTableProps> = ({
           style={{
             padding: '0.5rem 1rem',
             background: activeTab === 'lotes' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-            color: activeTab === 'lotes' ? '#3b82f6' : '#94a3b8',
+            color: activeTab === 'lotes' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-light)',
             border: 'none',
             borderRadius: '0.375rem',
             fontWeight: 600,
@@ -81,20 +81,20 @@ export const AdminInventoryTable: React.FC<AdminInventoryTableProps> = ({
                     <tr key={`${inv.cod_producto}-${idx}`}>
                       <td>#{inv.cod_producto}</td>
                       <td>
-                        <strong style={{ color: '#f8fafc' }}>{inv.producto}</strong>
+                        <strong style={{ color: 'var(--tt-color-text-main)' }}>{inv.producto}</strong>
                       </td>
                       <td>{inv.almacen}</td>
                       <td>{inv.stock_total} un.</td>
-                      <td style={{ color: inv.stock_reservado > 0 ? '#f59e0b' : '#94a3b8' }}>
+                      <td style={{ color: inv.stock_reservado > 0 ? 'var(--tt-color-warning)' : 'var(--tt-color-text-light)' }}>
                         {inv.stock_reservado} un.
                       </td>
                       <td>
-                        <strong style={{ color: isCritico ? '#ef4444' : '#10b981' }}>
+                        <strong style={{ color: isCritico ? 'var(--tt-color-error)' : 'var(--tt-color-success)' }}>
                           {inv.stock_disponible} un.
                         </strong>
                       </td>
                       <td>{inv.stock_minimo} un.</td>
-                      <td style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      <td style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
                         {inv.fecha_actualizacion || '—'}
                       </td>
                     </tr>
@@ -126,7 +126,7 @@ export const AdminInventoryTable: React.FC<AdminInventoryTableProps> = ({
                 {lotes.map((l) => (
                   <tr key={l.cod_lote}>
                     <td>
-                      <div style={{ fontWeight: 700, color: '#f8fafc' }}>{l.numero_lote}</div>
+                      <div style={{ fontWeight: 700, color: 'var(--tt-color-text-main)' }}>{l.numero_lote}</div>
                       <div style={{ marginTop: '0.2rem' }}>
                         <AdminStatusBadge status={l.estado} />
                       </div>
@@ -139,9 +139,9 @@ export const AdminInventoryTable: React.FC<AdminInventoryTableProps> = ({
                     <td>{l.reservada} un.</td>
                     <td>${l.costo}</td>
                     <td>
-                      <strong style={{ color: '#38bdf8' }}>${l.pvp}</strong>
+                      <strong style={{ color: 'var(--tt-color-primary)' }}>${l.pvp}</strong>
                     </td>
-                    <td style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    <td style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
                       {l.fecha_recepcion || '—'}
                     </td>
                   </tr>

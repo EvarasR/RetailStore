@@ -15,6 +15,15 @@ export interface AdminControlRole {
   nombre: string;
   descripcion: string;
   activo: boolean;
+  permisos?: string[];
+}
+
+export interface AdminControlPermission {
+  cod_permiso: number;
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  activo: boolean;
 }
 
 export interface AdminControlAuditLog {
@@ -37,6 +46,8 @@ export interface AdminControlAbandonedCart {
 export interface AdminControlResponse {
   usuarios?: AdminControlUser[];
   roles?: AdminControlRole[];
+  permisos?: AdminControlPermission[];
   registros?: AdminControlAuditLog[];
-  carritos_abandonados?: AdminControlAbandonedCart[];
+  carritos_abandonados?: Array<AdminControlAbandonedCart | { cod_carrito: number; cliente: string; total: string; fecha: string }>;
+  auditoria?: Array<{ cod_auditoria: number; tabla: string; operacion: string; registro: number; usuario_bd: string; fecha: string }>;
 }

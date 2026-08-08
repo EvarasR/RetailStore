@@ -27,14 +27,14 @@ export const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onOp
             {orders.map((o) => (
               <tr key={o.cod_pedido}>
                 <td>
-                  <div style={{ fontWeight: 700, color: '#f8fafc' }}>{o.numero_pedido}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--tt-color-text-main)' }}>{o.numero_pedido}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
                     {o.fecha || 'Reciente'}
                   </div>
                 </td>
                 <td>
                   <div style={{ fontWeight: 600, color: '#e2e8f0' }}>{o.cliente}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{o.email}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>{o.email}</div>
                 </td>
                 <td>
                   <AdminStatusBadge status={o.estado} label={o.estado_nombre || o.estado} />
@@ -53,7 +53,7 @@ export const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onOp
                   )}
                 </td>
                 <td>
-                  <strong style={{ color: '#38bdf8', fontSize: '0.95rem' }}>${o.total}</strong>
+                  <strong style={{ color: 'var(--tt-color-primary)', fontSize: '0.95rem' }}>${o.total}</strong>
                 </td>
                 <td>
                   <button
@@ -62,7 +62,7 @@ export const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onOp
                     style={{
                       padding: '0.35rem 0.7rem',
                       background: 'rgba(59, 130, 246, 0.15)',
-                      color: '#3b82f6',
+                      color: 'var(--tt-color-primary)',
                       border: '1px solid transparent',
                       borderRadius: '0.375rem',
                       cursor: 'pointer',

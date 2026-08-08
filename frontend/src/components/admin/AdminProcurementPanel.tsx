@@ -17,7 +17,7 @@ export const AdminProcurementPanel: React.FC<AdminProcurementPanelProps> = ({
 }) => {
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando órdenes de abastecimiento de almacén...
       </div>
     );
@@ -25,7 +25,7 @@ export const AdminProcurementPanel: React.FC<AdminProcurementPanelProps> = ({
 
   if (orders.length === 0) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         No hay solicitudes de abastecimiento activas en PostgreSQL.
       </div>
     );
@@ -51,8 +51,8 @@ export const AdminProcurementPanel: React.FC<AdminProcurementPanelProps> = ({
               <td style={{ fontWeight: 700 }}>#{ord.cod_orden_abastecimiento}</td>
               <td style={{ fontWeight: 600 }}>{ord.proveedor}</td>
               <td>{ord.almacen || 'Almacén Principal'}</td>
-              <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{ord.total_estimado}</td>
-              <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{ord.fecha}</td>
+              <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>{ord.total_estimado}</td>
+              <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{ord.fecha}</td>
               <td>
                 <span className={`status-badge status-${ord.estado.toLowerCase()}`}>
                   {ord.estado}
@@ -71,8 +71,8 @@ export const AdminProcurementPanel: React.FC<AdminProcurementPanelProps> = ({
                       padding: '0.35rem 0.65rem',
                       background: 'rgba(16, 185, 129, 0.12)',
                       border: '1px solid rgba(16, 185, 129, 0.3)',
-                      borderRadius: 'var(--radius-sm)',
-                      color: 'var(--color-success)',
+                      borderRadius: 'var(--tt-radius-sm)',
+                      color: 'var(--tt-color-success)',
                       fontSize: '0.75rem',
                       fontWeight: 600,
                       cursor: ord.estado === 'RECIBIDA' || ord.estado === 'CANCELADA' ? 'not-allowed' : 'pointer',
@@ -93,8 +93,8 @@ export const AdminProcurementPanel: React.FC<AdminProcurementPanelProps> = ({
                       padding: '0.35rem 0.65rem',
                       background: 'rgba(239, 68, 68, 0.12)',
                       border: '1px solid rgba(239, 68, 68, 0.3)',
-                      borderRadius: 'var(--radius-sm)',
-                      color: 'var(--color-error)',
+                      borderRadius: 'var(--tt-radius-sm)',
+                      color: 'var(--tt-color-error)',
                       fontSize: '0.75rem',
                       fontWeight: 600,
                       cursor: ord.estado === 'RECIBIDA' || ord.estado === 'CANCELADA' ? 'not-allowed' : 'pointer',

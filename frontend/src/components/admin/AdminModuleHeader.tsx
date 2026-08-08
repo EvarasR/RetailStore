@@ -1,12 +1,11 @@
 import React from 'react';
-import { RefreshCw, ExternalLink } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 interface AdminModuleHeaderProps {
   title: string;
   subtitle: string;
   onReload?: () => void;
   loading?: boolean;
-  classicPath?: string;
 }
 
 export const AdminModuleHeader: React.FC<AdminModuleHeaderProps> = ({
@@ -14,7 +13,6 @@ export const AdminModuleHeader: React.FC<AdminModuleHeaderProps> = ({
   subtitle,
   onReload,
   loading = false,
-  classicPath = '/panel/',
 }) => {
   return (
     <div
@@ -26,7 +24,7 @@ export const AdminModuleHeader: React.FC<AdminModuleHeaderProps> = ({
         gap: '1rem',
         marginBottom: '1.5rem',
         paddingBottom: '1rem',
-        borderBottom: '1px solid var(--color-border)',
+        borderBottom: '1px solid var(--tt-color-border)',
       }}
     >
       <div>
@@ -34,13 +32,13 @@ export const AdminModuleHeader: React.FC<AdminModuleHeaderProps> = ({
           style={{
             fontSize: '1.5rem',
             fontWeight: 700,
-            color: 'var(--color-text)',
+            color: 'var(--tt-color-text-main)',
             margin: '0 0 0.25rem 0',
           }}
         >
           {title}
         </h1>
-        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', margin: 0 }}>
+        <p style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-muted)', margin: 0 }}>
           {subtitle}
         </p>
       </div>
@@ -56,10 +54,10 @@ export const AdminModuleHeader: React.FC<AdminModuleHeaderProps> = ({
               alignItems: 'center',
               gap: '0.5rem',
               padding: '0.5rem 0.875rem',
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--color-text)',
+              background: 'var(--tt-color-surface)',
+              border: '1px solid var(--tt-color-border)',
+              borderRadius: 'var(--tt-radius-md)',
+              color: 'var(--tt-color-text-main)',
               fontSize: '0.825rem',
               fontWeight: 500,
               cursor: loading ? 'not-allowed' : 'pointer',
@@ -71,27 +69,6 @@ export const AdminModuleHeader: React.FC<AdminModuleHeaderProps> = ({
           </button>
         )}
 
-        <a
-          href={classicPath}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 0.875rem',
-            background: 'var(--color-primary)',
-            border: 'none',
-            borderRadius: 'var(--radius-md)',
-            color: '#fff',
-            fontSize: '0.825rem',
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
-        >
-          <span>Abrir Panel Clásico</span>
-          <ExternalLink size={14} />
-        </a>
       </div>
     </div>
   );

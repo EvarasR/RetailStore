@@ -11,7 +11,7 @@ interface AdminCouponsTableProps {
 export const AdminCouponsTable: React.FC<AdminCouponsTableProps> = ({ coupons, usage, loading }) => {
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando registro oficial de cupones de descuento...
       </div>
     );
@@ -19,7 +19,7 @@ export const AdminCouponsTable: React.FC<AdminCouponsTableProps> = ({ coupons, u
 
   if (coupons.length === 0) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         No hay cupones registrados en la base de datos de marketing.
       </div>
     );
@@ -51,8 +51,8 @@ export const AdminCouponsTable: React.FC<AdminCouponsTableProps> = ({ coupons, u
                       fontWeight: 700,
                       padding: '0.25rem 0.5rem',
                       background: 'rgba(37, 99, 235, 0.1)',
-                      color: 'var(--color-primary)',
-                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--tt-color-primary)',
+                      borderRadius: 'var(--tt-radius-sm)',
                     }}
                   >
                     {c.codigo}
@@ -60,16 +60,16 @@ export const AdminCouponsTable: React.FC<AdminCouponsTableProps> = ({ coupons, u
                 </td>
                 <td style={{ fontWeight: 600 }}>{c.nombre}</td>
                 <td>{c.tipo}</td>
-                <td style={{ fontWeight: 700, color: 'var(--color-success)' }}>{c.valor}</td>
+                <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{c.valor}</td>
                 <td>{c.monto_minimo}</td>
                 <td>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-muted)' }}>
                     {c.usos_maximos || 'Sin límite'} / {c.usos_por_usuario} por cliente
                   </span>
                 </td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem' }}>
-                    <Calendar size={13} color="var(--color-text-muted)" />
+                    <Calendar size={13} color="var(--tt-color-text-muted)" />
                     <span>{c.inicio} → {c.fin}</span>
                   </div>
                 </td>
@@ -90,14 +90,14 @@ export const AdminCouponsTable: React.FC<AdminCouponsTableProps> = ({ coupons, u
             style={{
               fontSize: '1.1rem',
               fontWeight: 600,
-              color: 'var(--color-text)',
+              color: 'var(--tt-color-text-main)',
               marginBottom: '1rem',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
             }}
           >
-            <Users size={18} color="var(--color-primary)" />
+            <Users size={18} color="var(--tt-color-primary)" />
             <span>Historial Oficial de Usos en Pedidos ({usage.length})</span>
           </h3>
           <div className="admin-table-container">
@@ -115,14 +115,14 @@ export const AdminCouponsTable: React.FC<AdminCouponsTableProps> = ({ coupons, u
                 {usage.map((u) => (
                   <tr key={u.cod_uso}>
                     <td>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--color-primary)' }}>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--tt-color-primary)' }}>
                         {u.cupon}
                       </span>
                     </td>
                     <td>{u.cliente}</td>
                     <td style={{ fontWeight: 600 }}>#{u.pedido}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--color-success)' }}>{u.valor}</td>
-                    <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{u.fecha}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{u.valor}</td>
+                    <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{u.fecha}</td>
                   </tr>
                 ))}
               </tbody>

@@ -61,9 +61,7 @@ export function useProductCarousels() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    async function loadCarousels() {
+  const loadCarousels = useCallback(async () => {
       setLoading(true);
       setError(null);
       try {
@@ -73,29 +71,22 @@ export function useProductCarousels() {
           fetchNuevos(),
           fetchOfertas(),
         ]);
-        if (mounted) {
-          setDestacados(dest);
-          setMasVendidos(vend);
-          setNuevos(nuev);
-          setOfertas(ofer);
-        }
+        setDestacados(dest);
+        setMasVendidos(vend);
+        setNuevos(nuev);
+        setOfertas(ofer);
       } catch (err: any) {
-        if (mounted) {
-          setError(err.message || 'Error al cargar secciones de productos');
-        }
+        setError(err.message || 'Error al cargar secciones de productos');
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
-    }
-    loadCarousels();
-    return () => {
-      mounted = false;
-    };
   }, []);
 
-  return { destacados, masVendidos, nuevos, ofertas, loading, error };
+  useEffect(() => {
+    loadCarousels();
+  }, [loadCarousels]);
+
+  return { destacados, masVendidos, nuevos, ofertas, loading, error, refetch: loadCarousels };
 }
 
 export function useCategories() {

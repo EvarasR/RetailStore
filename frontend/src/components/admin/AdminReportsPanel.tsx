@@ -10,7 +10,7 @@ interface AdminReportsPanelProps {
 export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, loading }) => {
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando estadísticas oficiales de ventas consolidadas en DB...
       </div>
     );
@@ -18,7 +18,7 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
 
   if (ventas.length === 0) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         No hay registros de ventas diarias en el periodo seleccionado en PostgreSQL.
       </div>
     );
@@ -49,7 +49,7 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
         <div className="admin-metric-card">
           <div className="metric-header">
             <span>Última Venta Diaria DB</span>
-            <TrendingUp size={16} color="var(--color-success)" />
+            <TrendingUp size={16} color="var(--tt-color-success)" />
           </div>
           <div className="metric-value">{ventas[0]?.total_ventas || '$0.00'}</div>
           <div className="metric-footer">Fecha: {ventas[0]?.fecha || 'N/A'}</div>
@@ -58,7 +58,7 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
         <div className="admin-metric-card">
           <div className="metric-header">
             <span>Pedidos en Último Día</span>
-            <ShoppingBag size={16} color="var(--color-primary)" />
+            <ShoppingBag size={16} color="var(--tt-color-primary)" />
           </div>
           <div className="metric-value">{ventas[0]?.total_pedidos || 0}</div>
           <div className="metric-footer">Clientes únicos: {ventas[0]?.total_clientes || 0}</div>
@@ -67,7 +67,7 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
         <div className="admin-metric-card">
           <div className="metric-header">
             <span>Ticket Promedio DB</span>
-            <Users size={16} color="var(--color-warning)" />
+            <Users size={16} color="var(--tt-color-warning)" />
           </div>
           <div className="metric-value">{ventas[0]?.ticket_promedio || '$0.00'}</div>
           <div className="metric-footer">Calculado por motor fiscal</div>
@@ -78,14 +78,14 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
         style={{
           fontSize: '1.1rem',
           fontWeight: 700,
-          color: 'var(--color-text)',
+          color: 'var(--tt-color-text-main)',
           marginBottom: '1rem',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
         }}
       >
-        <BarChart3 size={18} color="var(--color-primary)" />
+        <BarChart3 size={18} color="var(--tt-color-primary)" />
         <span>Evolución Diaria de Ventas y Rendimiento Oficial (Últimos 30 días)</span>
       </h3>
 
@@ -113,7 +113,7 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
                       style={{
                         width: '100%',
                         height: '10px',
-                        background: 'var(--color-border)',
+                        background: 'var(--tt-color-border)',
                         borderRadius: '999px',
                         overflow: 'hidden',
                       }}
@@ -122,7 +122,7 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
                         style={{
                           width: `${Math.max(percentage, 4)}%`,
                           height: '100%',
-                          background: 'var(--color-primary)',
+                          background: 'var(--tt-color-primary)',
                           borderRadius: '999px',
                           transition: 'width 0.3s ease',
                         }}
@@ -130,7 +130,7 @@ export const AdminReportsPanel: React.FC<AdminReportsPanelProps> = ({ ventas, lo
                     </div>
                   </td>
                   <td>{v.total_clientes}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--color-success)' }}>{v.total_ventas}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--tt-color-success)' }}>{v.total_ventas}</td>
                   <td style={{ fontWeight: 600 }}>{v.ticket_promedio}</td>
                 </tr>
               );

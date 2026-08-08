@@ -32,7 +32,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
         style={{
           display: 'flex',
           gap: '0.5rem',
-          borderBottom: '1px solid var(--color-border)',
+          borderBottom: '1px solid var(--tt-color-border)',
           marginBottom: '1.5rem',
           flexWrap: 'wrap',
         }}
@@ -45,10 +45,10 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: modulo === 'usuarios' ? 'var(--color-surface)' : 'transparent',
+            background: modulo === 'usuarios' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: modulo === 'usuarios' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: modulo === 'usuarios' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: modulo === 'usuarios' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: modulo === 'usuarios' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -66,10 +66,10 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            background: modulo === 'auditoria' ? 'var(--color-surface)' : 'transparent',
+            background: modulo === 'auditoria' ? 'var(--tt-color-surface)' : 'transparent',
             border: 'none',
-            borderBottom: modulo === 'auditoria' ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: modulo === 'auditoria' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            borderBottom: modulo === 'auditoria' ? '2px solid var(--tt-color-primary)' : '2px solid transparent',
+            color: modulo === 'auditoria' ? 'var(--tt-color-primary)' : 'var(--tt-color-text-muted)',
             fontWeight: 600,
             fontSize: '0.875rem',
             cursor: 'pointer',
@@ -81,7 +81,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
       </div>
 
       {loading ? (
-        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
           Cargando módulo de control empresarial y auditoría en BD...
         </div>
       ) : modulo === 'usuarios' ? (
@@ -91,14 +91,14 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
               style={{
                 fontSize: '1.05rem',
                 fontWeight: 700,
-                color: 'var(--color-text)',
+                color: 'var(--tt-color-text-main)',
                 marginBottom: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
               }}
             >
-              <Users size={18} color="var(--color-primary)" />
+              <Users size={18} color="var(--tt-color-primary)" />
               <span>Directorio de Usuarios Registrados ({usuarios.length})</span>
             </h3>
             <div className="admin-table-container">
@@ -117,7 +117,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                 <tbody>
                   {usuarios.map((usr) => (
                     <tr key={usr.cod_usuario}>
-                      <td style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{usr.email}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--tt-color-primary)' }}>{usr.email}</td>
                       <td>{usr.nombres} {usr.apellidos}</td>
                       <td>{usr.telefono || 'No reg.'}</td>
                       <td>
@@ -128,9 +128,9 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                                 key={idx}
                                 style={{
                                   padding: '0.15rem 0.45rem',
-                                  borderRadius: 'var(--radius-sm)',
+                                  borderRadius: 'var(--tt-radius-sm)',
                                   background: 'rgba(37, 99, 235, 0.1)',
-                                  color: 'var(--color-primary)',
+                                  color: 'var(--tt-color-primary)',
                                   fontSize: '0.72rem',
                                   fontWeight: 700,
                                 }}
@@ -139,7 +139,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                               </span>
                             ))
                           ) : (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>CLIENTE</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>CLIENTE</span>
                           )}
                         </div>
                       </td>
@@ -153,7 +153,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                           {usr.activo ? 'ACTIVO' : 'INACTIVO'}
                         </span>
                       </td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{usr.fecha}</td>
+                      <td style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-muted)' }}>{usr.fecha}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -166,14 +166,14 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
               style={{
                 fontSize: '1.05rem',
                 fontWeight: 700,
-                color: 'var(--color-text)',
+                color: 'var(--tt-color-text-main)',
                 marginBottom: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
               }}
             >
-              <ShieldCheck size={18} color="var(--color-success)" />
+              <ShieldCheck size={18} color="var(--tt-color-success)" />
               <span>Catálogo de Roles Oficiales ({roles.length})</span>
             </h3>
             <div className="admin-table-container">
@@ -190,7 +190,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                   {roles.map((rl) => (
                     <tr key={rl.cod_rol}>
                       <td style={{ fontWeight: 700 }}>#{rl.cod_rol}</td>
-                      <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{rl.nombre}</td>
+                      <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>{rl.nombre}</td>
                       <td style={{ fontSize: '0.85rem' }}>{rl.descripcion}</td>
                       <td>
                         <span className={`status-badge ${rl.activo ? 'status-active' : 'status-inactive'}`}>
@@ -211,14 +211,14 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
               style={{
                 fontSize: '1.05rem',
                 fontWeight: 700,
-                color: 'var(--color-text)',
+                color: 'var(--tt-color-text-main)',
                 marginBottom: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
               }}
             >
-              <Lock size={18} color="var(--color-warning)" />
+              <Lock size={18} color="var(--tt-color-warning)" />
               <span>Logs de Auditoría y Eventos del Sistema ({registros.length})</span>
             </h3>
             <div className="admin-table-container">
@@ -236,7 +236,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                 <tbody>
                   {registros.length === 0 ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-muted)' }}>
                         No hay registros de auditoría recientes en PostgreSQL.
                       </td>
                     </tr>
@@ -250,7 +250,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                           <span className="status-badge status-active">{reg.modulo}</span>
                         </td>
                         <td style={{ fontFamily: 'monospace' }}>{reg.ip}</td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{reg.fecha}</td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-muted)' }}>{reg.fecha}</td>
                       </tr>
                     ))
                   )}
@@ -264,14 +264,14 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
               style={{
                 fontSize: '1.05rem',
                 fontWeight: 700,
-                color: 'var(--color-text)',
+                color: 'var(--tt-color-text-main)',
                 marginBottom: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
               }}
             >
-              <ShoppingCart size={18} color="var(--color-error)" />
+              <ShoppingCart size={18} color="var(--tt-color-error)" />
               <span>Registro de Carritos Abandonados ({carritos.length})</span>
             </h3>
             <div className="admin-table-container">
@@ -288,7 +288,7 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                 <tbody>
                   {carritos.length === 0 ? (
                     <tr>
-                      <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                      <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-muted)' }}>
                         No hay carritos abandonados pendientes.
                       </td>
                     </tr>
@@ -297,9 +297,9 @@ export const AdminControlPanel: React.FC<AdminControlPanelProps> = ({
                       <tr key={cart.cod_carrito}>
                         <td style={{ fontWeight: 700 }}>#{cart.cod_carrito}</td>
                         <td style={{ fontWeight: 600 }}>{cart.usuario}</td>
-                        <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{cart.valor}</td>
+                        <td style={{ fontWeight: 700, color: 'var(--tt-color-primary)' }}>{cart.valor}</td>
                         <td>{cart.items} ítems</td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{cart.fecha}</td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-muted)' }}>{cart.fecha}</td>
                       </tr>
                     ))
                   )}

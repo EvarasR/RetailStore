@@ -58,10 +58,10 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Package className="text-blue-400" size={22} />
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
                 Pedido #{detail?.pedido.numero_pedido || '...'}
               </h3>
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
                 ID BD: {detail?.pedido.cod_pedido || '—'}
               </span>
             </div>
@@ -72,7 +72,7 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94a3b8',
+              color: 'var(--tt-color-text-light)',
               cursor: 'pointer',
             }}
           >
@@ -82,7 +82,7 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
 
         <div className="admin-drawer-content">
           {loading && (
-            <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-light)' }}>
               Cargando detalle oficial desde PostgreSQL...
             </div>
           )}
@@ -92,7 +92,7 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
               style={{
                 padding: '1rem',
                 background: 'rgba(239, 68, 68, 0.15)',
-                color: '#ef4444',
+                color: 'var(--tt-color-error)',
                 borderRadius: '0.5rem',
               }}
             >
@@ -115,17 +115,17 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cliente</div>
-                  <strong style={{ color: '#f8fafc', fontSize: '0.95rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>Cliente</div>
+                  <strong style={{ color: 'var(--tt-color-text-main)', fontSize: '0.95rem' }}>
                     {detail.pedido.cliente}
                   </strong>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)', marginTop: '0.2rem' }}>
                     {detail.pedido.direccion}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Total Oficial DB</div>
-                  <strong style={{ color: '#38bdf8', fontSize: '1.25rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--tt-color-text-light)' }}>Total Oficial DB</div>
+                  <strong style={{ color: 'var(--tt-color-primary)', fontSize: '1.25rem' }}>
                     ${detail.pedido.total}
                   </strong>
                   <div style={{ marginTop: '0.25rem' }}>
@@ -144,7 +144,7 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
                     padding: '0.65rem 1rem',
                     background: 'rgba(59, 130, 246, 0.1)',
                     borderRadius: '0.5rem',
-                    color: '#60a5fa',
+                    color: 'var(--tt-color-primary)',
                     fontSize: '0.8125rem',
                   }}
                 >
@@ -244,7 +244,7 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
                   gap: '0.85rem',
                 }}
               >
-                <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#f8fafc' }}>
+                <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--tt-color-text-main)' }}>
                   Cambiar Estado de Operación (BD-First)
                 </h4>
 
@@ -256,8 +256,8 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
                     style={{
                       flex: 1,
                       padding: '0.6rem',
-                      backgroundColor: '#1e293b',
-                      color: '#f8fafc',
+                      backgroundColor: 'var(--tt-color-surface)',
+                      color: 'var(--tt-color-text-main)',
                       border: '1px solid var(--tt-color-border)',
                       borderRadius: '0.375rem',
                     }}
@@ -278,8 +278,8 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
                   onChange={(e) => setComentario(e.target.value)}
                   style={{
                     padding: '0.6rem',
-                    backgroundColor: '#1e293b',
-                    color: '#f8fafc',
+                    backgroundColor: 'var(--tt-color-surface)',
+                    color: 'var(--tt-color-text-main)',
                     border: '1px solid var(--tt-color-border)',
                     borderRadius: '0.375rem',
                   }}
@@ -291,7 +291,7 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
                       padding: '0.65rem',
                       borderRadius: '0.375rem',
                       background: actionMsg.ok ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                      color: actionMsg.ok ? '#10b981' : '#ef4444',
+                      color: actionMsg.ok ? 'var(--tt-color-success)' : 'var(--tt-color-error)',
                       fontSize: '0.8125rem',
                       display: 'flex',
                       alignItems: 'center',
@@ -308,8 +308,8 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
                   disabled={saving || !newStatus}
                   style={{
                     padding: '0.65rem 1rem',
-                    background: newStatus ? '#3b82f6' : 'rgba(100, 116, 139, 0.2)',
-                    color: newStatus ? '#ffffff' : '#64748b',
+                    background: newStatus ? 'var(--tt-color-primary)' : 'rgba(100, 116, 139, 0.2)',
+                    color: newStatus ? '#ffffff' : 'var(--tt-color-text-muted)',
                     border: 'none',
                     borderRadius: '0.375rem',
                     cursor: newStatus ? 'pointer' : 'not-allowed',

@@ -140,7 +140,7 @@ export const AdminSidebar: React.FC = () => {
       </nav>
 
       <div className="admin-sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: '#94a3b8', padding: '0 0.5rem' }}>
+        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--tt-color-text-light)', padding: '0 0.5rem' }}>
           Roles Operativos
         </div>
         <NavLink
@@ -148,7 +148,7 @@ export const AdminSidebar: React.FC = () => {
           className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
           style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
         >
-          <Boxes size={16} color="#3b82f6" />
+          <Boxes size={16} color="var(--tt-color-primary)" />
           <span>Bodega e inventario</span>
         </NavLink>
         <NavLink
@@ -156,7 +156,7 @@ export const AdminSidebar: React.FC = () => {
           className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
           style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
         >
-          <Truck size={16} color="#10b981" />
+          <Truck size={16} color="var(--tt-color-success)" />
           <span>Compras y proveedores</span>
         </NavLink>
         <NavLink
@@ -164,7 +164,7 @@ export const AdminSidebar: React.FC = () => {
           className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
           style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
         >
-          <Headphones size={16} color="#f59e0b" />
+          <Headphones size={16} color="var(--tt-color-warning)" />
           <span>Centro de soporte</span>
         </NavLink>
         {es_proveedor_externo && (
@@ -173,7 +173,7 @@ export const AdminSidebar: React.FC = () => {
             className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
             style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
           >
-            <Building2 size={16} color="#38bdf8" />
+            <Building2 size={16} color="var(--tt-color-primary)" />
             <span>Portal de proveedor</span>
           </NavLink>
         )}

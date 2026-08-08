@@ -17,7 +17,7 @@ export const AdminInventoryAlerts: React.FC<AdminInventoryAlertsProps> = ({ aler
           border: '1px solid var(--tt-color-border)',
           borderRadius: '0.75rem',
           textAlign: 'center',
-          color: '#10b981',
+          color: 'var(--tt-color-success)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -25,10 +25,10 @@ export const AdminInventoryAlerts: React.FC<AdminInventoryAlertsProps> = ({ aler
         }}
       >
         <CheckCircle size={32} />
-        <strong style={{ color: '#f8fafc' }}>
+        <strong style={{ color: 'var(--tt-color-text-main)' }}>
           Sin Alertas de Inventario Crítico
         </strong>
-        <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+        <span style={{ fontSize: '0.8125rem', color: 'var(--tt-color-text-light)' }}>
           Todos los almacenes operan en niveles normales de abastecimiento en PostgreSQL.
         </span>
       </div>
@@ -55,22 +55,22 @@ export const AdminInventoryAlerts: React.FC<AdminInventoryAlertsProps> = ({ aler
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <AlertTriangle
               size={24}
-              color={a.atendida ? '#64748b' : '#f59e0b'}
+              color={a.atendida ? 'var(--tt-color-text-muted)' : 'var(--tt-color-warning)'}
               style={{ flexShrink: 0 }}
             />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <strong style={{ color: '#f8fafc', fontSize: '0.95rem' }}>{a.producto}</strong>
+                <strong style={{ color: 'var(--tt-color-text-main)', fontSize: '0.95rem' }}>{a.producto}</strong>
                 <span className="admin-badge admin-badge-amber">{a.tipo}</span>
               </div>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: '#cbd5e1' }}>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: 'var(--tt-color-text-muted)' }}>
                 {a.mensaje} • Almacén: {a.almacen}
               </p>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
               {a.fecha || 'Reciente'}
             </span>
             {!a.atendida && onResolve && (
@@ -80,7 +80,7 @@ export const AdminInventoryAlerts: React.FC<AdminInventoryAlertsProps> = ({ aler
                 style={{
                   padding: '0.45rem 0.85rem',
                   background: 'rgba(16, 185, 129, 0.15)',
-                  color: '#10b981',
+                  color: 'var(--tt-color-success)',
                   border: '1px solid rgba(16, 185, 129, 0.3)',
                   borderRadius: '0.375rem',
                   cursor: 'pointer',

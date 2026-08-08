@@ -5,6 +5,7 @@ import { fetchOrderDetail } from '../api/orders.api';
 import type { ShippingMethod, CreateOrderResult } from '../types/checkout.types';
 import { useAuth } from './useAuth';
 import { usePaymentMethods } from './usePaymentMethods';
+import { HttpError } from '../api/http';
 
 export type CheckoutStep =
   | 'CART'
@@ -216,9 +217,9 @@ export function useCheckout() {
       setStep('COMPLETED');
       clearRecoveryState();
       return true;
-    } catch (err: any) {
-      // 402 Payment Required se considera rechazo definitivo en esta arquitectura (pasarela)
-      if (err?.status === 402 || err?.response?.status === 402 || err?.message?.toLowerCase().includes('rechazado')) {
+    } catch (err: unknown) {
+      // El contrato HTTP 402 identifica un rechazo definitivo; no se infiere desde texto.
+      if (err instanceof HttpError && err.status === 402) {
         setStep('PAYMENT_DECLINED');
         sessionStorage.removeItem('tt_checkout_payment_attempt_id');
       } else {

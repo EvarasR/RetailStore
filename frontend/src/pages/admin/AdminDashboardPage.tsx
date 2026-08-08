@@ -19,7 +19,7 @@ export const AdminDashboardPage: React.FC = () => {
   return (
     <AdminLayout title="Dashboard Ejecutivo Empresarial">
       {loading && (
-        <div style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--tt-color-text-light)' }}>
           Cargando indicadores de negocio desde PostgreSQL...
         </div>
       )}
@@ -29,7 +29,7 @@ export const AdminDashboardPage: React.FC = () => {
           style={{
             padding: '1.5rem',
             background: 'rgba(239, 68, 68, 0.15)',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             borderRadius: '0.75rem',
             border: '1px solid rgba(239, 68, 68, 0.3)',
             marginBottom: '2rem',
@@ -97,7 +97,7 @@ export const AdminDashboardPage: React.FC = () => {
             {/* VENTAS DIARIAS */}
             <div className="admin-table-container">
               <div className="admin-table-toolbar">
-                <h3 style={{ margin: 0, fontSize: '1rem', color: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--tt-color-text-main)' }}>
                   Ventas Diarias (PostgreSQL)
                 </h3>
               </div>
@@ -114,7 +114,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <tbody>
                     {ventasDiarias.length === 0 ? (
                       <tr>
-                        <td colSpan={4} style={{ textAlign: 'center', color: '#64748b' }}>
+                        <td colSpan={4} style={{ textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
                           No hay registros diarios de venta en este periodo.
                         </td>
                       </tr>
@@ -124,7 +124,7 @@ export const AdminDashboardPage: React.FC = () => {
                           <td>{v.fecha}</td>
                           <td>{v.total_pedidos} un.</td>
                           <td>
-                            <strong style={{ color: '#38bdf8' }}>${v.total_ventas}</strong>
+                            <strong style={{ color: 'var(--tt-color-primary)' }}>${v.total_ventas}</strong>
                           </td>
                           <td>${v.ticket_promedio}</td>
                         </tr>
@@ -138,7 +138,7 @@ export const AdminDashboardPage: React.FC = () => {
             {/* ESTADOS DE PEDIDO */}
             <div className="admin-table-container">
               <div className="admin-table-toolbar">
-                <h3 style={{ margin: 0, fontSize: '1rem', color: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--tt-color-text-main)' }}>
                   Estado Operativo de Pedidos
                 </h3>
               </div>
@@ -154,7 +154,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <tbody>
                     {estadosPedido.length === 0 ? (
                       <tr>
-                        <td colSpan={3} style={{ textAlign: 'center', color: '#64748b' }}>
+                        <td colSpan={3} style={{ textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
                           No hay pedidos procesados.
                         </td>
                       </tr>
@@ -170,7 +170,7 @@ export const AdminDashboardPage: React.FC = () => {
                             <td>
                               <strong>{e.total}</strong>
                             </td>
-                            <td style={{ color: '#94a3b8' }}>{pct}%</td>
+                            <td style={{ color: 'var(--tt-color-text-light)' }}>{pct}%</td>
                           </tr>
                         );
                       })
@@ -185,7 +185,7 @@ export const AdminDashboardPage: React.FC = () => {
           {kpis && kpis.length > 0 && (
             <div className="admin-table-container">
               <div className="admin-table-toolbar">
-                <h3 style={{ margin: 0, fontSize: '1rem', color: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--tt-color-text-main)' }}>
                   Indicadores Clave de Rendimiento (KPIs Snapshot)
                 </h3>
               </div>
@@ -204,10 +204,10 @@ export const AdminDashboardPage: React.FC = () => {
                       <tr key={i}>
                         <td style={{ fontWeight: 600 }}>{k.nombre}</td>
                         <td>
-                          <strong style={{ color: '#38bdf8' }}>{k.valor}</strong>
+                          <strong style={{ color: 'var(--tt-color-primary)' }}>{k.valor}</strong>
                         </td>
                         <td>{k.unidad}</td>
-                        <td style={{ color: '#64748b' }}>{k.fecha || 'Reciente'}</td>
+                        <td style={{ color: 'var(--tt-color-text-muted)' }}>{k.fecha || 'Reciente'}</td>
                       </tr>
                     ))}
                   </tbody>

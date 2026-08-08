@@ -1,9 +1,11 @@
 import React from 'react';
-import { Search, Plus, ExternalLink, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { AdminProductTable } from '../../components/admin/AdminProductTable';
 import { AdminEmptyState } from '../../components/admin/AdminEmptyState';
 import { useAdminProducts } from '../../hooks/useAdminProducts';
+import { AdminMutationForm } from '../../components/admin/AdminMutationForm';
+import { createAdminProduct } from '../../api/adminProducts.api';
 
 export const AdminProductsPage: React.FC = () => {
   const {
@@ -39,7 +41,7 @@ export const AdminProductsPage: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: '#1e293b',
+                backgroundColor: 'var(--tt-color-surface)',
                 padding: '0.45rem 0.85rem',
                 borderRadius: '0.5rem',
                 border: '1px solid var(--tt-color-border)',
@@ -55,7 +57,7 @@ export const AdminProductsPage: React.FC = () => {
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#f8fafc',
+                  color: 'var(--tt-color-text-main)',
                   outline: 'none',
                   width: '100%',
                 }}
@@ -69,8 +71,8 @@ export const AdminProductsPage: React.FC = () => {
               }}
               style={{
                 padding: '0.5rem 0.75rem',
-                backgroundColor: '#1e293b',
-                color: '#f8fafc',
+                backgroundColor: 'var(--tt-color-surface)',
+                color: 'var(--tt-color-text-main)',
                 border: '1px solid var(--tt-color-border)',
                 borderRadius: '0.5rem',
               }}
@@ -87,7 +89,7 @@ export const AdminProductsPage: React.FC = () => {
               type="submit"
               style={{
                 padding: '0.5rem 1rem',
-                background: '#3b82f6',
+                background: 'var(--tt-color-primary)',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '0.5rem',
@@ -107,7 +109,7 @@ export const AdminProductsPage: React.FC = () => {
               style={{
                 padding: '0.5rem 0.75rem',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#cbd5e1',
+                color: 'var(--tt-color-text-muted)',
                 border: '1px solid var(--tt-color-border)',
                 borderRadius: '0.5rem',
                 cursor: 'pointer',
@@ -120,27 +122,36 @@ export const AdminProductsPage: React.FC = () => {
               <span>Actualizar</span>
             </button>
 
-            <a
-              href="/panel/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="admin-classic-fallback-btn"
-              style={{ width: 'auto', background: '#2563eb', borderColor: '#3b82f6' }}
-            >
-              <Plus size={16} />
-              <span>Crear Producto (Panel Clásico)</span>
-              <ExternalLink size={14} />
-            </a>
           </div>
         </div>
       </div>
+
+      <AdminMutationForm
+        title="Crear producto"
+        description="Captura datos base; la publicación, stock y precio oficial siguen validados por PostgreSQL."
+        submitLabel="Crear producto"
+        fields={[
+          { name: 'cod_categoria', label: 'ID categoría', type: 'number', required: true },
+          { name: 'cod_marca', label: 'ID marca', type: 'number', required: true },
+          { name: 'sku', label: 'SKU', required: true },
+          { name: 'nombre', label: 'Nombre', required: true },
+          { name: 'descripcion', label: 'Descripción', type: 'textarea' },
+          { name: 'precio_actual', label: 'Precio base registrado', type: 'number', required: true },
+          { name: 'peso_kg', label: 'Peso kg', type: 'number', defaultValue: '0' },
+          { name: 'largo_cm', label: 'Largo cm', type: 'number', defaultValue: '0' },
+          { name: 'ancho_cm', label: 'Ancho cm', type: 'number', defaultValue: '0' },
+          { name: 'alto_cm', label: 'Alto cm', type: 'number', defaultValue: '0' },
+        ]}
+        onSubmit={createAdminProduct}
+        onSuccess={refresh}
+      />
 
       {error && (
         <div
           style={{
             padding: '1rem',
             background: 'rgba(239, 68, 68, 0.15)',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             borderRadius: '0.5rem',
             marginBottom: '1.5rem',
           }}
@@ -150,24 +161,13 @@ export const AdminProductsPage: React.FC = () => {
       )}
 
       {loading ? (
-        <div style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--tt-color-text-light)' }}>
           Consultando productos institucionales...
         </div>
       ) : products.length === 0 ? (
         <AdminEmptyState
           title="No se encontraron productos"
-          description="Ajusta los criterios de búsqueda o crea un nuevo producto en el panel clásico Django."
-          action={
-            <a
-              href="/panel/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="admin-classic-fallback-btn"
-              style={{ width: 'auto' }}
-            >
-              <span>Abrir Panel Clásico</span>
-            </a>
-          }
+          description="Ajusta los criterios de búsqueda o usa el formulario React para crear un producto."
         />
       ) : (
         <AdminProductTable

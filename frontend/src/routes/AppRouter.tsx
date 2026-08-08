@@ -24,6 +24,8 @@ import { NotificationsPage } from '../pages/account/NotificationsPage';
 import { SupportPage } from '../pages/account/SupportPage';
 import { MembershipPage } from '../pages/account/MembershipPage';
 import { SecurityPage } from '../pages/account/SecurityPage';
+import { InvoicesPage } from '../pages/account/InvoicesPage';
+import { RecurringPurchasesPage } from '../pages/account/RecurringPurchasesPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
 import { AdminOrdersPage } from '../pages/admin/AdminOrdersPage';
@@ -177,10 +179,12 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
+      <Route path="/cuenta/facturas" element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
+      <Route path="/cuenta/recurrentes" element={<ProtectedRoute><RecurringPurchasesPage /></ProtectedRoute>} />
 
       {/* =====================================================================
           FASE 6.1 — PANEL DE ADMINISTRACIÓN ENTERPRISE EN REACT
-          Protegidas por RoleRoute (ADMIN). Fallback avanzado a /panel/ en botones.
+          Protegidas por RoleRoute (ADMIN).
           ===================================================================== */}
       <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
       <Route

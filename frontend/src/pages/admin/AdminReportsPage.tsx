@@ -2,7 +2,6 @@ import React from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { AdminModuleHeader } from '../../components/admin/AdminModuleHeader';
 import { AdminReportsPanel } from '../../components/admin/AdminReportsPanel';
-import { AdminFallbackCard } from '../../components/admin/AdminFallbackCard';
 import { useAdminReports } from '../../hooks/useAdminReports';
 
 export const AdminReportsPage: React.FC = () => {
@@ -16,14 +15,6 @@ export const AdminReportsPage: React.FC = () => {
           subtitle="Análisis de rendimiento diario, volumen de transacciones y ticket promedio calculado por el motor fiscal."
           onReload={reload}
           loading={loading}
-          classicPath="/panel/reportes/"
-        />
-
-        <AdminFallbackCard
-          title="¿Deseas exportar reportes XLS/PDF o consultar balances contables complejos?"
-          description="Los exportadores y filtros avanzados por sucursales y cajas están disponibles en el centro de reportes clásico."
-          classicPath="/panel/reportes/"
-          actionText="Centro de Reportes (Panel Clásico)"
         />
 
         {error ? (

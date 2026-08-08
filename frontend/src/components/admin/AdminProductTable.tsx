@@ -64,7 +64,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: '#64748b',
+                            color: 'var(--tt-color-text-muted)',
                             fontSize: '0.75rem',
                             fontWeight: 700,
                           }}
@@ -73,8 +73,8 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                         </div>
                       )}
                       <div>
-                        <div style={{ fontWeight: 600, color: '#f8fafc' }}>{p.nombre}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>{p.nombre}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
                           ID: #{p.cod_producto} • {p.fecha || 'Reciente'}
                         </div>
                       </div>
@@ -82,24 +82,24 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                   </td>
                   <td>
                     <div style={{ fontWeight: 600 }}>{p.sku}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{p.marca}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>{p.marca}</div>
                   </td>
                   <td>{p.categoria}</td>
                   <td>
-                    <strong style={{ color: '#38bdf8' }}>${p.precio}</strong>
+                    <strong style={{ color: 'var(--tt-color-primary)' }}>${p.precio}</strong>
                   </td>
                   <td>
                     {p.stock !== null && p.stock !== undefined ? (
                       <span
                         style={{
-                          color: p.stock <= 5 ? '#ef4444' : '#f8fafc',
+                          color: p.stock <= 5 ? 'var(--tt-color-error)' : 'var(--tt-color-text-main)',
                           fontWeight: 700,
                         }}
                       >
                         {p.stock} un.
                       </span>
                     ) : (
-                      <span style={{ color: '#64748b' }}>N/D</span>
+                      <span style={{ color: 'var(--tt-color-text-muted)' }}>N/D</span>
                     )}
                   </td>
                   <td>
@@ -109,7 +109,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                     {p.publicable ? (
                       <span className="admin-badge admin-badge-green">Listo (100%)</span>
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#f59e0b', fontSize: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--tt-color-warning)', fontSize: '0.75rem' }}>
                         <AlertCircle size={14} />
                         <span>Faltan {p.faltantes.length} datos</span>
                       </div>

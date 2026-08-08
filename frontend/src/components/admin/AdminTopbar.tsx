@@ -28,7 +28,7 @@ export const AdminTopbar: React.FC<AdminTopbarProps> = ({ title }) => {
 
         <div className="admin-user-pill">
           <User size={16} className="text-slate-400" />
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--tt-color-text-main)' }}>
             {displayUser}
           </span>
           <span className="admin-user-role-badge">{primaryRole}</span>

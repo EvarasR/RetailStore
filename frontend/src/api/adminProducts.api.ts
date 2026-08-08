@@ -36,3 +36,7 @@ export async function deactivateAdminProduct(cod_producto: number): Promise<Admi
   const res = await postForm(`/panel/api/productos/${cod_producto}/desactivar/`, {});
   return res as AdminProductActionResponse;
 }
+
+export async function createAdminProduct(values: Record<string, unknown>): Promise<{ mensaje?: string }> {
+  return postForm('/panel/api/productos/crear/', values);
+}

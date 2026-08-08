@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, Power, ExternalLink } from 'lucide-react';
+import { Play, Pause, Power } from 'lucide-react';
 
 interface AdminProductActionsProps {
   codProducto: number;
@@ -31,7 +31,7 @@ export const AdminProductActions: React.FC<AdminProductActionsProps> = ({
           style={{
             padding: '0.35rem 0.6rem',
             background: publicable ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.1)',
-            color: publicable ? '#10b981' : '#64748b',
+            color: publicable ? 'var(--tt-color-success)' : 'var(--tt-color-text-muted)',
             border: '1px solid transparent',
             borderRadius: '0.375rem',
             cursor: publicable ? 'pointer' : 'not-allowed',
@@ -56,7 +56,7 @@ export const AdminProductActions: React.FC<AdminProductActionsProps> = ({
           style={{
             padding: '0.35rem 0.6rem',
             background: 'rgba(245, 158, 11, 0.15)',
-            color: '#f59e0b',
+            color: 'var(--tt-color-warning)',
             border: '1px solid transparent',
             borderRadius: '0.375rem',
             cursor: 'pointer',
@@ -81,7 +81,7 @@ export const AdminProductActions: React.FC<AdminProductActionsProps> = ({
           style={{
             padding: '0.35rem 0.6rem',
             background: 'rgba(239, 68, 68, 0.15)',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             border: '1px solid transparent',
             borderRadius: '0.375rem',
             cursor: 'pointer',
@@ -96,22 +96,6 @@ export const AdminProductActions: React.FC<AdminProductActionsProps> = ({
           <span>Desactivar</span>
         </button>
       )}
-
-      <a
-        href={`/panel/`}
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Editar avanzado en Panel Clásico Django"
-        style={{
-          padding: '0.35rem 0.5rem',
-          color: '#94a3b8',
-          textDecoration: 'none',
-          display: 'inline-flex',
-          alignItems: 'center',
-        }}
-      >
-        <ExternalLink size={14} />
-      </a>
     </div>
   );
 };

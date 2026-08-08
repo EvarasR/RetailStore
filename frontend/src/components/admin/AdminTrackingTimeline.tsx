@@ -19,7 +19,7 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
 }) => {
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando centro de monitoreo logístico y rastreo...
       </div>
     );
@@ -41,14 +41,14 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
           style={{
             fontSize: '1.1rem',
             fontWeight: 700,
-            color: 'var(--color-text)',
+            color: 'var(--tt-color-text-main)',
             margin: 0,
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
           }}
         >
-          <Truck size={18} color="var(--color-primary)" />
+          <Truck size={18} color="var(--tt-color-primary)" />
           <span>Envíos Logísticos Oficiales ({envios.length})</span>
         </h3>
 
@@ -61,9 +61,9 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.5rem 1rem',
-            background: 'var(--color-primary)',
+            background: 'var(--tt-color-primary)',
             border: 'none',
-            borderRadius: 'var(--radius-md)',
+            borderRadius: 'var(--tt-radius-md)',
             color: '#fff',
             fontSize: '0.825rem',
             fontWeight: 600,
@@ -91,7 +91,7 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
           <tbody>
             {envios.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-muted)' }}>
                   No hay envíos en tránsito o programados en PostgreSQL.
                 </td>
               </tr>
@@ -100,14 +100,14 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
                 <tr key={env.cod_envio}>
                   <td style={{ fontWeight: 700 }}>#{env.cod_envio}</td>
                   <td style={{ fontWeight: 600 }}>#{env.pedido}</td>
-                  <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--color-primary)' }}>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--tt-color-primary)' }}>
                     {env.tracking || 'PENDIENTE'}
                   </td>
                   <td>{env.transportista || 'Transporte TechTail'}</td>
                   <td>
                     <span className="status-badge status-active">{env.estado}</span>
                   </td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{env.entrega}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{env.entrega}</td>
                 </tr>
               ))
             )}
@@ -119,14 +119,14 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
         style={{
           fontSize: '1.1rem',
           fontWeight: 700,
-          color: 'var(--color-text)',
+          color: 'var(--tt-color-text-main)',
           marginBottom: '1rem',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
         }}
       >
-        <Clock size={18} color="var(--color-warning)" />
+        <Clock size={18} color="var(--tt-color-warning)" />
         <span>Hitos y Programaciones Logísticas ({programaciones.length})</span>
       </h3>
 
@@ -145,7 +145,7 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
           <tbody>
             {programaciones.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--tt-color-text-muted)' }}>
                   No hay hitos programados en cola.
                 </td>
               </tr>
@@ -156,7 +156,7 @@ export const AdminTrackingTimeline: React.FC<AdminTrackingTimelineProps> = ({
                   <td>#{prog.cod_envio}</td>
                   <td style={{ fontWeight: 600 }}>{prog.evento}</td>
                   <td style={{ fontSize: '0.85rem' }}>{prog.descripcion}</td>
-                  <td style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>{prog.fecha_programada}</td>
+                  <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{prog.fecha_programada}</td>
                   <td>
                     {prog.procesado ? (
                       <span className="status-badge status-active" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>

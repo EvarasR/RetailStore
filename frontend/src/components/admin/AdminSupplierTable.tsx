@@ -1,6 +1,6 @@
 import React from 'react';
 import type { AdminSupplierItem } from '../../types/adminSupplier.types';
-import { Mail, Phone, MapPin, Building2, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Building2 } from 'lucide-react';
 
 interface AdminSupplierTableProps {
   suppliers: AdminSupplierItem[];
@@ -10,7 +10,7 @@ interface AdminSupplierTableProps {
 export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ suppliers, loading }) => {
   if (loading) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         Cargando directorio oficial de proveedores...
       </div>
     );
@@ -18,7 +18,7 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
 
   if (suppliers.length === 0) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--tt-color-text-muted)' }}>
         No se encontraron proveedores registrados en PostgreSQL.
       </div>
     );
@@ -35,7 +35,6 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
             <th>Ubicación</th>
             <th>Calificación DB</th>
             <th>Estado</th>
-            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -47,9 +46,9 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
                     style={{
                       width: '36px',
                       height: '36px',
-                      borderRadius: 'var(--radius-md)',
+                      borderRadius: 'var(--tt-radius-md)',
                       background: 'rgba(37, 99, 235, 0.1)',
-                      color: 'var(--color-primary)',
+                      color: 'var(--tt-color-primary)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -58,11 +57,11 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
                     <Building2 size={18} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 600, color: 'var(--color-text)' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>
                       {sup.razon_social}
                     </div>
                     {sup.nombre_comercial && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
                         {sup.nombre_comercial}
                       </div>
                     )}
@@ -74,13 +73,13 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   {sup.email && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem' }}>
-                      <Mail size={13} color="var(--color-text-muted)" />
+                      <Mail size={13} color="var(--tt-color-text-muted)" />
                       {sup.email}
                     </span>
                   )}
                   {sup.telefono && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem' }}>
-                      <Phone size={13} color="var(--color-text-muted)" />
+                      <Phone size={13} color="var(--tt-color-text-muted)" />
                       {sup.telefono}
                     </span>
                   )}
@@ -88,7 +87,7 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
               </td>
               <td>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}>
-                  <MapPin size={13} color="var(--color-text-muted)" />
+                  <MapPin size={13} color="var(--tt-color-text-muted)" />
                   {sup.ciudad}, {sup.provincia}
                 </span>
               </td>
@@ -96,9 +95,9 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
                 <span
                   style={{
                     padding: '0.25rem 0.6rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--tt-radius-sm)',
+                    background: 'var(--tt-color-surface)',
+                    border: '1px solid var(--tt-color-border)',
                     fontSize: '0.8rem',
                     fontWeight: 600,
                   }}
@@ -110,29 +109,6 @@ export const AdminSupplierTable: React.FC<AdminSupplierTableProps> = ({ supplier
                 <span className={`status-badge ${sup.activo ? 'status-active' : 'status-inactive'}`}>
                   {sup.activo ? 'ACTIVO' : 'INACTIVO'}
                 </span>
-              </td>
-              <td>
-                <a
-                  href={`/panel/proveedores/${sup.cod_proveedor}/`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    padding: '0.4rem 0.75rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                    color: 'var(--color-text)',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                  }}
-                >
-                  <span>Ver en Panel</span>
-                  <ExternalLink size={12} />
-                </a>
               </td>
             </tr>
           ))}

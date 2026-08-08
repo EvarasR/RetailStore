@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, ExternalLink } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { AdminInventoryTable } from '../../components/admin/AdminInventoryTable';
 import { AdminInventoryAlerts } from '../../components/admin/AdminInventoryAlerts';
@@ -23,7 +23,7 @@ export const AdminInventoryPage: React.FC = () => {
       <div className="admin-table-container" style={{ marginBottom: '1.5rem' }}>
         <div className="admin-table-toolbar">
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--tt-color-text-light)' }}>
               Almacenes oficiales conectados en tiempo real con PostgreSQL
             </span>
           </div>
@@ -35,7 +35,7 @@ export const AdminInventoryPage: React.FC = () => {
               style={{
                 padding: '0.5rem 0.85rem',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#cbd5e1',
+                color: 'var(--tt-color-text-muted)',
                 border: '1px solid var(--tt-color-border)',
                 borderRadius: '0.5rem',
                 cursor: 'pointer',
@@ -47,17 +47,6 @@ export const AdminInventoryPage: React.FC = () => {
               <RefreshCw size={14} />
               <span>Sincronizar</span>
             </button>
-
-            <a
-              href="/panel/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="admin-classic-fallback-btn"
-              style={{ width: 'auto' }}
-            >
-              <span>Gestión Avanzada (Panel Clásico)</span>
-              <ExternalLink size={14} />
-            </a>
           </div>
         </div>
       </div>
@@ -67,7 +56,7 @@ export const AdminInventoryPage: React.FC = () => {
           style={{
             padding: '1rem',
             background: 'rgba(239, 68, 68, 0.15)',
-            color: '#ef4444',
+            color: 'var(--tt-color-error)',
             borderRadius: '0.5rem',
             marginBottom: '1.5rem',
           }}
@@ -77,7 +66,7 @@ export const AdminInventoryPage: React.FC = () => {
       )}
 
       {loading ? (
-        <div style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--tt-color-text-light)' }}>
           Consultando stock y alertas oficiales de bodega...
         </div>
       ) : (
@@ -88,7 +77,7 @@ export const AdminInventoryPage: React.FC = () => {
               style={{
                 margin: '0 0 1rem 0',
                 fontSize: '1rem',
-                color: '#f8fafc',
+                color: 'var(--tt-color-text-main)',
                 textTransform: 'uppercase',
               }}
             >
