@@ -1,0 +1,5 @@
+{% extends "emails/base.html" %}{% block content %}
+<h1 style="font-size:22px;margin:0 0 16px">Bienvenido, {{ nombre }}</h1>
+<p style="line-height:1.6">Tu cuenta TechTail está lista. Puedes gestionar pedidos, facturas, favoritos y preferencias desde tu cuenta.</p>
+<p><a href="{{ url_cuenta }}" style="display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px">Ir a mi cuenta</a></p>
+{% endblock %}

@@ -28,6 +28,7 @@ export interface AdminPaymentInvoice {
   total: string;
   estado: string;
   fecha: string;
+  pdf_url: string;
 }
 
 export interface AdminPaymentReturn {

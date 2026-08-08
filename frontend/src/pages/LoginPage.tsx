@@ -2,15 +2,30 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { isValidNextRoute, getDefaultRouteForSession } from '../utils/authUtils';
+import { GoogleButton } from '../components/auth/GoogleButton';
+import type { GoogleAuthResponse } from '../api/googleAuth.api';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, error: sessionError } = useAuth();
+  const { login, refreshSession, error: sessionError } = useAuth();
   const [error, setError] = useState<string | null>(sessionError || null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const nextRoute = searchParams.get('next');
+
+  const handleGoogleSuccess = React.useCallback(async (result: GoogleAuthResponse) => {
+    if (result.onboarding_requerido) {
+      navigate('/registro/completar');
+      return;
+    }
+    const sessionData = await refreshSession(true);
+    if (isValidNextRoute(result.redirect)) navigate(result.redirect as string);
+    else navigate(getDefaultRouteForSession(sessionData));
+  }, [navigate, refreshSession]);
+
+  const handleGoogleError = React.useCallback((message: string) => setError(message), []);
 
   // Si el auth context reporta error posteriormente (por ej. expiró estando en el login)
   React.useEffect(() => {
@@ -115,6 +130,11 @@ export const LoginPage: React.FC = () => {
             {loading ? 'Iniciando sesión...' : 'Continuar'}
           </button>
         </form>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', margin: '1.5rem 0', color: 'var(--tt-color-text-muted)', fontSize: '.8rem' }}>
+          <span style={{ height: 1, background: 'var(--tt-color-border)', flex: 1 }} /> o <span style={{ height: 1, background: 'var(--tt-color-border)', flex: 1 }} />
+        </div>
+        <GoogleButton mode="login" next={nextRoute} onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
 
         <div style={{ marginTop: '1.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--tt-color-border)', textAlign: 'center', fontSize: '0.875rem' }}>
           <span>¿Eres nuevo en TechTail? </span>

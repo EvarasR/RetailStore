@@ -21,7 +21,7 @@ export const AdminPaymentsPage: React.FC = () => {
       <div className="admin-page">
         <AdminModuleHeader
           title="Centro Contable y Gestión de Pagos"
-          subtitle="Monitoreo ejecutivo de transacciones, autorizaciones, facturas SRI y devoluciones en DB."
+          subtitle="Monitoreo de transacciones, comprobantes TechTail y devoluciones con valores oficiales de PostgreSQL."
           onReload={reload}
           loading={loading}
         />

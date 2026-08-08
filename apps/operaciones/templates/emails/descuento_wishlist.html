@@ -1,0 +1,5 @@
+{% extends "emails/base.html" %}{% block content %}
+<h1 style="font-size:22px;margin:0 0 16px">¡Uno de tus favoritos está en oferta!</h1>
+<p style="line-height:1.6">El producto <b>{{ producto }}</b> que tienes guardado en favoritos ahora tiene descuento.</p>
+<p><a href="{{ url_producto }}" style="display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px">Ver producto</a></p>
+{% endblock %}

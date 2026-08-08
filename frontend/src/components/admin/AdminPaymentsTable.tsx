@@ -212,11 +212,12 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
             <thead>
               <tr>
                 <th># Factura</th>
-                <th>Nro. Fiscal SRI</th>
+                <th>Comprobante TechTail</th>
                 <th>Pedido</th>
                 <th>Total Facturado</th>
                 <th>Estado</th>
                 <th>Fecha Emisión</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -230,6 +231,7 @@ export const AdminPaymentsTable: React.FC<AdminPaymentsTableProps> = ({
                     <span className="status-badge status-active">{fac.estado}</span>
                   </td>
                   <td style={{ fontSize: '0.825rem', color: 'var(--tt-color-text-muted)' }}>{fac.fecha}</td>
+                  <td><div style={{ display: 'flex', gap: '.4rem' }}><a className="tt-btn tt-btn--secondary" href={fac.pdf_url} target="_blank" rel="noreferrer">Ver</a><a className="tt-btn tt-btn--primary" href={`${fac.pdf_url}?download=1`}>Descargar</a></div></td>
                 </tr>
               ))}
             </tbody>

@@ -1,0 +1,6 @@
+{% extends "emails/base.html" %}{% block content %}
+<h1 style="font-size:22px;margin:0 0 16px">Tu factura TechTail #{{ numero_factura }}</h1>
+<p>Hola {{ nombre }},</p><p style="line-height:1.6">Tu compra fue procesada correctamente.</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="6" style="background:#f8fafc;border:1px solid #e2e8f0"><tr><td>Pedido</td><td><b>{{ numero_pedido }}</b></td></tr><tr><td>Fecha</td><td>{{ fecha }}</td></tr><tr><td>Total</td><td><b>${{ total }}</b></td></tr></table>
+<p>Adjuntamos tu factura en PDF.</p><p><a href="{{ url_factura }}" style="display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px">Ver mis facturas</a></p>
+{% endblock %}

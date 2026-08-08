@@ -36,6 +36,12 @@ export interface OrderDetailResponse {
   ok: boolean;
   pedido: OrderDetailData;
   items: OrderItemDetail[];
+  factura?: {
+    cod_factura: number;
+    numero_factura: string;
+    estado: string;
+    pdf_url: string;
+  } | null;
 }
 
 export interface TrackingEnvioData {

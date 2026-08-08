@@ -64,7 +64,7 @@ from apps.clientes.services.recurrente_service import (
 )
 from apps.clientes.services.wishlist_service import agregar_a_wishlist, quitar_de_wishlist
 from apps.core.models import DireccionUsuario
-from apps.operaciones.models import Envio, MetodoEnvio, Pedido, PedidoDetalle, ZonaEntrega
+from apps.operaciones.models import Envio, Factura, MetodoEnvio, Pedido, PedidoDetalle, ZonaEntrega
 from apps.operaciones.services.tracking_service import consultar_tracking_persistente, procesar_tracking_pendiente
 
 
@@ -821,6 +821,7 @@ def api_mis_pedidos(request):
 def api_pedido_detalle(request, cod_pedido):
     pedido = get_object_or_404(Pedido.objects.select_related("cod_estado_pedido"), cod_pedido=cod_pedido, cod_usuario=request.user)
     detalles = PedidoDetalle.objects.filter(cod_pedido=pedido).select_related("cod_producto")
+    factura = Factura.objects.filter(cod_pedido=pedido).first()
     return _json_ok(
         pedido={
             "cod_pedido": pedido.cod_pedido,
@@ -841,6 +842,12 @@ def api_pedido_detalle(request, cod_pedido):
             }
             for d in detalles
         ],
+        factura={
+            "cod_factura": factura.cod_factura,
+            "numero_factura": factura.numero_factura,
+            "estado": factura.estado,
+            "pdf_url": f"/operaciones/api/facturas/{factura.cod_factura}/pdf/",
+        } if factura else None,
     )
 
 

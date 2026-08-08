@@ -13,6 +13,7 @@ import {
   Shield,
   ReceiptText,
   CalendarClock,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -27,6 +28,7 @@ export const AccountSidebar: React.FC = () => {
     { to: '/cuenta/facturas', label: 'Mis Facturas', icon: ReceiptText, end: false },
     { to: '/cuenta/wishlist', label: 'Wishlist Favoritos', icon: Heart, end: false },
     { to: '/cuenta/notificaciones', label: 'Notificaciones', icon: Bell, end: false },
+    { to: '/cuenta/preferencias', label: 'Preferencias', icon: Settings, end: false },
     { to: '/cuenta/soporte', label: 'Soporte y Tickets', icon: HelpCircle, end: false },
     { to: '/cuenta/membresia', label: 'Membresía Prime', icon: Award, end: false },
     { to: '/cuenta/recurrentes', label: 'Compras Recurrentes', icon: CalendarClock, end: false },

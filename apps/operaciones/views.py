@@ -4,12 +4,16 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_GET, require_POST
 
+from apps.core.models import PreferenciaNotificacion
 from apps.operaciones.models import CuentaSimulada, Envio, Factura, MetodoEnvio, MetodoPago, Notificacion, Pedido, SoporteTicket, SoporteTicketMensaje, TransaccionPago
+from apps.operaciones.services.email_service import encolar_reenvio_factura
+from apps.operaciones.services.factura_service import facturas_visibles_para, generar_factura_pdf, obtener_factura_visible
 from apps.operaciones.services.notificacion_service import marcar_notificacion_leida
 from apps.operaciones.services.pago_service import (
     autorizar_pago_simulado,
@@ -46,6 +50,25 @@ def _money(value):
     if isinstance(value, Decimal):
         return f"{value:.2f}"
     return str(value)
+
+
+def _factura_data(factura):
+    return {
+        "cod_factura": factura.cod_factura,
+        "cod_pedido": factura.cod_pedido_id,
+        "numero_factura": factura.numero_factura,
+        "numero_pedido": factura.cod_pedido.numero_pedido,
+        "subtotal": _money(factura.subtotal),
+        "descuento": _money(factura.descuento),
+        "impuesto": _money(factura.impuesto),
+        "tasa_impuesto": _money(factura.tasa_impuesto),
+        "costo_envio": _money(factura.costo_envio),
+        "total": _money(factura.total),
+        "estado": factura.estado,
+        "fecha_emision": _dt(factura.fecha_emision),
+        "pdf_url": f"/operaciones/api/facturas/{factura.cod_factura}/pdf/",
+        "detalle_url": f"/operaciones/api/facturas/{factura.cod_factura}/",
+    }
 
 
 def _dt(value):
@@ -110,25 +133,81 @@ def api_desactivar_metodo_pago(request, cod_metodo_pago):
 @login_required(login_url="/login/")
 @require_GET
 def api_facturas(request):
-    facturas = Factura.objects.filter(cod_pedido__cod_usuario=request.user).select_related("cod_pedido").order_by("-fecha_emision")[:30]
+    facturas = facturas_visibles_para(request.user).order_by("-fecha_emision")[:100]
     return _json_ok(
-        facturas=[
-            {
-                "cod_factura": f.cod_factura,
-                "numero_factura": f.numero_factura,
-                "numero_pedido": f.cod_pedido.numero_pedido,
-                "subtotal": _money(f.subtotal),
-                "descuento": _money(f.descuento),
-                "impuesto": _money(f.impuesto),
-                "tasa_impuesto": _money(f.tasa_impuesto),
-                "costo_envio": _money(f.costo_envio),
-                "total": _money(f.total),
-                "estado": f.estado,
-                "fecha_emision": _dt(f.fecha_emision),
-            }
-            for f in facturas
-        ]
+        facturas=[_factura_data(f) for f in facturas]
     )
+
+
+@login_required(login_url="/login/")
+@require_GET
+def api_factura_detalle(request, cod_factura):
+    factura = obtener_factura_visible(request.user, cod_factura)
+    if not factura:
+        return _json_error("Factura no encontrada.", status=404)
+    return _json_ok(factura=_factura_data(factura))
+
+
+@login_required(login_url="/login/")
+@require_GET
+def api_factura_pdf(request, cod_factura):
+    factura = obtener_factura_visible(request.user, cod_factura)
+    if not factura:
+        return _json_error("Factura no encontrada.", status=404)
+    pdf = generar_factura_pdf(factura)
+    response = HttpResponse(pdf, content_type="application/pdf")
+    disposition = "attachment" if request.GET.get("download") == "1" else "inline"
+    response["Content-Disposition"] = f'{disposition}; filename="factura-{factura.numero_factura}.pdf"'
+    response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_reenviar_factura(request, cod_factura):
+    factura = obtener_factura_visible(request.user, cod_factura)
+    if not factura:
+        return _json_error("Factura no encontrada.", status=404)
+    if factura.cod_pedido.cod_usuario_id != request.user.cod_usuario:
+        return _json_error("El reenvío manual solo está disponible para el titular.", status=403)
+    rate_key = f"reenviar_factura_{cod_factura}"
+    ultimo = request.session.get(rate_key)
+    ahora = timezone.now().timestamp()
+    if ultimo and ahora - float(ultimo) < 60:
+        return _json_error("Espera un minuto antes de volver a solicitar el envío.", status=429)
+    encolar_reenvio_factura(factura.cod_factura, request.user.cod_usuario)
+    request.session[rate_key] = ahora
+    return _json_ok(mensaje="La factura fue encolada para enviarse a tu correo registrado.")
+
+
+@login_required(login_url="/login/")
+def api_preferencias_notificacion(request):
+    preferencia = PreferenciaNotificacion.objects.filter(cod_usuario=request.user).first()
+    defaults = {
+        "notificaciones_web": True,
+        "emails_pedidos": True,
+        "emails_descuentos": True,
+        "emails_prime": True,
+        "emails_soporte": True,
+    }
+    if request.method == "GET":
+        if preferencia:
+            defaults = {key: getattr(preferencia, key) for key in defaults}
+        return _json_ok(preferencias=defaults)
+    if request.method != "POST":
+        return _json_error("Método no permitido.", status=405)
+
+    def value(name):
+        return request.POST.get(name) in ("1", "true", "on", "True")
+
+    from apps.core.services.sql_service import ejecutar_funcion_void
+    ejecutar_funcion_void(
+        "fn_actualizar_preferencias_notificacion",
+        [request.user.cod_usuario] + [value(name) for name in defaults],
+        ["BIGINT", "BOOLEAN", "BOOLEAN", "BOOLEAN", "BOOLEAN", "BOOLEAN"],
+    )
+    return _json_ok(mensaje="Preferencias actualizadas.", preferencias={name: value(name) for name in defaults})
 
 
 @login_required(login_url="/login/")

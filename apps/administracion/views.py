@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal
 from pathlib import Path
 from urllib.parse import urlparse
@@ -11,10 +12,13 @@ from django.db import IntegrityError, transaction
 from django.db.models import Count, Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.text import slugify
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 from PIL import Image, UnidentifiedImageError
+
+logger = logging.getLogger(__name__)
 
 from apps.administracion.models import (
     AlertaStock,
@@ -105,12 +109,13 @@ from apps.clientes.services.membresia_service import (
     desactivar_plan_membresia,
     desactivar_beneficio_membresia,
 )
-from apps.core.models import Auditoria, EstadoPedido, IntentoLogin, Permiso, Rol, RolPermiso, Usuario, UsuarioRol
+from apps.core.models import Auditoria, EstadoPedido, IntentoLogin, Permiso, PreferenciaNotificacion, Rol, RolPermiso, Usuario, UsuarioRol
 from apps.core.services import usuario_service
 from apps.operaciones.models import ColaEmail, Devolucion, MetodoEnvio, Notificacion, Pedido, SoporteTicket, SoporteTicketMensaje, Transportista, ZonaEntrega
 from apps.clientes.services.soporte_service import responder_ticket_soporte
 from apps.clientes.services.checkout_service import aprobar_devolucion
 from apps.operaciones.services.notificacion_service import crear_notificacion
+from apps.operaciones.services.email_service import encolar_email_transaccional
 from apps.operaciones.services.pago_service import generar_reembolso_simulado
 from apps.operaciones.services.tracking_service import (
     actualizar_envio_estado,
@@ -876,7 +881,25 @@ def api_accion_empresarial_admin(request):
             servicio(_post_int(request, "cod_rol"), _post_int(request, "cod_permiso"))
             return _json_ok(mensaje="Permisos del rol actualizados.")
         if accion == "responder_ticket":
-            responder_ticket_soporte(_post_int(request, "cod_ticket"), request.user.pk, request.POST["mensaje"], _post_bool(request, "interno"), request.POST.get("estado") or "EN_PROCESO")
+            ticket = SoporteTicket.objects.select_related("cod_usuario").get(pk=_post_int(request, "cod_ticket"))
+            interno = _post_bool(request, "interno")
+            responder_ticket_soporte(ticket.pk, request.user.pk, request.POST["mensaje"], interno, request.POST.get("estado") or "EN_PROCESO")
+            permite_email = PreferenciaNotificacion.objects.filter(cod_usuario=ticket.cod_usuario).values_list("emails_soporte", flat=True).first()
+            if not interno and permite_email is not False:
+                try:
+                    encolar_email_transaccional(
+                        cod_usuario=ticket.cod_usuario_id,
+                        destinatario=ticket.cod_usuario.email,
+                        tipo="SOPORTE_RESPUESTA",
+                        asunto=f"Respuesta a tu ticket TechTail: {ticket.asunto}",
+                        cuerpo_texto=request.POST["mensaje"],
+                        contexto={"mensaje": request.POST["mensaje"], "cod_ticket": ticket.pk},
+                        referencia_tipo="TICKET",
+                        referencia_id=ticket.pk,
+                        clave_idempotencia=f"SOPORTE_RESPUESTA:{ticket.pk}:{uuid4().hex}",
+                    )
+                except Exception:
+                    logger.exception("No se pudo encolar el email de respuesta de soporte")
             return _json_ok(mensaje="Respuesta registrada.")
         if accion == "estado_ticket":
             control_service.actualizar_estado_ticket(_post_int(request, "cod_ticket"), request.POST["estado"])
@@ -1836,13 +1859,59 @@ def api_pagos_admin(request):
         transacciones=[{"cod_transaccion": t.cod_transaccion, "pedido": t.cod_pedido.numero_pedido, "monto": _money(t.monto), "estado": t.cod_estado_pago_id, "fecha": _dt(t.fecha_creacion)} for t in data["transacciones"]],
         autorizaciones=[{"cod_autorizacion": a.cod_autorizacion, "transaccion": a.cod_transaccion_id, "monto": _money(a.monto_autorizado), "fecha": _dt(a.fecha_autorizacion)} for a in data["autorizaciones"]],
         reembolsos=[{"cod_reembolso": r.cod_reembolso, "transaccion": r.cod_transaccion_id, "monto": _money(r.monto), "estado": r.estado, "fecha": _dt(r.fecha_reembolso)} for r in data["reembolsos"]],
-        facturas=[{"cod_factura": f.cod_factura, "pedido": f.cod_pedido.numero_pedido, "numero_factura": f.numero_factura, "total": _money(f.total), "estado": f.estado, "fecha": _dt(f.fecha_emision)} for f in data["facturas"]],
+        facturas=[{"cod_factura": f.cod_factura, "pedido": f.cod_pedido.numero_pedido, "numero_factura": f.numero_factura, "total": _money(f.total), "estado": f.estado, "fecha": _dt(f.fecha_emision), "pdf_url": f"/operaciones/api/facturas/{f.cod_factura}/pdf/"} for f in data["facturas"]],
         devoluciones=[{
             "cod_devolucion": d.cod_devolucion, "pedido": d.cod_pedido.numero_pedido,
             "cliente": d.cod_usuario.email, "estado": d.estado, "motivo": d.motivo,
             "fecha": _dt(d.fecha_creacion),
         } for d in Devolucion.objects.select_related("cod_pedido", "cod_usuario").order_by("-fecha_creacion")[:100]],
     )
+
+
+@login_required(login_url="/login/")
+@require_GET
+def api_emails_admin(request):
+    error = _exigir_admin(request)
+    if error:
+        return error
+    queryset = ColaEmail.objects.order_by("-fecha_creacion")
+    estado = (request.GET.get("estado") or "").strip().upper()
+    busqueda = (request.GET.get("q") or "").strip()
+    if estado:
+        queryset = queryset.filter(estado=estado)
+    if busqueda:
+        from django.db.models import Q
+        queryset = queryset.filter(Q(destinatario__icontains=busqueda) | Q(asunto__icontains=busqueda) | Q(tipo__icontains=busqueda))
+    return _json_ok(emails=[{
+        "cod_email": email.cod_email,
+        "fecha": _dt(email.fecha_creacion),
+        "destinatario": email.destinatario,
+        "tipo": email.tipo,
+        "asunto": email.asunto,
+        "estado": email.estado,
+        "intentos": email.intentos,
+        "max_intentos": email.max_intentos,
+        "error": email.error_ultimo,
+        "fecha_envio": _dt(email.fecha_envio),
+    } for email in queryset[:300]])
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_reintentar_email_admin(request, cod_email):
+    error = _exigir_admin(request)
+    if error:
+        return error
+    email = ColaEmail.objects.filter(cod_email=cod_email).first()
+    if not email:
+        return _json_error("Correo no encontrado.", status=404)
+    if email.estado == "ENVIADO":
+        return _json_error("Un correo ya enviado no se reintenta.", status=409)
+    ColaEmail.objects.filter(cod_email=cod_email).update(
+        estado="PENDIENTE", intentos=0, procesando=False,
+        fecha_inicio_proceso=None, fecha_programada=timezone.now(), error_ultimo=None,
+    )
+    return _json_ok(mensaje="Correo encolado nuevamente.")
 
 
 @login_required(login_url="/login/")

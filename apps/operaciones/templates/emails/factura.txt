@@ -1,0 +1,10 @@
+Hola {{ nombre }},
+
+Tu compra fue procesada correctamente.
+Pedido: {{ numero_pedido }}
+Factura: {{ numero_factura }}
+Fecha: {{ fecha }}
+Total: ${{ total }}
+
+Adjuntamos tu factura en PDF.
+Ver mis facturas: {{ url_factura }}

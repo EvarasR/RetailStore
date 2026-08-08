@@ -1,0 +1,4 @@
+Hola {{ nombre }},
+
+Tu cuenta TechTail está lista.
+Ir a mi cuenta: {{ url_cuenta }}

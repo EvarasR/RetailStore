@@ -8,6 +8,7 @@ __pycache__/
 *.env
 db.sqlite3
 media/*
+media/facturas/
 !media/productos/
 !media/productos/**/
 !media/productos/**/*.svg
@@ -16,6 +17,8 @@ staticfiles/
 .vscode/
 frontend/node_modules/
 frontend/dist/
+tmp/pdfs/
+output/pdf/
 .DS_Store
 Thumbs.db
 .pytest_cache/

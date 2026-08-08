@@ -1,0 +1,4 @@
+Actualización de soporte TechTail
+
+{{ mensaje }}
+Ver soporte: {{ url_soporte }}

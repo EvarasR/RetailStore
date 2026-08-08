@@ -4,9 +4,10 @@ import type { PasswordChangePayload } from '../../types/security.types';
 
 interface PasswordFormProps {
   onChangePassword: (payload: PasswordChangePayload) => Promise<unknown>;
+  requiresCurrentPassword?: boolean;
 }
 
-export const PasswordForm: React.FC<PasswordFormProps> = ({ onChangePassword }) => {
+export const PasswordForm: React.FC<PasswordFormProps> = ({ onChangePassword, requiresCurrentPassword = true }) => {
   const [passwordActual, setPasswordActual] = useState('');
   const [passwordNueva, setPasswordNueva] = useState('');
   const [passwordConfirmacion, setPasswordConfirmacion] = useState('');
@@ -17,8 +18,8 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({ onChangePassword }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!passwordActual || !passwordNueva || !passwordConfirmacion) {
-      setError('Por favor completa los tres campos de contraseña.');
+    if ((requiresCurrentPassword && !passwordActual) || !passwordNueva || !passwordConfirmacion) {
+      setError('Por favor completa los campos de contraseña requeridos.');
       return;
     }
     if (passwordNueva.length < 8) {
@@ -107,7 +108,7 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({ onChangePassword }) 
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', maxWidth: '480px' }}>
-        <div>
+        {requiresCurrentPassword && <div>
           <label htmlFor="input-password-actual" className="tt-label" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.875rem' }}>
             Contraseña Actual *
           </label>
@@ -140,7 +141,7 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({ onChangePassword }) 
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-        </div>
+        </div>}
 
         <div>
           <label htmlFor="input-password-nueva" className="tt-label" style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.875rem' }}>
@@ -181,7 +182,7 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({ onChangePassword }) 
         <button
           type="submit"
           className="tt-btn tt-btn--primary"
-          disabled={loading || !passwordActual || !passwordNueva || !passwordConfirmacion}
+          disabled={loading || (requiresCurrentPassword && !passwordActual) || !passwordNueva || !passwordConfirmacion}
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.5rem', fontWeight: 700 }}
         >
           <Lock size={16} />

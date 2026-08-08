@@ -17,6 +17,7 @@ import {
   Shield,
   Headphones,
   FolderTree,
+  Mail,
 } from 'lucide-react';
 
 import { useAuth } from '../../hooks/useAuth';
@@ -113,6 +114,11 @@ export const AdminSidebar: React.FC = () => {
         >
           <CreditCard size={18} />
           <span>Pagos y Facturas</span>
+        </NavLink>
+
+        <NavLink to="/admin/emails" className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}>
+          <Mail size={18} />
+          <span>Emails</span>
         </NavLink>
 
         <NavLink

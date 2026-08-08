@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Truck, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Truck, ShoppingBag, ReceiptText } from 'lucide-react';
 import { AccountLayout } from '../../components/account/AccountLayout';
 import { OrderStatusBadge } from '../../components/account/OrderStatusBadge';
 import { useOrders } from '../../hooks/useOrders';
@@ -96,6 +96,11 @@ export const OrderDetailPage: React.FC = () => {
                 <span>Rastrear Envío</span>
               </Link>
             </div>
+          </div>
+
+          <div className="tt-card" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div><ReceiptText size={20} color="var(--tt-color-primary)" /> <strong>{detail.factura ? `Factura #${detail.factura.numero_factura}` : 'Factura todavía no disponible.'}</strong></div>
+            {detail.factura && <div style={{ display: 'flex', gap: '.5rem' }}><a className="tt-btn tt-btn--secondary" href={detail.factura.pdf_url} target="_blank" rel="noreferrer">Ver</a><a className="tt-btn tt-btn--primary" href={`${detail.factura.pdf_url}?download=1`}>Descargar PDF</a></div>}
           </div>
 
           {/* Tabla de ítems DB-First */}

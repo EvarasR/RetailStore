@@ -1,5 +1,6 @@
 export interface InvoiceItem {
   cod_factura: number;
+  cod_pedido: number;
   numero_factura: string;
   numero_pedido: string;
   subtotal: string;
@@ -10,4 +11,6 @@ export interface InvoiceItem {
   total: string;
   estado: string;
   fecha_emision: string;
+  pdf_url: string;
+  detalle_url: string;
 }

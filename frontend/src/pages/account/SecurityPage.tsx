@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { AccountLayout } from '../../components/account/AccountLayout';
 import { SecurityPanel } from '../../components/account/SecurityPanel';
 import { useSecurity } from '../../hooks/useSecurity';
 import { useAuth } from '../../hooks/useAuth';
+import { fetchGoogleSecurity, type GoogleSecurityState } from '../../api/googleAuth.api';
 
 export const SecurityPage: React.FC = () => {
   const { changeUserPassword, verifyUserEmail } = useSecurity();
   const { usuario, roles, logout } = useAuth();
+  const [googleState, setGoogleState] = useState<GoogleSecurityState | null>(null);
+  const reloadGoogleState = useCallback(async () => {
+    setGoogleState(await fetchGoogleSecurity());
+  }, []);
+  useEffect(() => { void reloadGoogleState(); }, [reloadGoogleState]);
 
   return (
     <AccountLayout
@@ -21,6 +27,8 @@ export const SecurityPage: React.FC = () => {
         onChangePassword={changeUserPassword}
         onVerifyEmail={verifyUserEmail}
         onLogout={logout}
+        googleState={googleState}
+        reloadGoogleState={reloadGoogleState}
       />
     </AccountLayout>
   );

@@ -323,6 +323,16 @@ class ColaEmail(models.Model):
     fecha_programada = models.DateTimeField()
     fecha_envio = models.DateTimeField(blank=True, null=True)
     fecha_creacion = models.DateTimeField()
+    tipo = models.CharField(max_length=60)
+    cuerpo_texto = models.TextField()
+    cuerpo_html = models.TextField()
+    contexto = models.JSONField()
+    referencia_tipo = models.CharField(max_length=40, blank=True, null=True)
+    referencia_id = models.BigIntegerField(blank=True, null=True)
+    clave_idempotencia = models.CharField(max_length=240, blank=True, null=True)
+    procesando = models.BooleanField()
+    fecha_inicio_proceso = models.DateTimeField(blank=True, null=True)
+    max_intentos = models.IntegerField()
 
     class Meta:
         managed = False

@@ -7,6 +7,7 @@ import { CartPage } from '../pages/CartPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
+import { CompleteGoogleRegistrationPage } from '../pages/CompleteGoogleRegistrationPage';
 import { ForbiddenPage } from '../pages/ForbiddenPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -26,6 +27,7 @@ import { MembershipPage } from '../pages/account/MembershipPage';
 import { SecurityPage } from '../pages/account/SecurityPage';
 import { InvoicesPage } from '../pages/account/InvoicesPage';
 import { RecurringPurchasesPage } from '../pages/account/RecurringPurchasesPage';
+import { PreferencesPage } from '../pages/account/PreferencesPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
 import { AdminCategoriesPage } from '../pages/admin/AdminCategoriesPage';
@@ -40,6 +42,7 @@ import { AdminTrackingPage } from '../pages/admin/AdminTrackingPage';
 import { AdminPrimePage } from '../pages/admin/AdminPrimePage';
 import { AdminReportsPage } from '../pages/admin/AdminReportsPage';
 import { AdminControlPage } from '../pages/admin/AdminControlPage';
+import { AdminEmailsPage } from '../pages/admin/AdminEmailsPage';
 
 // Importaciones Operativas FASE 7.1
 import { WarehouseDashboardPage } from '../pages/warehouse/WarehouseDashboardPage';
@@ -90,6 +93,7 @@ export const AppRouter: React.FC = () => {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/registro" element={<RegisterPage />} />
+      <Route path="/registro/completar" element={<CompleteGoogleRegistrationPage />} />
 
       {/* Rutas corporativas de cuenta FASE 5.1 en React */}
       <Route
@@ -182,6 +186,7 @@ export const AppRouter: React.FC = () => {
       />
       <Route path="/cuenta/facturas" element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
       <Route path="/cuenta/recurrentes" element={<ProtectedRoute><RecurringPurchasesPage /></ProtectedRoute>} />
+      <Route path="/cuenta/preferencias" element={<ProtectedRoute><PreferencesPage /></ProtectedRoute>} />
 
       {/* =====================================================================
           FASE 6.1 — PANEL DE ADMINISTRACIÓN ENTERPRISE EN REACT
@@ -269,6 +274,7 @@ export const AppRouter: React.FC = () => {
           </RoleRoute>
         }
       />
+      <Route path="/admin/emails" element={<RoleRoute requiredRole="ADMIN"><AdminEmailsPage /></RoleRoute>} />
       <Route
         path="/admin/tracking"
         element={

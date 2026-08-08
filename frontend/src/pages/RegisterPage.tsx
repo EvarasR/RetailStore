@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { postJSON } from '../api/http';
 import { useAuth } from '../hooks/useAuth';
+import { GoogleButton } from '../components/auth/GoogleButton';
+import type { GoogleAuthResponse } from '../api/googleAuth.api';
 
 export const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +20,17 @@ export const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { refreshSession } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = React.useCallback(async (result: GoogleAuthResponse) => {
+    if (result.onboarding_requerido) {
+      navigate('/registro/completar');
+      return;
+    }
+    await refreshSession(true);
+    navigate('/cuenta');
+  }, [navigate, refreshSession]);
+
+  const handleGoogleError = React.useCallback((message: string) => setError(message), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,6 +179,11 @@ export const RegisterPage: React.FC = () => {
             {loading ? 'Registrando cuenta...' : 'Crear Cuenta TechTail'}
           </button>
         </form>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', margin: '1.5rem 0', color: 'var(--tt-color-text-muted)', fontSize: '.8rem' }}>
+          <span style={{ height: 1, background: 'var(--tt-color-border)', flex: 1 }} /> o <span style={{ height: 1, background: 'var(--tt-color-border)', flex: 1 }} />
+        </div>
+        <GoogleButton mode="login" onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
 
         <div style={{ marginTop: '1.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--tt-color-border)', textAlign: 'center', fontSize: '0.875rem' }}>
           <span>¿Ya tienes cuenta? </span>
