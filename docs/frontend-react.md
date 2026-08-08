@@ -1,50 +1,39 @@
-# TechTail / RetailStore — Frontend React SPA
+# Frontend React TechTail
 
-Este documento describe la arquitectura, configuración y ejecución del nuevo frontend basado en **React 18/19, Vite y TypeScript**, diseñado para integrarse con **Django 5.2 + PostgreSQL (DB-First)** de forma no destructiva.
+## Arquitectura efectiva
 
-## 1. Estructura del Proyecto
+La SPA usa React 19, TypeScript, Vite, React Router y CSS propio. El inventario actual contiene 53 páginas, 121 componentes, 35 clientes API, 33 hooks, 31 módulos de tipos y 62 declaraciones de ruta. Los guards son `ProtectedRoute` y `RoleRoute`; `SessionNavigationBridge` convierte eventos de sesión en navegación SPA segura.
 
-El frontend reside en el directorio raíz `frontend/`:
-- **Framework:** React con TypeScript.
-- **Bundler / Dev Server:** Vite (`http://localhost:5173`).
-- **Enrutador:** React Router DOM (v7/v6).
-- **Estilos:** Vanilla CSS con variables por temas y tokens de diseño (`tokens.css`, `global.css`, `marketplace.css`).
-- **Iconos:** `lucide-react`.
+El cliente `src/api/http.ts` usa cookies Django con `credentials: include`, obtiene CSRF, acepta JSON y `FormData`, aplica timeout, distingue estados HTTP y elimina HTML o detalles internos de los mensajes visibles. No se usa JWT, Redux ni una librería UI externa.
 
-## 2. Cómo Correr en Desarrollo (Recomendación de Host Base)
+## Ejecución
 
-> [!IMPORTANT]
-> **Usa siempre `127.0.0.1` en ambos servidores** para garantizar que el navegador comparta las cookies (`sessionid`, `csrftoken`) entre el backend Django y la SPA React sin problemas de aislamiento de dominio.
+Backend, desde la raíz:
 
-### A. Backend Django (`http://127.0.0.1:8000`)
-En una terminal, desde la raíz del proyecto Django:
-```bash
-python manage.py runserver 127.0.0.1:8000
+```powershell
+.\entorno\Scripts\python.exe manage.py runserver 127.0.0.1:8000
 ```
-*Asegúrate de tener la base de datos PostgreSQL en ejecución y que `requirements.txt` esté instalado.*
 
-### B. Frontend React (`http://127.0.0.1:5173`)
-En otra terminal, dentro del directorio `frontend/`:
-```bash
-cd frontend
-npm install
-npm run dev
+Frontend:
+
+```powershell
+Set-Location frontend
+npm.cmd ci
+npm.cmd run dev
 ```
-Accede en tu navegador a: **`http://127.0.0.1:5173`** (o `http://localhost:5173` solo si corres Django en `http://localhost:8000`).
 
-## 3. Conexión con Django y Seguridad CSRF
+Vite redirige `/api/`, `/panel/api/`, `/proveedores/api/`, `/operaciones/api/`, `/media/` y `/static/` a Django. Usa `127.0.0.1` en ambos procesos o `localhost` en ambos; no mezcles hosts.
 
-1. **Proxy Integrado en Vite (`vite.config.ts`):**
-   Toda petición hacia `/api`, `/panel/api`, `/proveedores/api`, `/operaciones/api`, `/media` o `/static` se redirige de forma transparente al backend en `http://127.0.0.1:8000`. Esto permite compartir la misma sesión (`sessionid`) y cookie CSRF (`csrftoken`) sin conflictos de CORS.
+## DB-First
 
-2. **Manejo Automático de CSRF (Doble Garantía):**
-   - El endpoint `/api/session/` está decorado con `@ensure_csrf_cookie`, garantizando que la cookie `csrftoken` se emita en cuanto la SPA carga.
-   - Adicionalmente, se dispone del endpoint dedicado `GET /api/csrf/` en `apps/core/urls.py` decorado con `@ensure_csrf_cookie` como respaldo técnico.
-   - El cliente HTTP en `src/api/http.ts` lee la cookie `csrftoken` y la envía como encabezado `X-CSRFToken` en peticiones `POST`, `PUT` y `DELETE`.
-   - Todas las llamadas envían `credentials: 'include'` y cabecera `X-Requested-With: fetch`. No se utiliza `@csrf_exempt` en ninguna vista.
+React presenta valores devueltos por Django. No calcula PVP, subtotal oficial, IVA, descuentos, Prime, stock, envío, entrega, total, reembolso ni transición de estados. El checkout persiste solo identificadores de recuperación y vuelve a consultar el pedido oficial.
 
-## 4. Filosofía DB-First (Reglas Críticas)
+## Pruebas
 
-- El frontend React **nunca calcula** precios, descuentos, stock, PVP, impuestos o membresías Prime.
-- Todas las mutaciones del carrito o compras se realizan llamando a los endpoints oficiales de Django (`/api/carrito/agregar/`, `/api/carrito/actualizar/`, `/api/checkout/crear-pedido/`).
-- La lógica financiera, inventarios, kardex y estados del sistema se mantienen 100% en **PostgreSQL**.
+```powershell
+npm.cmd run lint
+npm.cmd run test
+npm.cmd run build
+```
+
+Vitest cubre redirecciones internas, prioridad de roles y clasificación segura de errores HTTP. Las pruebas de navegador por rol siguen la matriz manual de `docs/final-production-checklist.md` y no deben marcarse como aprobadas sin ejecutarse con cuentas y datos controlados.
