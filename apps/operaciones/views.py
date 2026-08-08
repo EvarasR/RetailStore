@@ -281,6 +281,9 @@ def api_notificaciones(request):
                 "url_accion": n.url_accion,
                 "leida": n.leida,
                 "fecha": _dt(n.fecha_creacion),
+                "referencia_tipo": n.referencia_tipo,
+                "referencia_id": n.referencia_id,
+                "cod_producto": n.cod_producto_id,
             }
             for n in notificaciones
         ]

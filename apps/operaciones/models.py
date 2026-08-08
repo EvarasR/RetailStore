@@ -303,6 +303,9 @@ class Notificacion(models.Model):
     leida = models.BooleanField()
     fecha_creacion = models.DateTimeField()
     fecha_lectura = models.DateTimeField(blank=True, null=True)
+    referencia_tipo = models.CharField(max_length=40, blank=True, null=True)
+    referencia_id = models.BigIntegerField(blank=True, null=True)
+    cod_producto = models.ForeignKey('administracion.Producto', models.DO_NOTHING, db_column='cod_producto', blank=True, null=True)
 
     class Meta:
         managed = False

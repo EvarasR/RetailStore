@@ -1,6 +1,8 @@
 import React from 'react';
-import { CheckCircle, ExternalLink, Info, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CheckCircle, ExternalLink, Info, AlertTriangle, ShieldAlert, Heart } from 'lucide-react';
 import type { NotificationItem } from '../../types/notification.types';
+import { isValidNextRoute } from '../../utils/authUtils';
 
 interface NotificationCardProps {
   notification: NotificationItem;
@@ -24,6 +26,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       case 'EXIF':
       case 'SUCCESS':
         return <CheckCircle size={20} color="var(--tt-color-success)" />;
+      case 'WISHLIST_DESCUENTO':
+        return <Heart size={20} color="var(--tt-color-error)" />;
       default:
         return <Info size={20} color="var(--tt-color-primary)" />;
     }
@@ -44,15 +48,15 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         <p className="tt-notification-card__message">{mensaje}</p>
 
         <div className="tt-notification-card__actions">
-          {url_accion && (
-            <a
-              href={url_accion}
+          {url_accion && isValidNextRoute(url_accion) && (
+            <Link
+              to={url_accion}
               className="tt-btn tt-btn--secondary"
               style={{ fontSize: '0.75rem', padding: '0.3rem 0.65rem' }}
             >
               <ExternalLink size={13} />
-              <span>Ver detalle de acción</span>
-            </a>
+              <span>Ver producto</span>
+            </Link>
           )}
 
           {!leida && (
