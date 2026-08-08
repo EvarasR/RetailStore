@@ -37,7 +37,7 @@ export const AdminPrimePage: React.FC = () => {
           description="Registra un beneficio oficial asociado a un plan existente."
           submitLabel="Crear beneficio"
           fields={[
-            { name: 'cod_plan', label: 'ID plan', type: 'number', required: true },
+            { name: 'cod_plan', label: 'Plan Prime', type: 'select', required: true, options: planes.filter((plan) => plan.activo).map((plan) => ({ value: String(plan.cod_plan), label: `${plan.nombre} · $${plan.precio}` })) },
             { name: 'codigo', label: 'Código', required: true },
             { name: 'nombre', label: 'Nombre', required: true },
             { name: 'valor', label: 'Valor', type: 'number' },

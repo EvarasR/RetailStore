@@ -45,7 +45,7 @@ export const AdminControlPage: React.FC = () => {
             <AdminMutationForm
               title="Roles de usuario" description="Asigna o retira roles oficiales existentes." submitLabel="Actualizar roles"
               fields={[
-                { name: 'cod_usuario', label: 'ID usuario', type: 'number', required: true },
+                { name: 'cod_usuario', label: 'Usuario', type: 'select', required: true, options: usuarios.map((user) => ({ value: String(user.cod_usuario), label: `${user.nombres} ${user.apellidos} · ${user.email}` })) },
                 { name: 'accion', label: 'Acción', type: 'select', required: true, options: [{ value: 'asignar_rol', label: 'Asignar rol' }, { value: 'quitar_rol', label: 'Quitar rol' }] },
                 { name: 'rol', label: 'Rol', type: 'select', required: true, options: roles.filter((role) => role.nombre !== 'PROVEEDOR').map((role) => ({ value: role.nombre, label: role.nombre })) },
               ]}
@@ -54,7 +54,7 @@ export const AdminControlPage: React.FC = () => {
             <AdminMutationForm
               title="Estado de usuario" description="Desactiva o reactiva una cuenta; el backend impide la autodesactivación administrativa." submitLabel="Actualizar estado"
               fields={[
-                { name: 'cod_usuario', label: 'ID usuario', type: 'number', required: true },
+                { name: 'cod_usuario', label: 'Usuario', type: 'select', required: true, options: usuarios.map((user) => ({ value: String(user.cod_usuario), label: `${user.nombres} ${user.apellidos} · ${user.email}` })) },
                 { name: 'accion', label: 'Acción', type: 'select', required: true, options: [{ value: 'desactivar_usuario', label: 'Desactivar' }, { value: 'reactivar_usuario', label: 'Reactivar' }] },
               ]}
               onSubmit={runAction}
