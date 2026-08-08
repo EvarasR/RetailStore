@@ -15,9 +15,6 @@ urlpatterns = [
     path("api/auth/login/", views.api_auth_login, name="api_auth_login"),
     path("api/auth/registro/", views.api_auth_registro, name="api_auth_registro"),
     path("api/auth/logout/", views.api_auth_logout, name="api_auth_logout"),
-    path("api/auth/google/preparar/", views.api_google_preparar, name="api_google_preparar"),
-    path("api/auth/google/autenticar/", views.api_google_autenticar, name="api_google_autenticar"),
-    path("api/auth/google/completar/", views.api_google_completar_registro, name="api_google_completar_registro"),
     path("api/perfil/", views.api_perfil, name="api_perfil"),
     path("api/perfil/actualizar/", views.api_actualizar_perfil, name="api_actualizar_perfil"),
     path("api/ubicaciones/", views.api_ubicaciones, name="api_ubicaciones"),
@@ -27,6 +24,4 @@ urlpatterns = [
     path("api/direcciones/<int:cod_direccion>/eliminar/", views.api_eliminar_direccion, name="api_eliminar_direccion"),
     path("api/seguridad/password/", views.api_cambiar_password, name="api_cambiar_password"),
     path("api/seguridad/verificar-email/", views.api_verificar_email, name="api_verificar_email"),
-    path("api/seguridad/google/", views.api_google_estado, name="api_google_estado"),
-    path("api/seguridad/google/desvincular/", views.api_google_desvincular, name="api_google_desvincular"),
 ]

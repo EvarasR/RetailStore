@@ -148,7 +148,6 @@ class PreferenciaNotificacion(models.Model):
     )
     notificaciones_web = models.BooleanField(default=True)
     emails_pedidos = models.BooleanField(default=True)
-    emails_descuentos = models.BooleanField(default=True)
     emails_prime = models.BooleanField(default=True)
     emails_soporte = models.BooleanField(default=True)
     fecha_actualizacion = models.DateTimeField()
@@ -157,22 +156,6 @@ class PreferenciaNotificacion(models.Model):
         managed = False
         db_table = 'preferencia_notificacion'
 
-
-class UsuarioIdentidadExterna(models.Model):
-    cod_identidad = models.BigAutoField(primary_key=True)
-    cod_usuario = models.ForeignKey('core.Usuario', models.DO_NOTHING, db_column='cod_usuario')
-    proveedor = models.CharField(max_length=30)
-    provider_subject = models.CharField(max_length=255)
-    email_proveedor = models.CharField(max_length=180)
-    email_verificado = models.BooleanField(default=False)
-    activo = models.BooleanField(default=True)
-    onboarding_completo = models.BooleanField(default=True)
-    fecha_vinculacion = models.DateTimeField()
-    fecha_actualizacion = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'usuario_identidad_externa'
 
 class DireccionUsuario(models.Model):
     # Un usuario puede tener varias direcciones; PostgreSQL solo permite una predeterminada por índice parcial.

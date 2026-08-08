@@ -9,5 +9,3 @@ django-extensions>=3.2
 whitenoise>=6.0
 argon2-cffi>=23.0
 reportlab>=4.2,<5.0
-google-auth>=2.35,<3.0
-requests>=2.31,<3.0

@@ -1,4 +1,8 @@
-# Facturación, correo transaccional y preferencias
+# Facturación PDF y correo transaccional
+
+Estado funcional: facturación PDF y email de factura activos. El acceso con
+Google y las notificaciones promocionales automáticas de wishlist están
+retirados. Google Cloud no es un requisito del proyecto.
 
 ## Flujo de factura
 
@@ -25,11 +29,15 @@ es un comprobante electrónico autorizado por el SRI.
 La migración SQL `ARCHIVOS SQL/12_billing_email_google_auth_patch.sql` amplía
 `cola_email` con tipo, cuerpos HTML/texto, contexto JSON, referencias,
 idempotencia, programación, bloqueo y reintentos. Es aditiva e idempotente.
-Debe aplicarse antes de iniciar la nueva versión:
+Los parches `12` y `13` deben aplicarse antes de iniciar la nueva versión. El
+segundo desactiva de forma no destructiva la automatización promocional que
+existía en instalaciones anteriores:
 
 ```bash
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
   -f "ARCHIVOS SQL/12_billing_email_google_auth_patch.sql"
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+  -f "ARCHIVOS SQL/13_remove_promotional_notifications_patch.sql"
 ```
 
 El worker usa `SELECT ... FOR UPDATE SKIP LOCKED`, reclama lotes de forma
@@ -43,14 +51,14 @@ exponer credenciales y reprograma con espera exponencial. Después de agotar
 ./entorno/bin/python manage.py procesar_cola_emails --lote 20 --continuo --espera 10
 ```
 
-La cola cubre bienvenida, factura con PDF adjunto, descuento de wishlist y
-respuesta pública de soporte. Una excepción de correo nunca revierte el pago,
-la factura, la promoción ni la respuesta del ticket.
+La cola cubre factura con PDF adjunto y otros mensajes transaccionales no
+promocionales. Una excepción de correo nunca revierte el pago, la factura ni la
+respuesta del ticket. No se generan emails por descuentos en favoritos.
 
 ## Preferencias
 
 `GET/POST /operaciones/api/preferencias-notificacion/` administra avisos web y
-emails de pedidos, descuentos, Prime y soporte. Las preferencias se crean con
+emails de pedidos, Prime y soporte. Las preferencias se crean con
 valores permisivos para cuentas existentes. La factura siempre puede verse en
 la cuenta aunque el usuario desactive emails.
 

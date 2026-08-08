@@ -1,4 +1,0 @@
-¡Uno de tus favoritos está en oferta!
-
-El producto {{ producto }} que tienes guardado en favoritos ahora tiene descuento.
-Ver producto: {{ url_producto }}

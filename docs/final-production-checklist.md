@@ -9,7 +9,8 @@
 - [x] Confirmados cero backups, secretos conocidos y scripts destructivos versionados; las plantillas conservan únicamente marcadores `CHANGE_ME`.
 - [x] Confirmados cero enlaces internos a Django y cero navegación dura en `frontend/src`.
 - [x] PDF privado válido, autorización propietario/roles, adjunto HTML+texto y cola idempotente verificados localmente.
-- [x] Google validado con tokens simulados (audiencia, nonce, vinculación y rol); el proveedor real requiere credenciales del entorno destino.
+- [x] Login y registro limitados a email y contraseña; rutas y dependencias Google retiradas.
+- [x] Automatización promocional wishlist/descuento desactivada sin alterar descuentos ni favoritos.
 
 ## Manual con datos aislados
 
@@ -24,7 +25,6 @@ Ejecutar en claro y oscuro a 360, 390, 768, 1024, 1366 y 1920 px. Registrar evid
 - [ ] Proveedor externo: aislamiento de productos, stock, órdenes e historial.
 - [ ] Teclado, foco visible, labels, contraste, diálogos y mensajes de error.
 - [ ] SMTP Gmail real: recepción, texto alternativo, adjunto PDF, reintento y rebote.
-- [ ] Google real: orígenes autorizados, popup, alta, login, enlace y desvinculación.
 - [ ] Worker de correo activo y monitorizado; Nginx bloquea `/media/facturas/`.
 
 Antes de desplegar rota `SECRET_KEY` y la contraseña PostgreSQL que hayan existido durante desarrollo. Verifica HTTPS, cookies seguras, HSTS, ownership de `/media` y permisos del socket Gunicorn.

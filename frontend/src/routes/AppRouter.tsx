@@ -7,7 +7,6 @@ import { CartPage } from '../pages/CartPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
-import { CompleteGoogleRegistrationPage } from '../pages/CompleteGoogleRegistrationPage';
 import { ForbiddenPage } from '../pages/ForbiddenPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -93,7 +92,6 @@ export const AppRouter: React.FC = () => {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/registro" element={<RegisterPage />} />
-      <Route path="/registro/completar" element={<CompleteGoogleRegistrationPage />} />
 
       {/* Rutas corporativas de cuenta FASE 5.1 en React */}
       <Route

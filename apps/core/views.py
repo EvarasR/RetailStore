@@ -1,8 +1,5 @@
 from urllib.parse import urlparse
 import logging
-import json
-import secrets
-import time
 
 from django.conf import settings
 from django.contrib import messages
@@ -31,14 +28,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.core.models import Canton, DireccionUsuario, PerfilUsuario, Provincia, UsuarioIdentidadExterna, UsuarioRol
-from apps.core.services.google_auth_service import (
-    GoogleAuthError,
-    completar_registro_google,
-    desvincular_google,
-    resolver_identidad_google,
-    verificar_credencial_google,
-)
+from apps.core.models import Canton, DireccionUsuario, PerfilUsuario, Provincia, UsuarioRol
 from apps.core.services.usuario_service import (
     actualizar_direccion_usuario,
     cambiar_password_usuario,
@@ -71,14 +61,6 @@ def _encolar_bienvenida_segura(usuario):
         encolar_bienvenida(usuario)
     except Exception:
         logging.getLogger(__name__).exception("EMAIL_QUEUED fallo al encolar bienvenida usuario=%s", usuario.pk)
-
-
-def _next_path_seguro(value):
-    value = (value or "").strip()
-    parsed = urlparse(value)
-    if not value.startswith("/") or value.startswith("//") or parsed.scheme or parsed.netloc:
-        return None
-    return parsed.path + (("?" + parsed.query) if parsed.query else "")
 
 
 def _is_admin(user):
@@ -604,7 +586,7 @@ def api_cambiar_password(request):
     actual = request.POST.get("password_actual") or ""
     nueva = request.POST.get("password_nueva") or ""
     confirmacion = request.POST.get("password_confirmacion") or ""
-    if request.user.has_usable_password() and not request.user.check_password(actual):
+    if not request.user.check_password(actual):
         return _json_error("La contraseña actual no es correcta.", status=400)
     if len(nueva) < 8:
         return _json_error("La nueva contraseña debe tener al menos 8 caracteres.", status=400)
@@ -617,130 +599,6 @@ def api_cambiar_password(request):
         return _json_ok(mensaje="Contraseña actualizada de forma segura.")
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)
-
-
-@require_POST
-@ensure_csrf_cookie
-def api_google_preparar(request):
-    now = time.time()
-    history = [item for item in request.session.get("google_attempts", []) if now - item < 60]
-    if len(history) >= 10:
-        return _json_error("Demasiados intentos. Espera un minuto.", status=429, codigo="RATE_LIMITED")
-    history.append(now)
-    request.session["google_attempts"] = history
-    if not settings.GOOGLE_CLIENT_ID:
-        return _json_error("El acceso con Google aún no está configurado.", status=503, codigo="GOOGLE_NOT_CONFIGURED")
-    data = _get_request_data(request)
-    mode = "link" if data.get("mode") == "link" else "login"
-    if mode == "link" and not request.user.is_authenticated:
-        return _json_error("Inicia sesión antes de vincular Google.", status=401, codigo="ACCOUNT_REQUIRED")
-    state = secrets.token_urlsafe(32)
-    nonce = secrets.token_urlsafe(32)
-    request.session["google_oidc_flow"] = {
-        "state": state,
-        "nonce": nonce,
-        "mode": mode,
-        "next": _next_path_seguro(data.get("next")),
-        "created": now,
-    }
-    return _json_ok(state=state, nonce=nonce, client_id=settings.GOOGLE_CLIENT_ID)
-
-
-@require_POST
-@ensure_csrf_cookie
-@sensitive_post_parameters("credential")
-def api_google_autenticar(request):
-    data = _get_request_data(request)
-    flow = request.session.pop("google_oidc_flow", None)
-    if not flow or time.time() - float(flow.get("created", 0)) > 300:
-        return _json_error("La solicitud de Google expiró.", status=400, codigo="GOOGLE_INVALID_STATE")
-    if not secrets.compare_digest(str(data.get("state") or ""), str(flow.get("state") or "")):
-        return _json_error("La solicitud de Google no es válida.", status=400, codigo="GOOGLE_INVALID_STATE")
-    try:
-        claims = verificar_credencial_google(str(data.get("credential") or ""), flow["nonce"])
-        user, nueva = resolver_identidad_google(
-            claims,
-            usuario_actual=request.user if request.user.is_authenticated else None,
-            vincular=flow["mode"] == "link",
-        )
-        if user is None:
-            request.session["google_onboarding"] = {
-                "claims": {
-                    "sub": claims["sub"],
-                    "email": claims["email"],
-                    "given_name": claims.get("given_name", ""),
-                    "family_name": claims.get("family_name", ""),
-                },
-                "created": time.time(),
-            }
-            return _json_ok(onboarding_requerido=True, redirect="/registro/completar")
-        if flow["mode"] == "link":
-            return _json_ok(mensaje="Google quedó vinculado a tu cuenta.", vinculado=True)
-        login(request, user)
-        if nueva:
-            transaction.on_commit(lambda: _encolar_bienvenida_segura(user))
-        response = _build_session_response(request, mensaje="Sesión iniciada con Google.")
-        payload = json.loads(response.content)
-        payload.update({"redirect": flow.get("next"), "cuenta_nueva": nueva})
-        return JsonResponse(payload)
-    except GoogleAuthError as exc:
-        status = 409 if exc.code in {"GOOGLE_ALREADY_LINKED", "GOOGLE_LINK_REQUIRED"} else 400
-        return _json_error(str(exc), status=status, codigo=exc.code)
-    except Exception:
-        logging.getLogger(__name__).exception("GOOGLE_LOGIN_FAILURE")
-        return _json_error("No se pudo completar el acceso con Google.", status=500, codigo="INTERNAL_ERROR")
-
-
-@require_POST
-@ensure_csrf_cookie
-def api_google_completar_registro(request):
-    pending = request.session.get("google_onboarding")
-    if not pending or time.time() - float(pending.get("created", 0)) > 600:
-        return _json_error("El registro con Google expiró. Inténtalo nuevamente.", status=400, codigo="GOOGLE_INVALID_STATE")
-    data = _get_request_data(request)
-    try:
-        user = completar_registro_google(
-            pending["claims"],
-            data.get("nombres") or "",
-            data.get("apellidos") or "",
-            data.get("telefono"),
-            data.get("documento_identidad"),
-        )
-        request.session.pop("google_onboarding", None)
-        login(request, user)
-        transaction.on_commit(lambda: _encolar_bienvenida_segura(user))
-        response = _build_session_response(request, mensaje="Cuenta Google creada correctamente.")
-        payload = json.loads(response.content)
-        payload.update({"redirect": "/cuenta", "cuenta_nueva": True})
-        return JsonResponse(payload)
-    except GoogleAuthError as exc:
-        return _json_error(str(exc), status=400, codigo=exc.code)
-    except Exception:
-        logging.getLogger(__name__).exception("GOOGLE_LOGIN_FAILURE onboarding")
-        return _json_error("No se pudo completar el registro.", status=500, codigo="INTERNAL_ERROR")
-
-
-@login_required(login_url="/login/")
-@require_GET
-def api_google_estado(request):
-    identidad = UsuarioIdentidadExterna.objects.filter(
-        cod_usuario=request.user, proveedor="GOOGLE", activo=True
-    ).first()
-    return _json_ok(
-        password_configurada=request.user.has_usable_password(),
-        google_vinculado=bool(identidad),
-        google_email=identidad.email_proveedor if identidad else None,
-    )
-
-
-@login_required(login_url="/login/")
-@require_POST
-def api_google_desvincular(request):
-    try:
-        desvincular_google(request.user)
-        return _json_ok(mensaje="Google fue desvinculado de tu cuenta.")
-    except GoogleAuthError as exc:
-        return _json_error(str(exc), status=409, codigo=exc.code)
 
 
 @login_required(login_url="/login/")

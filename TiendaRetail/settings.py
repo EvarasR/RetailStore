@@ -175,4 +175,3 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="TechTail <pozitoworld
 EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=20, cast=int)
 
 FRONTEND_BASE_URL = config("FRONTEND_BASE_URL", default="http://localhost:5173").rstrip("/")
-GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")

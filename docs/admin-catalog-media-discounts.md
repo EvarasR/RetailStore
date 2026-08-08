@@ -67,17 +67,11 @@ React muestra esos valores sin recalcularlos.
 
 Contratos administrativos: `POST /panel/api/promociones/`, `POST /panel/api/promociones/<id>/`, `POST /panel/api/promociones/<id>/productos/` y `POST /panel/api/promociones/<id>/categorias/`. El escaparate consume `GET /api/productos/ofertas/`.
 
-## Wishlist y notificaciones
+## Wishlist
 
-`fn_notificar_wishlist_promocion` crea una notificación por usuario, producto y descuento. El índice parcial `uk_notificacion_wishlist_promocion` garantiza idempotencia incluso si se ejecutan simultáneamente el trigger y el proceso programado.
-
-Para procesar reglas que alcanzan su fecha de inicio sin otra escritura, programar:
-
-```powershell
-python manage.py procesar_descuentos_wishlist
-```
-
-Ejemplo de Programador de tareas de Windows: ejecutar cada cinco minutos desde el entorno virtual del proyecto. En Linux puede usarse cron o un timer de systemd con el mismo comando.
+La wishlist conserva altas, bajas, consulta y navegación al producto. Los
+descuentos continúan reflejándose mediante el contrato oficial de precios, pero
+no generan notificaciones ni emails automáticos para los favoritos.
 
 ## Verificación
 
@@ -98,7 +92,6 @@ Lista manual mínima:
 - Editar y desactivar una categoría con confirmación.
 - Crear descuento para varios productos y para una categoría.
 - Ver el mismo precio normal/final y badge en inicio, catálogo, detalle y ofertas.
-- Ejecutar dos veces el comando de wishlist y comprobar que la segunda ejecución no duplica avisos.
 - Probar los cajones con teclado, foco, Escape y ancho de 360 px.
 
-La prueba integral final se ejecutó dentro de `transaction.atomic()` y forzó rollback: confirmó publicación con cinco imágenes, dos videos, un PDF, cinco proveedores, imagen principal y diagnóstico publicable. Los ocho archivos físicos temporales producidos por esa prueba se eliminaron después del rollback. Los casos de descuento por producto, descuento de categoría y notificación customer también se probaron con rollback, incluida la segunda ejecución idempotente y el marcado como leído.
+La prueba integral final se ejecutó dentro de `transaction.atomic()` y forzó rollback: confirmó publicación con cinco imágenes, dos videos, un PDF, cinco proveedores, imagen principal y diagnóstico publicable. Los ocho archivos físicos temporales producidos por esa prueba se eliminaron después del rollback. Los casos de descuento por producto y descuento de categoría también se probaron con rollback.

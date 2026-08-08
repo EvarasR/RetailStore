@@ -1874,7 +1874,7 @@ def api_emails_admin(request):
     error = _exigir_admin(request)
     if error:
         return error
-    queryset = ColaEmail.objects.order_by("-fecha_creacion")
+    queryset = ColaEmail.objects.exclude(tipo="WISHLIST_DESCUENTO").order_by("-fecha_creacion")
     estado = (request.GET.get("estado") or "").strip().upper()
     busqueda = (request.GET.get("q") or "").strip()
     if estado:
@@ -1905,6 +1905,8 @@ def api_reintentar_email_admin(request, cod_email):
     email = ColaEmail.objects.filter(cod_email=cod_email).first()
     if not email:
         return _json_error("Correo no encontrado.", status=404)
+    if email.tipo == "WISHLIST_DESCUENTO":
+        return _json_error("La entrega promocional fue retirada.", status=410)
     if email.estado == "ENVIADO":
         return _json_error("Un correo ya enviado no se reintenta.", status=409)
     ColaEmail.objects.filter(cod_email=cod_email).update(

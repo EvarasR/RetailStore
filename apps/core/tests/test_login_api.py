@@ -80,3 +80,13 @@ class LoginApiTestCase(SimpleTestCase):
         mock_atomic.return_value.__enter__.return_value = None
         resp = self._post_json_with_csrf('/api/auth/registro/', {"email": "new@example.com", "password": "UnitOnly!9_Credential", "password2": "UnitOnly!9_Credential", "acepta": True})
         self.assertEqual(resp.status_code, 200)
+
+    def test_12_rutas_google_retiradas(self):
+        for url in (
+            '/api/auth/google/preparar/',
+            '/api/auth/google/autenticar/',
+            '/api/auth/google/completar/',
+            '/api/seguridad/google/',
+            '/api/seguridad/google/desvincular/',
+        ):
+            self.assertEqual(self.client.get(url).status_code, 404)

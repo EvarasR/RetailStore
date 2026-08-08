@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, ExternalLink, Info, AlertTriangle, ShieldAlert, Heart } from 'lucide-react';
+import { CheckCircle, ExternalLink, Info, AlertTriangle, ShieldAlert } from 'lucide-react';
 import type { NotificationItem } from '../../types/notification.types';
 import { isValidNextRoute } from '../../utils/authUtils';
 
@@ -26,8 +26,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       case 'EXIF':
       case 'SUCCESS':
         return <CheckCircle size={20} color="var(--tt-color-success)" />;
-      case 'WISHLIST_DESCUENTO':
-        return <Heart size={20} color="var(--tt-color-error)" />;
       default:
         return <Info size={20} color="var(--tt-color-primary)" />;
     }

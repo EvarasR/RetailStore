@@ -3,8 +3,6 @@ import { Shield, LogOut, Key, UserCheck } from 'lucide-react';
 import type { PasswordChangePayload } from '../../types/security.types';
 import { PasswordForm } from './PasswordForm';
 import { EmailVerificationCard } from './EmailVerificationCard';
-import { GoogleSecurityCard } from './GoogleSecurityCard';
-import type { GoogleSecurityState } from '../../api/googleAuth.api';
 
 interface SecurityPanelProps {
   email?: string | null;
@@ -14,8 +12,6 @@ interface SecurityPanelProps {
   onChangePassword: (payload: PasswordChangePayload) => Promise<unknown>;
   onVerifyEmail: () => Promise<unknown>;
   onLogout: () => void;
-  googleState: GoogleSecurityState | null;
-  reloadGoogleState: () => Promise<void>;
 }
 
 export const SecurityPanel: React.FC<SecurityPanelProps> = ({
@@ -26,8 +22,6 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({
   onChangePassword,
   onVerifyEmail,
   onLogout,
-  googleState,
-  reloadGoogleState,
 }) => {
   return (
     <div className="tt-security-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
@@ -115,15 +109,13 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({
         />
       </div>
 
-      <GoogleSecurityCard state={googleState} reload={reloadGoogleState} />
-
       {/* Formulario de cambio de contraseña */}
       <div>
         <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--tt-color-text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <Key size={18} color="var(--tt-color-primary)" />
           <span>Credenciales de Acceso</span>
         </h4>
-        <PasswordForm onChangePassword={onChangePassword} requiresCurrentPassword={googleState?.password_configurada ?? true} />
+        <PasswordForm onChangePassword={onChangePassword} />
       </div>
     </div>
   );

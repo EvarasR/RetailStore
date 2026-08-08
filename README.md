@@ -5,9 +5,8 @@ Marketplace DB-First con PostgreSQL 15, Django 5.2 y una SPA React 19 + TypeScri
 ## Desarrollo en Windows
 
 1. Copia `.env.example` a `.env` y reemplaza todos los `CHANGE_ME`.
-   Para correo y Google consulta
-   [facturación y email](docs/billing-email-notifications.md) y
-   [acceso con Google](docs/google-auth-setup.md).
+   Para el correo de facturas consulta
+   [facturación y email](docs/billing-email-notifications.md).
 2. Instala Python y valida el intérprete del entorno:
 
 ```powershell
@@ -52,6 +51,10 @@ Instala `requirements-prod.txt`, configura `DEBUG=False`, genera el build de Vit
 
 Las credenciales PostgreSQL y `SECRET_KEY` utilizados durante desarrollo deben rotarse antes del despliegue porque existieron valores expuestos en plantillas históricas. Nunca guardes secretos reales en `.env.example`.
 
-Antes de arrancar esta versión aplica, en orden, los parches SQL `11` y `12` de
+El acceso soportado es exclusivamente email y contraseña; el proyecto no
+requiere Google Cloud. Las facturas PDF pueden enviarse por SMTP mediante la
+cola transaccional.
+
+Antes de arrancar esta versión aplica, en orden, los parches SQL `11`, `12` y `13` de
 `ARCHIVOS SQL`. Ejecuta el worker `procesar_cola_emails` como un servicio
 separado de Gunicorn; la petición web únicamente encola el trabajo.

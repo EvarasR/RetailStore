@@ -187,7 +187,6 @@ def api_preferencias_notificacion(request):
     defaults = {
         "notificaciones_web": True,
         "emails_pedidos": True,
-        "emails_descuentos": True,
         "emails_prime": True,
         "emails_soporte": True,
     }
@@ -204,7 +203,14 @@ def api_preferencias_notificacion(request):
     from apps.core.services.sql_service import ejecutar_funcion_void
     ejecutar_funcion_void(
         "fn_actualizar_preferencias_notificacion",
-        [request.user.cod_usuario] + [value(name) for name in defaults],
+        [
+            request.user.cod_usuario,
+            value("notificaciones_web"),
+            value("emails_pedidos"),
+            False,
+            value("emails_prime"),
+            value("emails_soporte"),
+        ],
         ["BIGINT", "BOOLEAN", "BOOLEAN", "BOOLEAN", "BOOLEAN", "BOOLEAN"],
     )
     return _json_ok(mensaje="Preferencias actualizadas.", preferencias={name: value(name) for name in defaults})

@@ -3,7 +3,6 @@ import { getJSON, postForm } from './http';
 export interface NotificationPreferences {
   notificaciones_web: boolean;
   emails_pedidos: boolean;
-  emails_descuentos: boolean;
   emails_prime: boolean;
   emails_soporte: boolean;
 }

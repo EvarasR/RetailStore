@@ -5,7 +5,6 @@ import { fetchNotificationPreferences, saveNotificationPreferences, type Notific
 const labels: Record<keyof NotificationPreferences, string> = {
   notificaciones_web: 'Notificaciones web',
   emails_pedidos: 'Emails de pedidos y facturas',
-  emails_descuentos: 'Emails de descuentos en favoritos',
   emails_prime: 'Emails de membresía Prime',
   emails_soporte: 'Emails de soporte',
 };

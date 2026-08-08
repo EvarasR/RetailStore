@@ -10,7 +10,6 @@ from django.db import connection, transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from apps.administracion.models import Producto
 from apps.core.models import Usuario
 from apps.core.services.sql_service import ejecutar_funcion_scalar
 from apps.operaciones.models import ColaEmail, Factura
@@ -71,6 +70,7 @@ def reclamar_lote(limite: int = 20) -> list[ColaEmail]:
                 SELECT cod_email
                 FROM cola_email
                 WHERE estado IN ('PENDIENTE', 'FALLIDO')
+                  AND tipo <> 'WISHLIST_DESCUENTO'
                   AND (
                       procesando IS FALSE
                       OR fecha_inicio_proceso < now() - interval '15 minutes'
@@ -111,13 +111,6 @@ def _contexto_email(email: ColaEmail) -> tuple[str, dict, Factura | None]:
             "url_factura": f"{settings.FRONTEND_BASE_URL}/cuenta/facturas",
         })
         plantilla = "factura"
-    elif email.tipo == "WISHLIST_DESCUENTO":
-        producto = Producto.objects.get(cod_producto=contexto.get("cod_producto"))
-        contexto.update({
-            "producto": producto.nombre,
-            "url_producto": f"{settings.FRONTEND_BASE_URL}/producto/{producto.cod_producto}",
-        })
-        plantilla = "descuento_wishlist"
     elif email.tipo == "BIENVENIDA":
         usuario = Usuario.objects.get(cod_usuario=contexto.get("cod_usuario") or email.cod_usuario_id)
         contexto.update({
