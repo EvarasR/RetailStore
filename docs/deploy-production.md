@@ -17,7 +17,13 @@ cd ..
 ./entorno/bin/python manage.py collectstatic --noinput
 ```
 
-Variables mínimas: `SECRET_KEY`, `DEBUG=False`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_SSL_REDIRECT=True`, `SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True`, `SECURE_HSTS_SECONDS`, `SECURE_HSTS_INCLUDE_SUBDOMAINS=True`. El dominio se configura por entorno, nunca en código.
+Variables mínimas: `SECRET_KEY`, `DEBUG=False`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_SSL_REDIRECT=True`, `SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True`, `SECURE_HSTS_SECONDS`, `SECURE_HSTS_INCLUDE_SUBDOMAINS=True`, `FRONTEND_BASE_URL`, las variables `EMAIL_*`, `GOOGLE_CLIENT_ID` y `VITE_GOOGLE_CLIENT_ID`. El dominio se configura por entorno, nunca en código.
+
+Aplica el parche SQL antes de cambiar el tráfico a la nueva aplicación:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "ARCHIVOS SQL/12_billing_email_google_auth_patch.sql"
+```
 
 Ejemplo de servicio Gunicorn (`WorkingDirectory` y usuario son ilustrativos):
 
@@ -56,6 +62,8 @@ server {
         proxy_pass http://unix:/run/techtail.sock;
     }
 
+    # Las facturas son privadas y solo se sirven por Django con autorización.
+    location ^~ /media/facturas/ { return 404; }
     location /media/ { alias /srv/techtail/media/; }
     location /static/ { alias /srv/techtail/staticfiles/; }
 
@@ -66,3 +74,30 @@ server {
 ```
 
 Las ubicaciones API deben declararse antes del fallback SPA. Nginx termina TLS y envía `X-Forwarded-Proto`; Django tiene `SECURE_PROXY_SSL_HEADER` configurado. Los certificados y secretos se administran fuera del repositorio.
+
+Ejemplo de worker de correo (`techtail-email.service`):
+
+```ini
+[Unit]
+Description=TechTail transactional email worker
+After=network.target postgresql.service
+
+[Service]
+User=techtail
+WorkingDirectory=/srv/techtail
+EnvironmentFile=/srv/techtail/.env
+ExecStart=/srv/techtail/entorno/bin/python manage.py procesar_cola_emails --continuo --lote 20 --espera 10
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Actívalo con `systemctl enable --now techtail-email`. Alternativamente ejecuta
+el comando sin `--continuo` desde un timer cada minuto. Supervisa estados
+`FALLIDO`, profundidad de la cola y antigüedad del trabajo pendiente.
+
+La configuración detallada de Gmail y Google está en
+[billing-email-notifications.md](billing-email-notifications.md) y
+[google-auth-setup.md](google-auth-setup.md).
