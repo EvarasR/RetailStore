@@ -3,7 +3,6 @@ import { fetchShippingMethods } from '../api/shipping.api';
 import { createOrder } from '../api/checkout.api';
 import { fetchOrderDetail } from '../api/orders.api';
 import type { ShippingMethod, CreateOrderResult } from '../types/checkout.types';
-import type { OrderDetailResponse } from '../types/order.types';
 import { useAuth } from './useAuth';
 import { usePaymentMethods } from './usePaymentMethods';
 
@@ -83,7 +82,7 @@ export function useCheckout() {
             ok: true,
             mensaje: 'Pedido recuperado',
             cod_pedido: orderData.pedido.cod_pedido,
-            estado: orderData.pedido.estado_pedido_id,
+            estado: orderData.pedido.estado,
             subtotal: orderData.pedido.subtotal,
             descuento: orderData.pedido.descuento,
             impuesto: orderData.pedido.impuesto,
@@ -92,9 +91,9 @@ export function useCheckout() {
           });
 
           // Move to READY_TO_PAY if it's pending, or COMPLETED if paid
-          if (['PENDIENTE_PAGO'].includes(orderData.pedido.estado_pedido_id)) {
+          if (orderData.pedido.estado === 'PENDIENTE_PAGO') {
             setStep('READY_TO_PAY');
-          } else if (['PAGADO', 'PREPARANDO', 'ENVIADO', 'ENTREGADO'].includes(orderData.pedido.estado_pedido_id)) {
+          } else if (['PAGADO', 'PREPARANDO', 'ENVIADO', 'ENTREGADO'].includes(orderData.pedido.estado)) {
             setStep('COMPLETED');
             clearRecoveryState();
           } else {

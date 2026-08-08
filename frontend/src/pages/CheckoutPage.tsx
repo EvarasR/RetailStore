@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
-import { useCheckout, CheckoutStep } from '../hooks/useCheckout';
+import { useCheckout } from '../hooks/useCheckout';
 import { useAddresses } from '../hooks/useAddresses';
 import { usePaymentMethods } from '../hooks/usePaymentMethods';
 import { CheckoutLayout } from '../components/checkout/CheckoutLayout';
@@ -21,7 +21,7 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { postForm } from '../api/http';
 
 export const CheckoutPage: React.FC = () => {
-  const { autenticado: isAuthenticated, loading: authLoading, usuario, es_prime, roles } = useAuth();
+  const { autenticado: isAuthenticated, loading: authLoading } = useAuth();
   const { cart, loading: cartLoading, refreshCart } = useCart();
   const {
     step,

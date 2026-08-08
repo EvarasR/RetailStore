@@ -28,6 +28,7 @@ export interface OrderDetailData {
   total: string;
   subtotal: string;
   descuento: string;
+  impuesto: string;
   costo_envio: string;
 }
 

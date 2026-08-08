@@ -815,6 +815,7 @@ def api_pedido_detalle(request, cod_pedido):
             "total": _money(pedido.total),
             "subtotal": _money(pedido.subtotal),
             "descuento": _money(pedido.descuento),
+            "impuesto": _money(pedido.impuesto),
             "costo_envio": _money(pedido.costo_envio),
         },
         items=[
