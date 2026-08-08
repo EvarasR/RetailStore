@@ -7,12 +7,14 @@ from uuid import uuid4
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils.text import slugify
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
+from PIL import Image, UnidentifiedImageError
 
 from apps.administracion.models import (
     AlertaStock,
@@ -34,6 +36,7 @@ from apps.administracion.models import (
     ProductoRelacionado,
     ProductoResena,
     Promocion,
+    PromocionCategoria,
     PromocionProducto,
     ReglaLimiteCompra,
     ReservaInventario,
@@ -86,10 +89,12 @@ from apps.administracion.services.promocion_service import (
     actualizar_cupon,
     actualizar_promocion,
     asociar_promocion_producto,
+    asociar_promocion_categoria,
     crear_cupon,
     crear_promocion,
     desactivar_cupon,
     desactivar_promocion,
+    desasociar_promocion_categoria,
 )
 from apps.administracion.services import panel_service
 from apps.clientes.models import Carrito, ProductoPregunta, ProductoRespuesta
@@ -195,16 +200,47 @@ def _validar_url_imagen(url):
 
 def _guardar_archivo_producto(archivo, cod_producto, tipo):
     reglas = {
-        "IMAGEN": ({".jpg", ".jpeg", ".png", ".webp", ".gif"}, 8 * 1024 * 1024, "imagenes"),
-        "VIDEO": ({".mp4", ".webm", ".mov", ".m4v"}, 60 * 1024 * 1024, "videos"),
+        "IMAGEN": ({".jpg", ".jpeg", ".png", ".webp"}, 8 * 1024 * 1024, "imagenes"),
+        "VIDEO": ({".mp4", ".webm"}, 60 * 1024 * 1024, "videos"),
         "FICHA": ({".pdf"}, 15 * 1024 * 1024, "fichas"),
     }
     extensiones, maximo, carpeta = reglas[tipo]
+    if archivo is None:
+        raise ValueError("Selecciona un archivo.")
     extension = Path(archivo.name or "").suffix.lower()
     if extension not in extensiones:
         raise ValueError(f"Formato no permitido para {tipo.lower()}.")
+    if archivo.size <= 0:
+        raise ValueError("El archivo está vacío.")
     if archivo.size > maximo:
         raise ValueError(f"El archivo de {tipo.lower()} supera el tamaño permitido.")
+
+    content_type = (getattr(archivo, "content_type", "") or "").lower()
+    cabecera = archivo.read(16)
+    archivo.seek(0)
+    if tipo == "IMAGEN":
+        mime_permitidos = {"image/jpeg", "image/png", "image/webp"}
+        if content_type not in mime_permitidos:
+            raise ValueError("El archivo no tiene un MIME de imagen permitido.")
+        try:
+            imagen = Image.open(archivo)
+            formato = (imagen.format or "").upper()
+            imagen.verify()
+            archivo.seek(0)
+        except (UnidentifiedImageError, OSError, ValueError) as exc:
+            raise ValueError("El contenido no corresponde a una imagen válida.") from exc
+        formatos = {".jpg": "JPEG", ".jpeg": "JPEG", ".png": "PNG", ".webp": "WEBP"}
+        if formato != formatos[extension]:
+            raise ValueError("La extensión no coincide con el contenido de la imagen.")
+    elif tipo == "FICHA":
+        if content_type != "application/pdf" or not cabecera.startswith(b"%PDF-"):
+            raise ValueError("La ficha técnica debe ser un PDF válido.")
+    elif tipo == "VIDEO":
+        if extension == ".mp4" and (content_type != "video/mp4" or cabecera[4:8] != b"ftyp"):
+            raise ValueError("El archivo no corresponde a un video MP4 válido.")
+        if extension == ".webm" and (content_type not in {"video/webm", "application/octet-stream"} or not cabecera.startswith(b"\x1aE\xdf\xa3")):
+            raise ValueError("El archivo no corresponde a un video WebM válido.")
+
     nombre = f"productos/{int(cod_producto)}/{carpeta}/{uuid4().hex}{extension}"
     ruta = default_storage.save(nombre, archivo)
     return f"{settings.MEDIA_URL.rstrip('/')}/{ruta.replace(chr(92), '/')}"
@@ -354,11 +390,18 @@ def api_productos_admin(request):
 
     q = (request.GET.get("q") or "").strip()
     estado = request.GET.get("estado") or ""
+    categoria = request.GET.get("categoria") or ""
+    proveedor = request.GET.get("proveedor") or ""
     qs = Producto.objects.select_related("cod_categoria", "cod_marca", "cod_estado_producto").order_by("-fecha_creacion")
     if q:
         qs = qs.filter(nombre__icontains=q)
     if estado:
         qs = qs.filter(cod_estado_producto_id=estado)
+    if categoria.isdigit():
+        qs = qs.filter(cod_categoria_id=int(categoria))
+    if proveedor.isdigit():
+        qs = qs.filter(productoproveedor__cod_proveedor_id=int(proveedor), productoproveedor__activo=True)
+    qs = qs.distinct()
     qs = qs[:80]
 
     productos = []
@@ -729,6 +772,19 @@ def api_control_empresarial_admin(request):
             )
         if modulo == "marketing":
             return _json_ok(
+                promociones=[{
+                    "cod_promocion": x.cod_promocion, "codigo": x.codigo, "nombre": x.nombre,
+                    "descripcion": x.descripcion, "tipo": x.tipo_descuento, "valor": _money(x.valor),
+                    "inicio": _dt(x.fecha_inicio), "fin": _dt(x.fecha_fin),
+                    "acumulable": x.acumulable, "activo": x.activo,
+                } for x in Promocion.objects.order_by("-fecha_creacion")],
+                productos=[{
+                    "cod_producto": x.cod_producto, "nombre": x.nombre, "sku": x.sku,
+                    "categoria": x.cod_categoria.nombre,
+                } for x in Producto.objects.select_related("cod_categoria").order_by("nombre")[:500]],
+                categorias=[{
+                    "cod_categoria": x.cod_categoria, "nombre": x.nombre, "activo": x.activo,
+                } for x in Categoria.objects.order_by("nombre")],
                 cupones=[{
                     "cod_cupon": x.cod_cupon, "codigo": x.codigo, "nombre": x.nombre,
                     "tipo": x.tipo_descuento, "valor": _money(x.valor), "monto_minimo": _money(x.monto_minimo),
@@ -744,6 +800,10 @@ def api_control_empresarial_admin(request):
                     "promocion": x.cod_promocion.codigo, "producto": x.cod_producto.nombre,
                     "cod_promocion": x.cod_promocion_id, "cod_producto": x.cod_producto_id,
                 } for x in PromocionProducto.objects.select_related("cod_promocion", "cod_producto").order_by("cod_promocion__codigo")],
+                asociaciones_categorias=[{
+                    "promocion": x.cod_promocion.nombre, "categoria": x.cod_categoria.nombre,
+                    "cod_promocion": x.cod_promocion_id, "cod_categoria": x.cod_categoria_id,
+                } for x in PromocionCategoria.objects.select_related("cod_promocion", "cod_categoria").order_by("cod_promocion__nombre", "cod_categoria__nombre")],
             )
         return _json_error("Módulo empresarial no soportado.", status=400)
     except Exception as exc:
@@ -878,6 +938,44 @@ def api_catalogo_admin(request):
         return error
     entidad = request.GET.get("entidad", "producto")
     try:
+        if entidad == "opciones_producto":
+            return _json_ok(
+                categorias=[{
+                    "cod_categoria": x.cod_categoria, "nombre": x.nombre, "descripcion": x.descripcion,
+                    "slug": x.slug, "activo": x.activo,
+                } for x in Categoria.objects.order_by("nombre")],
+                marcas=[{
+                    "cod_marca": x.cod_marca, "nombre": x.nombre, "activo": x.activo,
+                } for x in Marca.objects.order_by("nombre")],
+                proveedores=[{
+                    "cod_proveedor": x.cod_proveedor,
+                    "nombre": x.nombre_comercial or x.razon_social,
+                    "razon_social": x.razon_social, "ruc": x.ruc, "activo": x.activo,
+                } for x in Proveedor.objects.order_by("razon_social")],
+                atributos=[{
+                    "cod_atributo": x.cod_atributo, "nombre": x.nombre,
+                    "tipo_dato": x.tipo_dato, "activo": x.activo,
+                } for x in ProductoAtributo.objects.order_by("nombre")],
+                productos=[{
+                    "cod_producto": x.cod_producto, "nombre": x.nombre, "sku": x.sku,
+                    "categoria": x.cod_categoria.nombre,
+                } for x in Producto.objects.select_related("cod_categoria").order_by("nombre")[:500]],
+            )
+        if entidad == "categoria":
+            categorias = Categoria.objects.order_by("nombre")
+            if request.GET.get("activos", "1") != "0":
+                categorias = categorias.filter(activo=True)
+            return _json_ok(
+                entidad=entidad,
+                registros=[{
+                    "cod_categoria": x.cod_categoria,
+                    "nombre": x.nombre,
+                    "slug": x.slug,
+                    "descripcion": x.descripcion,
+                    "activo": x.activo,
+                    "total_productos": Producto.objects.filter(cod_categoria=x.cod_categoria).count(),
+                } for x in categorias],
+            )
         return _json_ok(entidad=entidad, registros=panel_service.listar_entidad(entidad, request.GET.get("activos", "1") != "0"))
     except Exception as exc:
         return _json_error(_safe_error(exc), status=400)
@@ -891,7 +989,13 @@ def api_categoria_admin(request, cod_categoria=None):
         return error
     try:
         if cod_categoria is None:
-            ident = crear_categoria(request.POST["nombre"], request.POST["slug"], request.POST.get("descripcion") or None, _post_int(request, "cod_categoria_padre", False))
+            nombre = request.POST["nombre"].strip()
+            ident = crear_categoria(
+                nombre,
+                request.POST.get("slug") or slugify(nombre),
+                request.POST.get("descripcion") or None,
+                _post_int(request, "cod_categoria_padre", False),
+            )
             return _json_ok(cod_categoria=ident, mensaje="Categoría creada.")
         if _post_bool(request, "desactivar"):
             eliminar_categoria_logica(cod_categoria)
@@ -966,8 +1070,9 @@ def api_producto_integral_admin(request):
         imagenes_url = [x.strip() for x in (request.POST.get("imagenes_url") or "").splitlines() if x.strip()]
         ficha_archivo = request.FILES.get("ficha_tecnica")
         ficha_url = (request.POST.get("ficha_url") or "").strip()
-        video_archivo = request.FILES.get("video")
-        video_url = (request.POST.get("video_url") or "").strip()
+        videos = request.FILES.getlist("videos")
+        if request.FILES.get("video"):
+            videos.append(request.FILES["video"])
         if not imagenes and not imagenes_url:
             raise ValueError("Agrega al menos una imagen del producto.")
         if not ficha_archivo and not ficha_url:
@@ -975,8 +1080,12 @@ def api_producto_integral_admin(request):
         if ficha_url and not ficha_url.lower().split("?", 1)[0].endswith(".pdf"):
             raise ValueError("La URL de ficha técnica debe apuntar a un archivo PDF.")
         proveedores = json.loads(request.POST.get("proveedores") or "[]")
+        atributos = json.loads(request.POST.get("atributos") or "[]")
+        relacionados = json.loads(request.POST.get("relacionados") or "[]")
         if not isinstance(proveedores, list):
             raise ValueError("La configuración de proveedores no es válida.")
+        if not isinstance(atributos, list) or not isinstance(relacionados, list):
+            raise ValueError("Las especificaciones o productos relacionados no son válidos.")
         ids_proveedor = [int(x["cod_proveedor"]) for x in proveedores if x.get("cod_proveedor")]
         if len(ids_proveedor) != len(set(ids_proveedor)):
             raise ValueError("No repitas un proveedor en el producto.")
@@ -1005,13 +1114,13 @@ def api_producto_integral_admin(request):
                 ficha_url = _validar_url_imagen(ficha_url)
             control_service.configurar_archivo_producto(ident, "FICHA", ficha_url, request.POST.get("ficha_titulo") or "Ficha técnica PDF")
 
-            if video_archivo:
+            for indice, video_archivo in enumerate(videos, 1):
                 video_url = _guardar_archivo_producto(video_archivo, ident, "VIDEO")
                 archivos_guardados.append(video_url)
-            elif video_url:
-                video_url = _validar_url_imagen(video_url)
-            if video_url:
-                control_service.configurar_archivo_producto(ident, "VIDEO", video_url, request.POST.get("video_titulo") or "Video del producto")
+                control_service.configurar_archivo_producto(
+                    ident, "VIDEO", video_url,
+                    request.POST.get("video_titulo") or f"Video {indice} del producto",
+                )
 
             control_service.configurar_limite_producto(
                 ident, _post_int(request, "limite_por_pedido"),
@@ -1030,20 +1139,36 @@ def api_producto_integral_admin(request):
                     int(fila["pedido_maximo"]) if fila.get("pedido_maximo") not in (None, "") else None,
                     int(fila.get("cantidad_disponible") or 0),
                 )
+            for fila in atributos:
+                if fila.get("cod_atributo") and str(fila.get("valor") or "").strip():
+                    asignar_producto_atributo_valor(
+                        ident, int(fila["cod_atributo"]), str(fila["valor"]).strip()
+                    )
+            for fila in relacionados:
+                if fila.get("cod_producto"):
+                    control_service.asociar_producto_relacionado(
+                        ident, int(fila["cod_producto"]), fila.get("tipo") or "RELACIONADO"
+                    )
 
-        producto = Producto.objects.get(pk=ident)
-        diagnostico = _diagnostico_publicacion(producto)
-        publicado = False
-        if _post_bool(request, "publicar") and diagnostico["publicable"]:
-            publicar_producto(ident)
-            publicado = True
-        mensaje = "Producto creado y publicado." if publicado else "Producto creado como borrador."
-        if _post_bool(request, "publicar") and not publicado:
-            mensaje += " Completa los requisitos indicados para publicarlo."
+            producto = Producto.objects.get(pk=ident)
+            diagnostico = _diagnostico_publicacion(producto)
+            publicar = _post_bool(request, "publicar")
+            if publicar and not diagnostico["publicable"]:
+                raise ValueError("No se pudo publicar el producto: " + "; ".join(diagnostico["faltantes"]))
+            if publicar:
+                publicar_producto(ident)
+
+        publicado = _post_bool(request, "publicar")
+        mensaje = "Producto creado y publicado correctamente." if publicado else "Producto creado."
         return _json_ok(
             cod_producto=ident, publicado=publicado, mensaje=mensaje,
             publicacion=diagnostico,
         )
+    except IntegrityError as exc:
+        for url in archivos_guardados:
+            _eliminar_archivo_producto_local(url)
+        mensaje = "El SKU ya está registrado." if "sku" in str(exc).lower() else "No fue posible guardar el producto por una restricción de integridad."
+        return _json_error(mensaje, status=409)
     except (KeyError, ValueError, json.JSONDecodeError) as exc:
         for url in archivos_guardados:
             _eliminar_archivo_producto_local(url)
@@ -1073,14 +1198,20 @@ def api_imagen_producto_admin(request, cod_producto):
     error = _exigir_admin(request)
     if error:
         return error
+    url_local = None
     try:
         archivo = request.FILES.get("archivo")
         url = _guardar_archivo_producto(archivo, cod_producto, "IMAGEN") if archivo else _validar_url_imagen(request.POST.get("url_imagen"))
+        url_local = url if archivo else None
         ident = agregar_imagen_producto(cod_producto, url, request.POST.get("alt_text") or None, _post_bool(request, "es_principal"), _post_int(request, "orden", False) or 1)
         return _json_ok(cod_imagen=ident, mensaje="Imagen registrada.")
     except (KeyError, ValueError) as exc:
+        if url_local:
+            _eliminar_archivo_producto_local(url_local)
         return _json_error(str(exc), status=400)
     except Exception as exc:
+        if url_local:
+            _eliminar_archivo_producto_local(url_local)
         return _json_error(_safe_error(exc), status=500)
 
 
@@ -1092,8 +1223,12 @@ def api_imagen_admin(request, cod_imagen):
         return error
     try:
         accion = request.POST.get("accion")
+        imagen = ProductoImagen.objects.filter(pk=cod_imagen).first()
         if accion == "desactivar":
+            if not imagen:
+                return _json_error("Imagen no encontrada.", status=404)
             desactivar_imagen_producto(cod_imagen)
+            _eliminar_archivo_producto_local(imagen.url_imagen)
         elif accion == "ordenar":
             ordenar_imagen_producto(cod_imagen, _post_int(request, "orden"), _post_bool(request, "es_principal"))
         elif accion == "actualizar":
@@ -1206,19 +1341,37 @@ def api_archivo_producto_admin(request, cod_producto):
         tipo = (request.POST.get("tipo") or "").upper()
         if tipo not in {"VIDEO", "FICHA"}:
             raise ValueError("Tipo de archivo no soportado.")
+        producto = Producto.objects.get(pk=cod_producto)
+        metadata = producto.metadata if isinstance(producto.metadata, dict) else {}
+        anterior = None
+        if tipo == "FICHA":
+            anterior = (metadata.get("ficha_tecnica") or {}).get("url")
+        elif _post_bool(request, "eliminar"):
+            anterior = request.POST.get("url") or None
         eliminar = _post_bool(request, "eliminar")
         archivo = request.FILES.get("archivo")
         url = request.POST.get("url") or ""
+        nueva_url = None
         if archivo and not eliminar:
             url = _guardar_archivo_producto(archivo, cod_producto, tipo)
+            nueva_url = url
         if not eliminar:
             if not url:
                 raise ValueError("Adjunta un archivo o indica una URL.")
             parsed = urlparse(url)
             if not url.startswith(settings.MEDIA_URL) and parsed.scheme not in ("http", "https"):
                 raise ValueError("La URL del archivo no es válida.")
-        control_service.configurar_archivo_producto(cod_producto, tipo, url, request.POST.get("titulo") or None, eliminar)
+        try:
+            control_service.configurar_archivo_producto(cod_producto, tipo, url, request.POST.get("titulo") or None, eliminar)
+        except Exception:
+            if nueva_url:
+                _eliminar_archivo_producto_local(nueva_url)
+            raise
+        if anterior and (eliminar or anterior != url):
+            _eliminar_archivo_producto_local(anterior)
         return _json_ok(url=url, mensaje="Archivo del producto actualizado.")
+    except Producto.DoesNotExist:
+        return _json_error("Producto no encontrado.", status=404)
     except ValueError as exc:
         return _json_error(str(exc), status=400)
     except Exception as exc:
@@ -1617,12 +1770,37 @@ def api_promocion_producto_admin(request, cod_promocion):
     if error:
         return error
     try:
-        cod_producto = _post_int(request, "cod_producto")
+        valores = json.loads(request.POST.get("cod_productos") or "[]")
+        if not valores:
+            valores = [_post_int(request, "cod_producto")]
+        cod_productos = list(dict.fromkeys(int(value) for value in valores))
+        with transaction.atomic():
+            for cod_producto in cod_productos:
+                if _post_bool(request, "desasociar"):
+                    control_service.desasociar_promocion_producto(cod_promocion, cod_producto)
+                else:
+                    asociar_promocion_producto(cod_promocion, cod_producto)
+        accion = "retirados del" if _post_bool(request, "desasociar") else "asociados al"
+        return _json_ok(mensaje=f"{len(cod_productos)} producto(s) {accion} descuento.")
+    except (ValueError, json.JSONDecodeError) as exc:
+        return _json_error(str(exc), status=400)
+    except Exception as exc:
+        return _json_error(_safe_error(exc), status=500)
+
+
+@login_required(login_url="/login/")
+@require_POST
+def api_promocion_categoria_admin(request, cod_promocion):
+    error = _exigir_admin(request)
+    if error:
+        return error
+    try:
+        cod_categoria = _post_int(request, "cod_categoria")
         if _post_bool(request, "desasociar"):
-            control_service.desasociar_promocion_producto(cod_promocion, cod_producto)
-            return _json_ok(mensaje="Producto retirado de la promoción.")
-        asociar_promocion_producto(cod_promocion, cod_producto)
-        return _json_ok(mensaje="Producto asociado a la promoción.")
+            desasociar_promocion_categoria(cod_promocion, cod_categoria)
+            return _json_ok(mensaje="Categoría retirada del descuento.")
+        asociar_promocion_categoria(cod_promocion, cod_categoria)
+        return _json_ok(mensaje="Categoría asociada al descuento.")
     except ValueError as exc:
         return _json_error(str(exc), status=400)
     except Exception as exc:

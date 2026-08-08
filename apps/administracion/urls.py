@@ -54,6 +54,7 @@ urlpatterns = [
     path("api/promociones/", views.api_promocion_admin, name="api_crear_promocion"),
     path("api/promociones/<int:cod_promocion>/", views.api_promocion_admin, name="api_actualizar_promocion"),
     path("api/promociones/<int:cod_promocion>/productos/", views.api_promocion_producto_admin, name="api_promocion_producto"),
+    path("api/promociones/<int:cod_promocion>/categorias/", views.api_promocion_categoria_admin, name="api_promocion_categoria"),
     path("api/pagos/", views.api_pagos_admin, name="api_pagos_admin"),
     path("api/tracking/", views.api_tracking_admin, name="api_tracking_admin"),
     path("api/tracking/acciones/", views.api_accion_tracking_admin, name="api_accion_tracking_admin"),

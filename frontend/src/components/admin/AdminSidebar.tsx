@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Shield,
   Headphones,
+  FolderTree,
 } from 'lucide-react';
 
 import { useAuth } from '../../hooks/useAuth';
@@ -48,6 +49,14 @@ export const AdminSidebar: React.FC = () => {
         >
           <Package size={18} />
           <span>Productos</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin/categorias"
+          className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+        >
+          <FolderTree size={18} />
+          <span>Categorías</span>
         </NavLink>
 
         <NavLink
@@ -91,11 +100,11 @@ export const AdminSidebar: React.FC = () => {
         </NavLink>
 
         <NavLink
-          to="/admin/promociones"
+          to="/admin/descuentos"
           className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
         >
           <Tag size={18} />
-          <span>Promociones</span>
+          <span>Descuentos</span>
         </NavLink>
 
         <NavLink

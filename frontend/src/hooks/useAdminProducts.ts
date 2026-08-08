@@ -14,12 +14,14 @@ export function useAdminProducts() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [q, setQ] = useState('');
   const [estado, setEstado] = useState('');
+  const [categoria, setCategoria] = useState('');
+  const [proveedor, setProveedor] = useState('');
 
   const loadProducts = useCallback(async (searchQuery = q, searchEstado = estado) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchAdminProducts(searchQuery, searchEstado);
+      const data = await fetchAdminProducts(searchQuery, searchEstado, categoria, proveedor);
       setProducts(data.productos || []);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cargar productos administrativos.';
@@ -27,7 +29,7 @@ export function useAdminProducts() {
     } finally {
       setLoading(false);
     }
-  }, [q, estado]);
+  }, [q, estado, categoria, proveedor]);
 
   useEffect(() => {
     loadProducts();
@@ -75,6 +77,10 @@ export function useAdminProducts() {
     setQ,
     estado,
     setEstado,
+    categoria,
+    setCategoria,
+    proveedor,
+    setProveedor,
     refresh: () => loadProducts(q, estado),
     handlePublish,
     handlePause,

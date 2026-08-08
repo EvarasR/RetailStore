@@ -251,6 +251,17 @@ def precio_producto_con_promocion(cod_producto):
     )
 
 
+def detalle_precio_producto(cod_producto):
+    resultado = ejecutar_funcion_scalar(
+        "fn_detalle_precio_producto",
+        [cod_producto],
+        ["BIGINT"],
+    )
+    if isinstance(resultado, str):
+        return json.loads(resultado)
+    return resultado or {}
+
+
 def recalcular_precio_desde_producto(cod_producto):
     """Actualiza en PostgreSQL el precio de exhibicion desde el lote FIFO."""
     return ejecutar_funcion_void(

@@ -28,6 +28,7 @@ import { InvoicesPage } from '../pages/account/InvoicesPage';
 import { RecurringPurchasesPage } from '../pages/account/RecurringPurchasesPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminProductsPage } from '../pages/admin/AdminProductsPage';
+import { AdminCategoriesPage } from '../pages/admin/AdminCategoriesPage';
 import { AdminOrdersPage } from '../pages/admin/AdminOrdersPage';
 import { AdminInventoryPage } from '../pages/admin/AdminInventoryPage';
 import { AdminSuppliersPage } from '../pages/admin/AdminSuppliersPage';
@@ -204,6 +205,14 @@ export const AppRouter: React.FC = () => {
         }
       />
       <Route
+        path="/admin/categorias"
+        element={
+          <RoleRoute requiredRole="ADMIN">
+            <AdminCategoriesPage />
+          </RoleRoute>
+        }
+      />
+      <Route
         path="/admin/pedidos"
         element={
           <RoleRoute requiredRole="ADMIN">
@@ -244,13 +253,14 @@ export const AppRouter: React.FC = () => {
         }
       />
       <Route
-        path="/admin/promociones"
+        path="/admin/descuentos"
         element={
           <RoleRoute requiredRole="ADMIN">
             <AdminPromotionsPage />
           </RoleRoute>
         }
       />
+      <Route path="/admin/promociones" element={<Navigate to="/admin/descuentos" replace />} />
       <Route
         path="/admin/pagos"
         element={

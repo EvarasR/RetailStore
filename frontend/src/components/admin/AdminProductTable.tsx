@@ -3,6 +3,7 @@ import { AdminStatusBadge } from './AdminStatusBadge';
 import { AdminProductActions } from './AdminProductActions';
 import type { AdminProductItem } from '../../types/adminProduct.types';
 import { AlertCircle } from 'lucide-react';
+import type { ProductManagementTab } from './ProductManagementDrawer';
 
 interface AdminProductTableProps {
   products: AdminProductItem[];
@@ -10,6 +11,7 @@ interface AdminProductTableProps {
   onPublish: (id: number) => Promise<unknown>;
   onPause: (id: number) => Promise<unknown>;
   onDeactivate: (id: number) => Promise<unknown>;
+  onManage: (id: number, tab: ProductManagementTab) => void;
 }
 
 export const AdminProductTable: React.FC<AdminProductTableProps> = ({
@@ -18,6 +20,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
   onPublish,
   onPause,
   onDeactivate,
+  onManage,
 }) => {
   return (
     <div className="admin-table-container">
@@ -75,7 +78,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                       <div>
                         <div style={{ fontWeight: 600, color: 'var(--tt-color-text-main)' }}>{p.nombre}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-muted)' }}>
-                          ID: #{p.cod_producto} • {p.fecha || 'Reciente'}
+                          {p.fecha || 'Registro reciente'}
                         </div>
                       </div>
                     </div>
@@ -124,6 +127,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                       onPublish={onPublish}
                       onPause={onPause}
                       onDeactivate={onDeactivate}
+                      onManage={onManage}
                     />
                   </td>
                 </tr>

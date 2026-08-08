@@ -1,183 +1,58 @@
-import React from 'react';
-import { Search, RefreshCw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Search } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { AdminProductTable } from '../../components/admin/AdminProductTable';
 import { AdminEmptyState } from '../../components/admin/AdminEmptyState';
+import { AdminDrawer } from '../../components/admin/AdminDrawer';
+import { ConfirmDialog } from '../../components/admin/ConfirmDialog';
+import { ProductWizard } from '../../components/admin/ProductWizard';
+import { ProductManagementDrawer, type ProductManagementTab } from '../../components/admin/ProductManagementDrawer';
+import { Toast, type ToastType } from '../../components/ui/Toast';
+import { fetchProductCatalogOptions } from '../../api/adminCatalog.api';
 import { useAdminProducts } from '../../hooks/useAdminProducts';
-import { AdminMutationForm } from '../../components/admin/AdminMutationForm';
-import { createAdminProduct } from '../../api/adminProducts.api';
+import type { ProductCatalogOptions } from '../../types/adminCatalog.types';
+
+const emptyOptions: ProductCatalogOptions = { categorias: [], marcas: [], proveedores: [], atributos: [], productos: [] };
 
 export const AdminProductsPage: React.FC = () => {
-  const {
-    products,
-    loading,
-    error,
-    actionLoading,
-    q,
-    setQ,
-    estado,
-    setEstado,
-    refresh,
-    handlePublish,
-    handlePause,
-    handleDeactivate,
-  } = useAdminProducts();
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    refresh();
+  const catalog = useAdminProducts();
+  const [options, setOptions] = useState<ProductCatalogOptions>(emptyOptions);
+  const [optionsLoading, setOptionsLoading] = useState(true);
+  const [optionsError, setOptionsError] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [manageId, setManageId] = useState<number | null>(null);
+  const [manageTab, setManageTab] = useState<ProductManagementTab>('datos');
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const loadOptions = async () => {
+    setOptionsLoading(true); setOptionsError(null);
+    try { setOptions(await fetchProductCatalogOptions()); }
+    catch (reason) { setOptionsError(reason instanceof Error ? reason.message : 'No fue posible cargar las opciones del catálogo.'); }
+    finally { setOptionsLoading(false); }
   };
+  useEffect(() => { loadOptions(); }, []);
+  const changed = async (message: string) => { setToast({ message, type: 'success' }); await catalog.refresh(); await loadOptions(); };
+  const manage = (id: number, tab: ProductManagementTab) => { setManageTab(tab); setManageId(id); };
 
-  return (
-    <AdminLayout title="Catálogo y Gestión de Productos">
-      <div className="admin-table-container" style={{ marginBottom: '1.5rem' }}>
-        <div className="admin-table-toolbar">
-          <form
-            onSubmit={handleSearchSubmit}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, flexWrap: 'wrap' }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                backgroundColor: 'var(--tt-color-surface)',
-                padding: '0.45rem 0.85rem',
-                borderRadius: '0.5rem',
-                border: '1px solid var(--tt-color-border)',
-                flex: '1 1 240px',
-              }}
-            >
-              <Search size={16} className="text-slate-400" />
-              <input
-                type="text"
-                placeholder="Buscar por Nombre, SKU..."
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--tt-color-text-main)',
-                  outline: 'none',
-                  width: '100%',
-                }}
-              />
-            </div>
+  return <AdminLayout title="Catálogo y Gestión de Productos">
+    {toast ? <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} /> : null}
+    <div className="admin-page-heading"><div><h1>Catálogo y productos</h1><p>Administra clasificación, proveedores, multimedia, documentos y publicación sin escribir identificadores técnicos.</p></div><button type="button" className="tt-btn tt-btn--primary" onClick={() => setCreateOpen(true)} disabled={optionsLoading}><Plus size={17} />Nuevo producto</button></div>
+    {optionsError ? <div className="admin-alert admin-alert-error" role="alert">{optionsError}<button type="button" onClick={loadOptions}>Reintentar</button></div> : null}
 
-            <select
-              value={estado}
-              onChange={(e) => {
-                setEstado(e.target.value);
-              }}
-              style={{
-                padding: '0.5rem 0.75rem',
-                backgroundColor: 'var(--tt-color-surface)',
-                color: 'var(--tt-color-text-main)',
-                border: '1px solid var(--tt-color-border)',
-                borderRadius: '0.5rem',
-              }}
-            >
-              <option value="">Todos los estados</option>
-              <option value="BORRADOR">Borrador</option>
-              <option value="EN_REVISION">En Revisión</option>
-              <option value="PUBLICADO">Publicado</option>
-              <option value="PAUSADO">Pausado</option>
-              <option value="DESACTIVADO">Desactivado</option>
-            </select>
+    <form className="admin-catalog-toolbar" onSubmit={(event) => { event.preventDefault(); catalog.refresh(); }}>
+      <label className="admin-search-field"><Search size={17} /><input value={catalog.q} onChange={(event) => catalog.setQ(event.target.value)} placeholder="Buscar por nombre o SKU…" aria-label="Buscar productos" /></label>
+      <label><span>Categoría</span><select value={catalog.categoria} onChange={(event) => catalog.setCategoria(event.target.value)}><option value="">Todas</option>{options.categorias.filter((item) => item.activo).map((item) => <option key={item.cod_categoria} value={item.cod_categoria}>{item.nombre}</option>)}</select></label>
+      <label><span>Estado</span><select value={catalog.estado} onChange={(event) => catalog.setEstado(event.target.value)}><option value="">Todos</option><option value="BORRADOR">Borrador</option><option value="EN_REVISION">En revisión</option><option value="PUBLICADO">Publicado</option><option value="PAUSADO">Pausado</option><option value="DESACTIVADO">Desactivado</option></select></label>
+      <label><span>Proveedor</span><select value={catalog.proveedor} onChange={(event) => catalog.setProveedor(event.target.value)}><option value="">Todos</option>{options.proveedores.filter((item) => item.activo).map((item) => <option key={item.cod_proveedor} value={item.cod_proveedor}>{item.nombre}</option>)}</select></label>
+      <button className="tt-btn tt-btn--secondary" type="submit">Aplicar filtros</button>
+    </form>
 
-            <button
-              type="submit"
-              style={{
-                padding: '0.5rem 1rem',
-                background: 'var(--tt-color-primary)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '0.5rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Filtrar
-            </button>
-          </form>
+    {catalog.error ? <div className="admin-alert admin-alert-error" role="alert">{catalog.error}<button type="button" onClick={catalog.refresh}>Reintentar</button></div> : null}
+    {!catalog.loading && !catalog.products.length ? <AdminEmptyState title="No hay productos para estos filtros" description="Cambia los filtros o crea el primer producto del catálogo." /> : <AdminProductTable products={catalog.products} actionLoading={catalog.actionLoading} onPublish={async (id) => { const result = await catalog.handlePublish(id); setToast({ message: result.mensaje, type: 'success' }); }} onPause={async (id) => { const result = await catalog.handlePause(id); setToast({ message: result.mensaje, type: 'success' }); }} onDeactivate={async (id) => { setConfirmId(id); }} onManage={manage} />}
+    {catalog.loading ? <div className="admin-loading-state">Cargando productos…</div> : null}
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={refresh}
-              title="Refrescar catálogo"
-              style={{
-                padding: '0.5rem 0.75rem',
-                background: 'rgba(255,255,255,0.05)',
-                color: 'var(--tt-color-text-muted)',
-                border: '1px solid var(--tt-color-border)',
-                borderRadius: '0.5rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-              }}
-            >
-              <RefreshCw size={14} />
-              <span>Actualizar</span>
-            </button>
-
-          </div>
-        </div>
-      </div>
-
-      <AdminMutationForm
-        title="Crear producto"
-        description="Captura datos base; la publicación, stock y precio oficial siguen validados por PostgreSQL."
-        submitLabel="Crear producto"
-        fields={[
-          { name: 'cod_categoria', label: 'ID categoría', type: 'number', required: true },
-          { name: 'cod_marca', label: 'ID marca', type: 'number', required: true },
-          { name: 'sku', label: 'SKU', required: true },
-          { name: 'nombre', label: 'Nombre', required: true },
-          { name: 'descripcion', label: 'Descripción', type: 'textarea' },
-          { name: 'precio_actual', label: 'Precio base registrado', type: 'number', required: true },
-          { name: 'peso_kg', label: 'Peso kg', type: 'number', defaultValue: '0' },
-          { name: 'largo_cm', label: 'Largo cm', type: 'number', defaultValue: '0' },
-          { name: 'ancho_cm', label: 'Ancho cm', type: 'number', defaultValue: '0' },
-          { name: 'alto_cm', label: 'Alto cm', type: 'number', defaultValue: '0' },
-        ]}
-        onSubmit={createAdminProduct}
-        onSuccess={refresh}
-      />
-
-      {error && (
-        <div
-          style={{
-            padding: '1rem',
-            background: 'rgba(239, 68, 68, 0.15)',
-            color: 'var(--tt-color-error)',
-            borderRadius: '0.5rem',
-            marginBottom: '1.5rem',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--tt-color-text-light)' }}>
-          Consultando productos institucionales...
-        </div>
-      ) : products.length === 0 ? (
-        <AdminEmptyState
-          title="No se encontraron productos"
-          description="Ajusta los criterios de búsqueda o usa el formulario React para crear un producto."
-        />
-      ) : (
-        <AdminProductTable
-          products={products}
-          actionLoading={actionLoading}
-          onPublish={handlePublish}
-          onPause={handlePause}
-          onDeactivate={handleDeactivate}
-        />
-      )}
-    </AdminLayout>
-  );
+    <AdminDrawer open={createOpen} title="Nuevo producto" onClose={() => setCreateOpen(false)} wide><ProductWizard options={options} onSuccess={(message) => { setCreateOpen(false); changed(message); }} /></AdminDrawer>
+    <ProductManagementDrawer productId={manageId} initialTab={manageTab} options={options} onClose={() => setManageId(null)} onChanged={changed} />
+    <ConfirmDialog open={Boolean(confirmId)} title="Desactivar producto" message="El producto dejará de estar disponible en la tienda. Sus pedidos e historial no se eliminarán." confirmLabel="Desactivar" busy={catalog.actionLoading === confirmId} onCancel={() => setConfirmId(null)} onConfirm={async () => { if (!confirmId) return; try { const result = await catalog.handleDeactivate(confirmId); setToast({ message: result.mensaje, type: 'success' }); } catch (reason) { setToast({ message: reason instanceof Error ? reason.message : 'No fue posible desactivar el producto.', type: 'error' }); } finally { setConfirmId(null); } }} />
+  </AdminLayout>;
 };

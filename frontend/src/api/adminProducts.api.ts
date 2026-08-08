@@ -4,10 +4,12 @@ import type { AdminProductsResponse, AdminProductActionResponse } from '../types
 /**
  * Consulta la lista oficial de productos del panel administrativo
  */
-export async function fetchAdminProducts(q = '', estado = ''): Promise<AdminProductsResponse> {
+export async function fetchAdminProducts(q = '', estado = '', categoria = '', proveedor = ''): Promise<AdminProductsResponse> {
   const params = new URLSearchParams();
   if (q.trim()) params.append('q', q.trim());
   if (estado.trim()) params.append('estado', estado.trim());
+  if (categoria.trim()) params.append('categoria', categoria.trim());
+  if (proveedor.trim()) params.append('proveedor', proveedor.trim());
   const queryStr = params.toString() ? `?${params.toString()}` : '';
   const data = await getJSON<AdminProductsResponse>(`/panel/api/productos/${queryStr}`);
   return data;
