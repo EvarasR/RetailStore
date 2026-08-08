@@ -131,7 +131,7 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
         )}
       </div>
 
-      {cap?.factura && (
+      {cap?.factura ? (
         <div
           className="tt-card"
           style={{
@@ -177,6 +177,21 @@ export const CheckoutConfirmation: React.FC<CheckoutConfirmationProps> = ({
             <span>Total Facturado:</span>
             <span>${cap.factura.total}</span>
           </div>
+        </div>
+      ) : (
+        <div
+          className="tt-card"
+          style={{
+            padding: '1.25rem',
+            textAlign: 'left',
+            marginBottom: '2.5rem',
+            backgroundColor: 'rgba(100, 116, 139, 0.05)',
+            border: '1px solid rgba(100, 116, 139, 0.2)',
+            color: '#64748b',
+            fontSize: '0.875rem',
+          }}
+        >
+          Pago confirmado. La factura final todavía no está disponible.
         </div>
       )}
 
