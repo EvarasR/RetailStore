@@ -65,7 +65,7 @@ export const WarehouseLotsPage: React.FC = () => {
           setSearchTerm('');
           setSelectedAlmacen('');
         }}
-        placeholder="Buscar por código de lote, producto o ID..."
+        placeholder="Buscar por código de lote, producto o referencia..."
       />
 
       {error && (
@@ -89,7 +89,7 @@ export const WarehouseLotsPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID Lote</th>
+                <th>Lote</th>
                 <th>Código Lote</th>
                 <th>Producto Asignado</th>
                 <th>Almacén</th>

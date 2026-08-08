@@ -112,7 +112,7 @@ export const SupportTicketsPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID Ticket</th>
+                <th>Ticket</th>
                 <th>Cliente</th>
                 <th>Asunto / Categoría</th>
                 <th>Prioridad</th>

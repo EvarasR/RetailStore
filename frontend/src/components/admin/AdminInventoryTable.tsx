@@ -64,7 +64,7 @@ export const AdminInventoryTable: React.FC<AdminInventoryTableProps> = ({
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Referencia</th>
                   <th>Producto</th>
                   <th>Almacén</th>
                   <th>Stock Total</th>

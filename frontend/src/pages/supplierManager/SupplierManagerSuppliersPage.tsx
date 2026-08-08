@@ -87,7 +87,7 @@ export const SupplierManagerSuppliersPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Referencia</th>
                 <th>RUC / NIT</th>
                 <th>Razón Social</th>
                 <th>Ciudad / Provincia</th>

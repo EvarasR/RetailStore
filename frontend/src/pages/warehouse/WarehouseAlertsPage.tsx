@@ -61,7 +61,7 @@ export const WarehouseAlertsPage: React.FC = () => {
           setSearchTerm('');
           setSelectedSeveridad('');
         }}
-        placeholder="Buscar por producto, tipo o ID de alerta..."
+        placeholder="Buscar por producto, tipo o referencia..."
       />
 
       {mensajeOk && (
@@ -92,7 +92,7 @@ export const WarehouseAlertsPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Alerta</th>
                 <th>Tipo de Alerta</th>
                 <th>Severidad</th>
                 <th>SKU Asignado</th>

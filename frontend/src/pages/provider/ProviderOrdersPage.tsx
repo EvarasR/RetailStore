@@ -81,7 +81,7 @@ export const ProviderOrdersPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID Orden</th>
+                <th>Orden</th>
                 <th>Almacén Destino</th>
                 <th>Fecha Emisión / Prog.</th>
                 <th>Estado BD</th>

@@ -61,9 +61,6 @@ export const AdminOrderDrawer: React.FC<AdminOrderDrawerProps> = ({
               <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--tt-color-text-main)' }}>
                 Pedido #{detail?.pedido.numero_pedido || '...'}
               </h3>
-              <span style={{ fontSize: '0.75rem', color: 'var(--tt-color-text-light)' }}>
-                ID BD: {detail?.pedido.cod_pedido || '—'}
-              </span>
             </div>
           </div>
           <button

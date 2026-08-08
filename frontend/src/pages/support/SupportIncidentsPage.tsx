@@ -88,7 +88,7 @@ export const SupportIncidentsPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID Incidencia</th>
+                <th>Incidencia</th>
                 <th>Pedido #</th>
                 <th>Cliente</th>
                 <th>Descripción DB</th>

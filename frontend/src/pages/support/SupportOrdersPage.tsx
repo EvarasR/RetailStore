@@ -94,7 +94,7 @@ export const SupportOrdersPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID Pedido</th>
+                <th>Pedido</th>
                 <th>Cliente</th>
                 <th>Fecha Emisión</th>
                 <th>Estado BD</th>

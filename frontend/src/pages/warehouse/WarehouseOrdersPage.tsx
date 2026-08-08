@@ -91,7 +91,7 @@ export const WarehouseOrdersPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID Pedido</th>
+                <th>Pedido</th>
                 <th>Número / Ref</th>
                 <th>Cliente Logística</th>
                 <th>Fecha Despacho</th>

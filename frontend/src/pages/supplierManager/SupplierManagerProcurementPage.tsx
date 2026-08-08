@@ -93,7 +93,7 @@ export const SupplierManagerProcurementPage: React.FC = () => {
           <table className="ops-table">
             <thead>
               <tr>
-                <th>ID Orden</th>
+                <th>Orden</th>
                 <th>Proveedor Asignado</th>
                 <th>Almacén Destino</th>
                 <th>Fecha Creación</th>
