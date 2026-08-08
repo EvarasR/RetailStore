@@ -204,7 +204,7 @@ def _guardar_archivo_producto(archivo, cod_producto, tipo):
     if extension not in extensiones:
         raise ValueError(f"Formato no permitido para {tipo.lower()}.")
     if archivo.size > maximo:
-        raise ValueError(f"El archivo de {tipo.lower()} supera el tamaÃ±o permitido.")
+        raise ValueError(f"El archivo de {tipo.lower()} supera el tamaño permitido.")
     nombre = f"productos/{int(cod_producto)}/{carpeta}/{uuid4().hex}{extension}"
     ruta = default_storage.save(nombre, archivo)
     return f"{settings.MEDIA_URL.rstrip('/')}/{ruta.replace(chr(92), '/')}"
@@ -268,7 +268,7 @@ def _tiene_rol(user, *roles):
 
 def _exigir_roles(request, *roles):
     if not _tiene_rol(request.user, *roles):
-        return _json_error("No tienes permisos para esta operaciÃ³n.", status=403)
+        return _json_error("No tienes permisos para esta operación.", status=403)
     return None
 
 
@@ -508,7 +508,7 @@ def api_cambiar_estado_pedido(request, cod_pedido):
     comentario = request.POST.get("comentario") or "Cambio desde panel administrativo"
     try:
         if not _es_admin(request.user) and estado not in {"PREPARANDO", "LISTO_ENVIO"}:
-            return _json_error("Bodega solo puede marcar pedidos como preparando o listos para envÃ­o.", status=403)
+            return _json_error("Bodega solo puede marcar pedidos como preparando o listos para envío.", status=403)
         actualizar_estado_pedido(cod_pedido, estado, comentario)
         return _json_ok(mensaje="Estado actualizado.")
     except Exception as exc:
@@ -576,7 +576,7 @@ def api_control_empresarial_admin(request):
         "proveedores": ("SUPPLIER_MANAGER",),
     }
     if modulo not in permitidos:
-        return _json_error("MÃ³dulo empresarial no soportado.", status=400)
+        return _json_error("Módulo empresarial no soportado.", status=400)
     error = _exigir_admin(request) if not permitidos[modulo] else _exigir_roles(request, *permitidos[modulo])
     if error:
         return error
@@ -745,7 +745,7 @@ def api_control_empresarial_admin(request):
                     "cod_promocion": x.cod_promocion_id, "cod_producto": x.cod_producto_id,
                 } for x in PromocionProducto.objects.select_related("cod_promocion", "cod_producto").order_by("cod_promocion__codigo")],
             )
-        return _json_error("MÃ³dulo empresarial no soportado.", status=400)
+        return _json_error("Módulo empresarial no soportado.", status=400)
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)
 
@@ -794,7 +794,7 @@ def api_accion_empresarial_admin(request):
         if accion in {"desactivar_usuario", "reactivar_usuario"}:
             ident = _post_int(request, "cod_usuario")
             if ident == request.user.pk and accion == "desactivar_usuario":
-                raise ValueError("No puedes desactivar tu propia sesiÃ³n administrativa.")
+                raise ValueError("No puedes desactivar tu propia sesión administrativa.")
             (usuario_service.desactivar_usuario if accion == "desactivar_usuario" else control_service.reactivar_usuario)(ident)
             return _json_ok(mensaje="Estado del usuario actualizado.")
         if accion in {"asignar_rol", "quitar_rol"}:
@@ -823,9 +823,9 @@ def api_accion_empresarial_admin(request):
             return _json_ok(mensaje="Estado del ticket actualizado.")
         if accion == "notificar_cliente":
             crear_notificacion(_post_int(request, "cod_usuario"), request.POST.get("tipo") or "SOPORTE", request.POST["titulo"], request.POST["mensaje"], request.POST.get("url") or None)
-            return _json_ok(mensaje="NotificaciÃ³n creada.")
+            return _json_ok(mensaje="Notificación creada.")
         if accion == "crear_almacen":
-            return _json_ok(cod_almacen=crear_almacen(request.POST["nombre"], request.POST["direccion"], request.POST["ciudad"], request.POST["provincia"]), mensaje="AlmacÃ©n creado.")
+            return _json_ok(cod_almacen=crear_almacen(request.POST["nombre"], request.POST["direccion"], request.POST["ciudad"], request.POST["provincia"]), mensaje="Almacén creado.")
         if accion == "actualizar_almacen":
             control_service.actualizar_almacen(_post_int(request, "cod_almacen"), request.POST["nombre"], request.POST["direccion"], request.POST["ciudad"], request.POST["provincia"], _post_bool(request, "activo"))
             return _json_ok(mensaje="Almacen actualizado.")
@@ -835,7 +835,7 @@ def api_accion_empresarial_admin(request):
             control_service.actualizar_transportista(_post_int(request, "cod_transportista"), request.POST["nombre"], request.POST.get("telefono") or None, request.POST.get("email") or None, _post_bool(request, "activo", True))
             return _json_ok(mensaje="Transportista actualizado.")
         if accion == "crear_metodo_envio":
-            return _json_ok(cod_metodo_envio=control_service.crear_metodo_envio(request.POST["nombre"], _post_int(request, "dias_min"), _post_int(request, "dias_max"), _post_decimal(request, "costo"), _post_bool(request, "prime")), mensaje="MÃ©todo de envÃ­o creado.")
+            return _json_ok(cod_metodo_envio=control_service.crear_metodo_envio(request.POST["nombre"], _post_int(request, "dias_min"), _post_int(request, "dias_max"), _post_decimal(request, "costo"), _post_bool(request, "prime")), mensaje="Método de envío creado.")
         if accion == "actualizar_metodo_envio":
             control_service.actualizar_metodo_envio(_post_int(request, "cod_metodo_envio"), request.POST["nombre"], _post_int(request, "dias_min"), _post_int(request, "dias_max"), _post_decimal(request, "costo"), _post_bool(request, "prime"), _post_bool(request, "activo"))
             return _json_ok(mensaje="Metodo de envio actualizado.")
@@ -854,16 +854,16 @@ def api_accion_empresarial_admin(request):
             return _json_ok(mensaje="Plan Prime desactivado.")
         if accion == "cancelar_membresia":
             control_service.cancelar_membresia(_post_int(request, "cod_membresia"))
-            return _json_ok(mensaje="MembresÃ­a cancelada conservando su historial.")
+            return _json_ok(mensaje="Membresía cancelada conservando su historial.")
         if accion == "aprobar_devolucion":
-            aprobar_devolucion(_post_int(request, "cod_devolucion"), request.POST.get("comentario") or "Aprobada por administraciÃ³n")
-            return _json_ok(mensaje="DevoluciÃ³n aprobada.")
+            aprobar_devolucion(_post_int(request, "cod_devolucion"), request.POST.get("comentario") or "Aprobada por administración")
+            return _json_ok(mensaje="Devolución aprobada.")
         if accion == "reembolsar_devolucion":
             ident = generar_reembolso_simulado(_post_int(request, "cod_devolucion"))
             return _json_ok(cod_reembolso=ident, mensaje="Reembolso simulado generado.")
-        return _json_error("AcciÃ³n empresarial no soportada.", status=400)
+        return _json_error("Acción empresarial no soportada.", status=400)
     except (KeyError, ValueError, Usuario.DoesNotExist) as exc:
-        return _json_error(str(exc) or "Datos invÃ¡lidos.", status=400)
+        return _json_error(str(exc) or "Datos inválidos.", status=400)
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)
 
@@ -1216,7 +1216,7 @@ def api_archivo_producto_admin(request, cod_producto):
                 raise ValueError("Adjunta un archivo o indica una URL.")
             parsed = urlparse(url)
             if not url.startswith(settings.MEDIA_URL) and parsed.scheme not in ("http", "https"):
-                raise ValueError("La URL del archivo no es vÃ¡lida.")
+                raise ValueError("La URL del archivo no es válida.")
         control_service.configurar_archivo_producto(cod_producto, tipo, url, request.POST.get("titulo") or None, eliminar)
         return _json_ok(url=url, mensaje="Archivo del producto actualizado.")
     except ValueError as exc:
@@ -1237,7 +1237,7 @@ def api_limite_producto_admin(request, cod_producto):
             _post_int(request, "limite_por_dia", False), _post_int(request, "limite_por_mes", False),
             _post_bool(request, "requiere_revision"), _post_bool(request, "activo", True),
         )
-        return _json_ok(cod_regla=ident, mensaje="LÃ­mite retail actualizado.")
+        return _json_ok(cod_regla=ident, mensaje="Límite retail actualizado.")
     except ValueError as exc:
         return _json_error(str(exc), status=400)
     except Exception as exc:
@@ -1282,8 +1282,8 @@ def api_moderacion_producto_admin(request, cod_producto):
             else:
                 control_service.moderar_pregunta(pregunta.cod_pregunta, request.POST.get("estado") or "PUBLICADA")
         else:
-            raise ValueError("Entidad de moderaciÃ³n no soportada.")
-        return _json_ok(mensaje="ModeraciÃ³n actualizada.")
+            raise ValueError("Entidad de moderación no soportada.")
+        return _json_ok(mensaje="Moderación actualizada.")
     except (ValueError, ProductoResena.DoesNotExist, ProductoPregunta.DoesNotExist) as exc:
         return _json_error(str(exc) or "Registro no encontrado.", status=400)
     except Exception as exc:
@@ -1516,7 +1516,7 @@ def api_accion_abastecimiento_admin(request, cod_orden_abastecimiento):
         if not _es_admin(request.user) and "WAREHOUSE_MANAGER" in roles and accion != "recibir":
             return _json_error("Bodega solo puede registrar recepciones.", status=403)
         if not _es_admin(request.user) and "SUPPLIER_MANAGER" in roles and accion == "recibir":
-            return _json_error("La recepciÃ³n fÃ­sica corresponde a bodega.", status=403)
+            return _json_error("La recepción física corresponde a bodega.", status=403)
         if accion == "recibir":
             recibir_orden_abastecimiento(cod_orden_abastecimiento, _post_int(request, "cod_almacen"), request.POST.get("observacion") or "Recepción desde panel administrativo")
         elif accion == "cancelar":

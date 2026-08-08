@@ -548,7 +548,7 @@ def api_eliminar_direccion(request, cod_direccion):
 def api_actualizar_direccion(request, cod_direccion):
     direccion = DireccionUsuario.objects.filter(cod_direccion=cod_direccion, cod_usuario=request.user, activo=True).first()
     if not direccion:
-        return _json_error("DirecciÃ³n no encontrada.", status=404)
+        return _json_error("Dirección no encontrada.", status=404)
     try:
         provincia, ciudad = _resolver_ubicacion_desde_post(request)
         actualizar_direccion_usuario(
@@ -562,7 +562,7 @@ def api_actualizar_direccion(request, cod_direccion):
             request.POST.get("telefono_contacto") if "telefono_contacto" in request.POST else direccion.telefono_contacto,
             request.POST.get("es_predeterminada") in ("true", "on", "1"),
         )
-        return _json_ok(mensaje="DirecciÃ³n actualizada.")
+        return _json_ok(mensaje="Dirección actualizada.")
     except ValueError as exc:
         return _json_error(str(exc), status=400)
     except Exception as exc:
@@ -577,16 +577,16 @@ def api_cambiar_password(request):
     nueva = request.POST.get("password_nueva") or ""
     confirmacion = request.POST.get("password_confirmacion") or ""
     if not request.user.check_password(actual):
-        return _json_error("La contraseÃ±a actual no es correcta.", status=400)
+        return _json_error("La contraseña actual no es correcta.", status=400)
     if len(nueva) < 8:
-        return _json_error("La nueva contraseÃ±a debe tener al menos 8 caracteres.", status=400)
+        return _json_error("La nueva contraseña debe tener al menos 8 caracteres.", status=400)
     if nueva != confirmacion:
-        return _json_error("La confirmaciÃ³n no coincide.", status=400)
+        return _json_error("La confirmación no coincide.", status=400)
     try:
         cambiar_password_usuario(request.user.pk, nueva)
         request.user.refresh_from_db(fields=["password"])
         update_session_auth_hash(request, request.user)
-        return _json_ok(mensaje="ContraseÃ±a actualizada de forma segura.")
+        return _json_ok(mensaje="Contraseña actualizada de forma segura.")
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)
 
@@ -595,11 +595,11 @@ def api_cambiar_password(request):
 @require_POST
 def api_verificar_email(request):
     if request.user.email_verificado:
-        return _json_ok(mensaje="Tu correo ya estÃ¡ verificado.")
+        return _json_ok(mensaje="Tu correo ya está verificado.")
     if request.POST.get("confirmar") not in ("1", "true", "on"):
-        return _json_error("Confirma la verificaciÃ³n del correo.", status=400)
+        return _json_error("Confirma la verificación del correo.", status=400)
     try:
         verificar_email_usuario(request.user.pk)
-        return _json_ok(mensaje="Correo verificado para este entorno de demostraciÃ³n.")
+        return _json_ok(mensaje="Correo verificado para este entorno de demostración.")
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)

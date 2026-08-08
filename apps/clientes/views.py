@@ -1101,10 +1101,10 @@ def api_activar_membresia(request):
 def api_cancelar_membresia(request):
     membresia = MembresiaUsuario.objects.filter(cod_usuario=request.user, cod_estado_membresia_id="ACTIVA").order_by("-fecha_creacion").first()
     if not membresia:
-        return _json_error("No tienes una membresÃ­a activa para cancelar.", status=409)
+        return _json_error("No tienes una membresía activa para cancelar.", status=409)
     try:
         cancelar_membresia_usuario(membresia.cod_membresia)
-        return _json_ok(mensaje="MembresÃ­a cancelada. El historial de pagos se conserva.")
+        return _json_ok(mensaje="Membresía cancelada. El historial de pagos se conserva.")
     except Exception as exc:
         return _json_error(_safe_error(exc), status=500)
 
@@ -1137,12 +1137,12 @@ def api_compras_recurrentes(request):
 @require_POST
 def api_crear_compra_recurrente(request):
     if not _membresia_prime_activa(request.user):
-        return _json_error("Esta funciÃ³n requiere una membresÃ­a Prime activa.", status=403)
+        return _json_error("Esta función requiere una membresía Prime activa.", status=403)
     try:
         frecuencia = int(request.POST.get("frecuencia_dias") or 0)
         proxima = parse_date(request.POST.get("proxima_ejecucion") or "")
         if frecuencia < 1 or not proxima or proxima < timezone.localdate():
-            raise ValueError("Frecuencia o prÃ³xima ejecuciÃ³n invÃ¡lida.")
+            raise ValueError("Frecuencia o próxima ejecución inválida.")
         ident = crear_compra_recurrente(request.user.pk, request.POST.get("nombre") or "Compra recurrente", frecuencia, proxima)
         return _json_ok(cod_compra=ident, mensaje="Compra recurrente creada.")
     except (TypeError, ValueError) as exc:
@@ -1160,7 +1160,7 @@ def api_actualizar_compra_recurrente(request, cod_compra):
     try:
         frecuencia = int(request.POST.get("frecuencia_dias") or compra.frecuencia_dias)
         proxima = parse_date(request.POST.get("proxima_ejecucion") or "") or compra.proxima_ejecucion
-        activa = request.POST.get("activa", "1").lower() in {"1", "true", "on", "si", "sÃ­"}
+        activa = request.POST.get("activa", "1").lower() in {"1", "true", "on", "si", "sí"}
         actualizar_compra_recurrente(cod_compra, request.POST.get("nombre") or compra.nombre, frecuencia, proxima, activa)
         return _json_ok(mensaje="Compra recurrente actualizada.")
     except (TypeError, ValueError) as exc:
@@ -1173,7 +1173,7 @@ def api_actualizar_compra_recurrente(request, cod_compra):
 @require_POST
 def api_producto_compra_recurrente(request, cod_compra):
     if not _membresia_prime_activa(request.user):
-        return _json_error("Esta funciÃ³n requiere una membresÃ­a Prime activa.", status=403)
+        return _json_error("Esta función requiere una membresía Prime activa.", status=403)
     compra = CompraRecurrente.objects.filter(pk=cod_compra, cod_usuario=request.user, activa=True).first()
     if not compra:
         return _json_error("Compra recurrente no encontrada o pausada.", status=404)
@@ -1181,7 +1181,7 @@ def api_producto_compra_recurrente(request, cod_compra):
         cod_producto = int(request.POST.get("cod_producto") or 0)
         cantidad = int(request.POST.get("cantidad") or 0)
         if cantidad < 1 or not Producto.objects.filter(pk=cod_producto, cod_estado_producto_id="PUBLICADO").exists():
-            raise ValueError("Producto o cantidad invÃ¡lidos.")
+            raise ValueError("Producto o cantidad inválidos.")
         agregar_producto_compra_recurrente(cod_compra, cod_producto, cantidad)
         return _json_ok(mensaje="Producto agregado a la compra recurrente.")
     except (TypeError, ValueError) as exc:
@@ -1194,7 +1194,7 @@ def api_producto_compra_recurrente(request, cod_compra):
 @require_POST
 def api_ejecutar_compra_recurrente(request, cod_compra):
     if not _membresia_prime_activa(request.user):
-        return _json_error("Esta funciÃ³n requiere una membresÃ­a Prime activa.", status=403)
+        return _json_error("Esta función requiere una membresía Prime activa.", status=403)
     compra = CompraRecurrente.objects.filter(pk=cod_compra, cod_usuario=request.user, activa=True).first()
     if not compra:
         return _json_error("Compra recurrente no encontrada o pausada.", status=404)
@@ -1202,6 +1202,6 @@ def api_ejecutar_compra_recurrente(request, cod_compra):
         return _json_error("Agrega al menos un producto antes de ejecutarla.", status=409)
     try:
         carrito = preparar_carrito_compra_recurrente(cod_compra)
-        return _json_ok(cod_carrito=carrito, mensaje="Carrito preparado. Revisa stock, lÃ­mites y pago antes de confirmar.")
+        return _json_ok(cod_carrito=carrito, mensaje="Carrito preparado. Revisa stock, límites y pago antes de confirmar.")
     except Exception as exc:
         return _json_error(_safe_error(exc), status=409)

@@ -26,7 +26,7 @@ class LoginApiTestCase(SimpleTestCase):
     @patch('apps.core.views.authenticate')
     def test_2_login_valido_con_csrf(self, mock_auth):
         mock_auth.return_value = None
-        resp = self._post_json_with_csrf('/api/auth/login/', {"email": "customer@example.com", "password": "password123"})
+        resp = self._post_json_with_csrf('/api/auth/login/', {"email": "customer@example.com", "password": "UnitOnly!9_Credential"})
         self.assertEqual(resp.status_code, 401)
 
     @patch('apps.core.views.authenticate')
@@ -39,7 +39,7 @@ class LoginApiTestCase(SimpleTestCase):
     @patch('apps.core.views.authenticate')
     def test_11_login_error_interno(self, mock_auth):
         mock_auth.side_effect = Exception("DB error")
-        resp = self._post_json_with_csrf('/api/auth/login/', {"email": "customer@example.com", "password": "password123"})
+        resp = self._post_json_with_csrf('/api/auth/login/', {"email": "customer@example.com", "password": "UnitOnly!9_Credential"})
         self.assertEqual(resp.status_code, 500)
         self.assertIn("error interno", resp.json()['mensaje'])
 
@@ -54,7 +54,7 @@ class LoginApiTestCase(SimpleTestCase):
     @patch('apps.core.views.authenticate')
     def test_6_usuario_inactivo(self, mock_auth):
         mock_auth.return_value = None
-        resp = self._post_json_with_csrf('/api/auth/login/', {"email": "inactive@example.com", "password": "password123"})
+        resp = self._post_json_with_csrf('/api/auth/login/', {"email": "inactive@example.com", "password": "UnitOnly!9_Credential"})
         self.assertEqual(resp.status_code, 401)
 
     def test_7_csrf_endpoint(self):
@@ -67,7 +67,7 @@ class LoginApiTestCase(SimpleTestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_9_registro_sin_csrf(self):
-        resp = self.client.post('/api/auth/registro/', {"email": "new@example.com", "password": "password123"}, content_type="application/json")
+        resp = self.client.post('/api/auth/registro/', {"email": "new@example.com", "password": "UnitOnly!9_Credential"}, content_type="application/json")
         self.assertEqual(resp.status_code, 403)
 
     @patch('apps.core.views.transaction.atomic')
@@ -78,5 +78,5 @@ class LoginApiTestCase(SimpleTestCase):
         mock_crear.return_value = 1
         mock_auth.return_value = None
         mock_atomic.return_value.__enter__.return_value = None
-        resp = self._post_json_with_csrf('/api/auth/registro/', {"email": "new@example.com", "password": "password123", "password2": "password123", "acepta": True})
+        resp = self._post_json_with_csrf('/api/auth/registro/', {"email": "new@example.com", "password": "UnitOnly!9_Credential", "password2": "UnitOnly!9_Credential", "acepta": True})
         self.assertEqual(resp.status_code, 200)

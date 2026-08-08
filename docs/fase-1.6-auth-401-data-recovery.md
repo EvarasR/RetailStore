@@ -13,7 +13,7 @@ Este documento reporta los hallazgos y correcciones aplicadas durante la Fase 1.
 ## 2. Auditoría del Administrador y Causa del 401
 * **Cuenta ADMIN:** El usuario `admin@retailprime.local` **existe** y está **activo**.
 * **Roles Asociados:** Su rol asociado principal sigue siendo `ADMIN`.
-* **Causa exacta del 401:** Durante el script de verificación automatizado en la Fase 1.5, se cambió exitosamente la contraseña de este y otros usuarios a `TestPass123!`. Como el cliente intentaba iniciar sesión con la contraseña antigua (`RetailPrime2026*`), el backend devolvía correctamente un HTTP 401.
+* **Causa exacta del 401:** Durante el script de verificación automatizado en la Fase 1.5 se cambiaron contraseñas de usuarios de desarrollo. Como el cliente intentaba iniciar sesión con credenciales anteriores, el backend devolvía correctamente un HTTP 401. Los valores expuestos se retiraron y deben considerarse rotados.
 * **Respuesta JSON Real:** `{"ok": false, "mensaje": "Credenciales incorrectas"}` (HTTP 401).
 
 ## 3. Corrección del Manejo 401 en el Frontend (React)

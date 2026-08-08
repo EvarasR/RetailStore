@@ -526,28 +526,28 @@ COMMIT;
 BEGIN;
 -- ============================================================
 -- USUARIOS DE PRUEBA
--- Contraseña demo para todos los usuarios sembrados: RetailPrime2026*
+-- Contraseña demo para todos los usuarios sembrados: CHANGE_ME_DEMO_PASSWORD
 -- El hash se genera en PostgreSQL con fn_generar_password_hash_django().
 -- Formato compatible con Django: pbkdf2_sha256$iteraciones$salt$hash.
 -- ============================================================
 
 INSERT INTO usuario(email, password_hash, nombres, apellidos, telefono, documento_identidad, email_verificado)
 VALUES
-('admin@retailprime.local', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeAdmin2026',120000),'Admin','General','0991000001','ADM-001',TRUE),
-('bodega@retailprime.local', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeBodega2026',120000),'Walter','Bodega','0991000002','BOD-001',TRUE),
-('proveedores@retailprime.local', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeProveedor2026',120000),'Paula','Proveedores','0991000003','PRO-001',TRUE),
-('soporte@retailprime.local', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeSoporte2026',120000),'Sofía','Soporte','0991000004','SOP-001',TRUE),
-('ana.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeAna2026',120000),'Ana','Mendoza','0992000001','CLI-001',TRUE),
-('bruno.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeBruno2026',120000),'Bruno','Salazar','0992000002','CLI-002',TRUE),
-('carla.prime@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeCarla2026',120000),'Carla','Torres','0992000003','CLI-003',TRUE),
-('diego.prime@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeDiego2026',120000),'Diego','Vera','0992000004','CLI-004',TRUE),
-('elena.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeElena2026',120000),'Elena','Paz','0992000005','CLI-005',TRUE),
-('fabian.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeFabian2026',120000),'Fabián','Castro','0992000006','CLI-006',TRUE),
-('gabriela.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeGabriela2026',120000),'Gabriela','Ríos','0992000007','CLI-007',TRUE),
-('hector.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeHector2026',120000),'Héctor','Naranjo','0992000008','CLI-008',TRUE),
-('irene.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeIrene2026',120000),'Irene','Suárez','0992000009','CLI-009',TRUE),
-('jose.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeJose2026',120000),'José','Villacís','0992000010','CLI-010',TRUE),
-('karla.cliente@example.com', fn_generar_password_hash_django('RetailPrime2026*','RetailPrimeKarla2026',120000),'Karla','Molina','0992000011','CLI-011',TRUE)
+('admin@retailprime.local', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeAdmin2026',120000),'Admin','General','0991000001','ADM-001',TRUE),
+('bodega@retailprime.local', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeBodega2026',120000),'Walter','Bodega','0991000002','BOD-001',TRUE),
+('proveedores@retailprime.local', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeProveedor2026',120000),'Paula','Proveedores','0991000003','PRO-001',TRUE),
+('soporte@retailprime.local', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeSoporte2026',120000),'Sofía','Soporte','0991000004','SOP-001',TRUE),
+('ana.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeAna2026',120000),'Ana','Mendoza','0992000001','CLI-001',TRUE),
+('bruno.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeBruno2026',120000),'Bruno','Salazar','0992000002','CLI-002',TRUE),
+('carla.prime@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeCarla2026',120000),'Carla','Torres','0992000003','CLI-003',TRUE),
+('diego.prime@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeDiego2026',120000),'Diego','Vera','0992000004','CLI-004',TRUE),
+('elena.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeElena2026',120000),'Elena','Paz','0992000005','CLI-005',TRUE),
+('fabian.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeFabian2026',120000),'Fabián','Castro','0992000006','CLI-006',TRUE),
+('gabriela.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeGabriela2026',120000),'Gabriela','Ríos','0992000007','CLI-007',TRUE),
+('hector.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeHector2026',120000),'Héctor','Naranjo','0992000008','CLI-008',TRUE),
+('irene.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeIrene2026',120000),'Irene','Suárez','0992000009','CLI-009',TRUE),
+('jose.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeJose2026',120000),'José','Villacís','0992000010','CLI-010',TRUE),
+('karla.cliente@example.com', fn_generar_password_hash_django('CHANGE_ME_DEMO_PASSWORD','RetailPrimeKarla2026',120000),'Karla','Molina','0992000011','CLI-011',TRUE)
 ON CONFLICT (email) DO UPDATE SET
     password_hash = EXCLUDED.password_hash,
     nombres = EXCLUDED.nombres,
