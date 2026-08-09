@@ -7,20 +7,37 @@ Marketplace DB-First con PostgreSQL 15, Django 5.2 y una SPA React 19 + TypeScri
 1. Copia `.env.example` a `.env` y reemplaza todos los `CHANGE_ME`.
    Para el correo de facturas consulta
    [facturación y email](docs/billing-email-notifications.md).
-2. Instala Python y valida el intérprete del entorno:
+2. Crea el entorno local e instala las dependencias (configuración inicial):
 
 ```powershell
-.\entorno\Scripts\python.exe --version
-.\entorno\Scripts\python.exe -m pip install -r requirements.txt
-.\entorno\Scripts\python.exe -c "from decouple import config; print('python-decouple OK')"
+cd C:\Users\Admin\OneDrive\Desktop\RetailStore-COPIA
+py -m venv entorno
+.\entorno\Scripts\Activate.ps1
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
 ```
 
-3. Inicia Django usando siempre el venv (no uses `py manage.py`):
+Si PowerShell bloquea `Activate.ps1`, habilita los scripts solo para la terminal
+actual y vuelve a activarlo (no cambia la política permanente de Windows):
 
 ```powershell
-.\entorno\Scripts\python.exe manage.py check
-.\entorno\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\entorno\Scripts\Activate.ps1
 ```
+
+3. Con `(entorno)` activo, comprueba el intérprete e inicia Django normalmente:
+
+```powershell
+py -c "import sys; print(sys.executable)"
+py -c "from decouple import config; print('python-decouple OK')"
+py manage.py check
+py manage.py runserver
+```
+
+El ejecutable mostrado por el primer comando debe ser
+`C:\Users\Admin\OneDrive\Desktop\RetailStore-COPIA\entorno\Scripts\python.exe`.
+Si la terminal integrada ya abre con `(entorno)` activo, basta con ejecutar
+`py manage.py runserver`.
 
 4. En otra terminal inicia React:
 
@@ -35,9 +52,9 @@ Abre `http://127.0.0.1:5173`. Mantén el mismo hostname para Vite y Django, de m
 ## Validación
 
 ```powershell
-.\entorno\Scripts\python.exe manage.py test apps.core apps.clientes apps.administracion apps.operaciones apps.proveedores
-.\entorno\Scripts\python.exe manage.py check
-.\entorno\Scripts\python.exe -m compileall apps TiendaRetail
+py manage.py test apps.core apps.clientes apps.administracion apps.operaciones apps.proveedores
+py manage.py check
+py -m compileall apps TiendaRetail
 Set-Location frontend
 npm.cmd ci
 npm.cmd run lint
